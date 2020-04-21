@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文是 WWDC 2013 《Solutions to Common Date and Time Challenges》 视频的学习笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 中令人头疼的时间日期处理">
+<meta property="og:url" content="https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="本文是 WWDC 2013 《Solutions to Common Date and Time Challenges》 视频的学习笔记。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-20T03:16:38.000Z">
+<meta property="article:modified_time" content="2020-04-21T07:38:34.969Z">
+<meta property="article:author" content="Sunset Wan">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS 中令人头疼的时间日期处理 | 日落大道</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">日落大道</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS 中令人头疼的时间日期处理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 11:16:38" itemprop="dateCreated datePublished" datetime="2020-04-20T11:16:38+08:00">2020-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-21 15:38:34" itemprop="dateModified" datetime="2020-04-21T15:38:34+08:00">2020-04-21</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文是 WWDC 2013 《Solutions to Common Date and Time Challenges》 视频的学习笔记。<a id="more"></a></p>
+<p>我自己在工作中第一次接触与时间日期处理相关的需求时，下意识地打开搜索引擎进行搜索，结果发现自己要与 Calendar、Date、DateFormatter、DateComponents 和 TimeZone 这五个家伙打交道。我人都差点傻了，由此可见：iOS 中的时间日期处理不是想象中的那么容易。</p>
+<h2 id="Date、DateFormatter、DateComponents-和-TimeZone"><a href="#Date、DateFormatter、DateComponents-和-TimeZone" class="headerlink" title="Date、DateFormatter、DateComponents 和 TimeZone"></a>Date、DateFormatter、DateComponents 和 TimeZone</h2><p>Date 是什么呢？让我们看看 Apple 官方的解释:</p>
+<blockquote>
+<p><code>Date</code> represents a single point in time.<br>A <code>Date</code> is independent of a particular calendar or time zone. To represent a <code>Date</code> to a user, you must interpret it in the context of a <code>Calendar</code>.</p>
+</blockquote>
+<p>Date 表示一个时间点，它与某个特定的历法或时区无关。如果要把 Date 展示给用户，我们必须以某个历法为背景来解释它。<br>Date 包含了一个属性，这个属性存储的是相对于参照日期的秒数。至于这个参照日期是什么，其实不重要。官方 API 里有提供三个参照日期，你自己也可以自定义所需的参照日期。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 此时的参照时间为：当前的时间和日期</span><br><span class="line">public init(timeIntervalSinceNow: TimeInterval)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 此时的参照时间为：世界协调时间 1970 年 1 月 1 日零时零分零秒</span><br><span class="line">public init(timeIntervalSince1970: TimeInterval)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 此时的参照时间为：用户自定义的 Date 所表示的时间日期</span><br><span class="line">public init(timeInterval: TimeInterval, since date: Date)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 此时的参照时间为：世界协调时间 2001 年 1 月 1 日零时零分零秒</span><br><span class="line">public init(timeIntervalSinceReferenceDate ti: TimeInterval)</span><br></pre></td></tr></table></figure>
+<p>当在业务中处理时间日期时，后端往往提供的是一段描述时间日期的字符串。这时候 DateFormatter 就派上用场了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 如果不单独设置 DateFormatter 的 calendar 属性，DateFormatter 会默认使用用户当前使用的 calendar 来把 Date 解释成符合该历法的表示时间日期的字符串</span><br><span class="line">func string(from date: Date) -&gt; String</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 将一串表示时间日期的字符串（往往是 ISO 8601 格式）处理为对应的 Date</span><br><span class="line">func date(from string: String) -&gt; Date?</span><br></pre></td></tr></table></figure>
+<p>除了把后端返回的表示时间日期的字符串恰当地显示给用户之外，我还遇到了时间日期的比较问题。此时，用来格式化的这串字符串的 dateFormatter 需要多一步设置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var dateFormatter &#x3D; DateFormatter()</span><br><span class="line">...</span><br><span class="line">dateFormatter.timeZone &#x3D; TimeZone(secondsFromGMT: 0)</span><br></pre></td></tr></table></figure>
+<p>这是在 UTC+0 时区里理解这个字符串代表的 Date。举例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">var dateFormatter &#x3D; DateFormatter()</span><br><span class="line">dateFormatter.dateFormat &#x3D; &quot;YYYY-MM-dd-HH-mm-ss&quot;</span><br><span class="line">dateFormatter.timeZone &#x3D; TimeZone(secondsFromGMT: 0)</span><br><span class="line">let timeString &#x3D; &quot;2020-04-20-19-00-00&quot;</span><br><span class="line">let res &#x3D; dateFormatter.date(from: timeString)!</span><br><span class="line">print(res) &#x2F;&#x2F; 输出：2020-04-20 19:00:00 +0000</span><br></pre></td></tr></table></figure>
+<p>如果使用 dateFormatter 的 timeZone 默认值，即用户当前的时区，举个例子，东八区：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">var dateFormatter &#x3D; DateFormatter()</span><br><span class="line">dateFormatter.dateFormat &#x3D; &quot;YYYY-MM-dd-HH-mm-ss&quot;</span><br><span class="line">dateFormatter.timeZone &#x3D; TimeZone(secondsFromGMT: 60 * 60 * 8)</span><br><span class="line">let timeString &#x3D; &quot;2020-04-20-19-00-00&quot;</span><br><span class="line">let res &#x3D; dateFormatter.date(from: timeString)!</span><br><span class="line">print(res) &#x2F;&#x2F; 输出：2020-04-20 11:00:00 +0000</span><br></pre></td></tr></table></figure>
+<p>在东八区里理解这个字符串代表的 Date，那么所输出的时间会少八个小时，因为 Date 的参照时区为 UTC+0。</p>
+<p>接下来是 DateComponents：</p>
+<blockquote>
+<p><code>DateComponents</code> encapsulates the components of a date in an extendable, structured manner.<br> It is used to specify a date by providing the temporal components that make up a date and time in a particular calendar: hour, minutes, seconds, day, month, year, and so on. It can also be used to specify a duration of time, for example, 5 hours and 16 minutes. A <code>DateComponents</code> is not required to define all the component fields.<br>When a new instance of <code>DateComponents</code> is created, the date components are set to <code>nil</code>.</p>
+</blockquote>
+<p>DateComponents 以可扩展的结构化方式来封装日期的组成部分。日期的组成部分包括：年、月、日、时、分和秒等。它也可以用来表示一段持续时间。当创建一个 DateComponents 的实例时，该实例所有的日期组成部分都设置为 nil。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var dateComponent &#x3D; DateComponents()</span><br><span class="line">dateComponent.year &#x3D; 2020</span><br><span class="line">dateComponent.month &#x3D; 04</span><br><span class="line">dateComponent.day &#x3D; 20</span><br></pre></td></tr></table></figure>
+
+<p>TimeZone 知道世界时的本地偏移量以及用于确定偏移量何时更改的特定规则，比如夏令时。    </p>
+<p>在夏令时（Daylight Saving Time）这一点上，中国一开始的做法跟美国相似，是拨快（慢）时钟。夏令时到来时，把钟表拨快一小时。夏令时结束时，把钟表回拨一小时。但根据中国的国情，这样做并<a href="https://www.zhihu.com/question/20309772" target="_blank" rel="noopener">不能达到节能的目的</a>。我上初中的时候，是通过改作息时间来应对夏令时的，比如，夏令时到来时，上下学时间为：06:00 - 18:00；夏令时结束时，上下学时间为：06:30 - 18:30。    </p>
+<p>TimeZone 也有一系列夏令时相关的 <a href="https://developer.apple.com/documentation/foundation/timezone" target="_blank" rel="noopener">API</a> 供开发者使用。</p>
+<h2 id="时间日期处理中的常见计算"><a href="#时间日期处理中的常见计算" class="headerlink" title="时间日期处理中的常见计算"></a>时间日期处理中的常见计算</h2><h3 id="午夜时刻？"><a href="#午夜时刻？" class="headerlink" title="午夜时刻？"></a>午夜时刻？</h3><p>为什么想要午夜这个时刻呢？<br>一个普遍的原因是：想把这个时间点当作一个默认时间。比如当想表示一个人的生日时，我们只在乎这个人是某年某月某日出生的，而不会去想知道是几时几分几秒出生的，除非要去绘制占星学中的 <a href="https://zh.wikipedia.org/zh-tw/%E5%87%BA%E7%94%9F%E5%9C%96" target="_blank" rel="noopener">出生图</a>。面对这种情况，我们可以使用正午时间作为这个默认时间。<br>另外一个普遍原因是：想对「新的一天开始」这个事件作出反应。比如，在新的一天的开始，app 的一些界面会因此作出改变。对此，Cocoa 提供 <strong>NSCalendarDayChangeNotification</strong>。只要注册并监听这个通知，我们就可以及时对此事件作出相应。</p>
+<h3 id="午夜时刻可能会很棘手"><a href="#午夜时刻可能会很棘手" class="headerlink" title="午夜时刻可能会很棘手"></a>午夜时刻可能会很棘手</h3><p>午夜时刻可能不存在，也可能存在两个。<br>这里以巴西为例：<br>2018 年 11 月 4 日，巴西在这一天进入夏令时，具体表现为：当 11 月 3 日 23 时 59 分 59 秒时，再过一秒，时钟的时间会被人为地拨快一小时，变为：11 月 4 日 01:00:00。在这种情况下，午夜时刻就不存在了。    </p>
+<p>2019 年 2 月 17 日，巴西在这一天结束夏令时，具体表现为：当 00:00 分 00 秒时，再过一秒，时钟的时间会被人为地拨慢一小时，变为：2 月 16 日 23:00。在这种情况下，存在两个午夜时刻。    </p>
+<p>以上的例子是 WWDC 中所举的原例。但在我写这篇文章的时候，发现：巴西最后一次观测夏令时是在 2019 年。从 2020 年开始，巴西弃用夏令时。    </p>
+<p>换个美国的例子：<br>2020 年 3 月 8 日，美国在这一天进入夏令时，具体表现为：当 01:59 分 59 秒时，再过一秒，时钟的时间会被人为地拨快一小时，变为：03:00。<br>2020 年 11 月 1 号，美国会在这一天退出夏令时，具体表现为：当 01:59 分 59 秒时，再过一秒，时间会变为 1:00。所以在这一天，其实会有两个 1:30 分。</p>
+<p>所以，建议用每一天的开始时刻来取代午夜时刻。<br>计算今天的开始时刻:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var cal &#x3D; Calendar.current</span><br><span class="line">let todayStart &#x3D; cal.startOfDay(for: Date())</span><br><span class="line">print(todayStart) &#x2F;&#x2F; 输出：2020-04-20 16:00:00 +0000</span><br></pre></td></tr></table></figure>
+<p>计算明天的开始时刻：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let sometimeTommorrow &#x3D; cal.date(byAdding: .day, value: 1, to: todayStart) ?? Date()</span><br><span class="line">let tommorrowStart &#x3D; cal.startOfDay(for: sometimeTommorrow)</span><br><span class="line">print(tommorrowStart) &#x2F;&#x2F; 输出：2020-04-21 16:00:00 +0000</span><br></pre></td></tr></table></figure>
+<h3 id="把-Date-设置成一个具体时间"><a href="#把-Date-设置成一个具体时间" class="headerlink" title="把 Date 设置成一个具体时间"></a>把 Date 设置成一个具体时间</h3><p>比如，我想设置成今天的 11 点 30 分：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var date &#x3D; Date()</span><br><span class="line">var resDate &#x3D; cal.date(bySettingHour: 11, minute: 30, second: 0, of: date) ?? Date()</span><br><span class="line">print(resDate) &#x2F;&#x2F; 输出：2020-04-21 03:30:00 +0000</span><br></pre></td></tr></table></figure>
+<h3 id="这个-Date-是在今天吗？"><a href="#这个-Date-是在今天吗？" class="headerlink" title="这个 Date 是在今天吗？"></a>这个 Date 是在今天吗？</h3><p>Calendar 提供如下的 API，方便开发者使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 判断 date 是否在今天</span><br><span class="line">public func isDateInToday(_ date: Date) -&gt; Bool</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 判断 date 是否在昨天</span><br><span class="line">public func isDateInYesterday(_ date: Date) -&gt; Bool</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 判断 date 是否在明天</span><br><span class="line">public func isDateInTomorrow(_ date: Date) -&gt; Bool</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 判断 date 是否在周末</span><br><span class="line">public func isDateInWeekend(_ date: Date) -&gt; Bool</span><br></pre></td></tr></table></figure>
+<p>需要记住的是：以上函数返回的 Bool 值是会随着时间推移发生变化的。</p>
+<h3 id="Date-的比较"><a href="#Date-的比较" class="headerlink" title="Date 的比较"></a>Date 的比较</h3><p>Date 本身提供一些供比较时使用的 API：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static func &#x3D;&#x3D; (lhs: Date, rhs: Date) -&gt; Bool</span><br><span class="line"></span><br><span class="line">public static func &lt; (lhs: Date, rhs: Date) -&gt; Bool</span><br><span class="line"></span><br><span class="line">public static func &gt; (lhs: Date, rhs: Date) -&gt; Bool</span><br></pre></td></tr></table></figure>
+<p>但实际上，这些比较方法的比较粒度太粗，我们还需要更细粒度的比较方法。<br>Calendar 正好提供这个比较方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 输出: 2020-04-21 02:59:52 +0000</span><br><span class="line">let currentDate &#x3D; Date() </span><br><span class="line"></span><br><span class="line">let sometimeTommorrow &#x3D; cal.date(byAdding: .day, value: 1, to: currentDate) ?? Date()</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 比较粒度为：天</span><br><span class="line">let res &#x3D; cal.compare(date, to: sometimeTommorrow, toGranularity: .day) </span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 输出：orderedAscending</span><br><span class="line">printCompareResult(res) </span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 辅助函数</span><br><span class="line">func printCompareResult(_ result: ComparisonResult) &#123;</span><br><span class="line">    switch result &#123;</span><br><span class="line">    case .orderedAscending:</span><br><span class="line">        print(&quot;orderedAscending&quot;)</span><br><span class="line">    case .orderedSame:</span><br><span class="line">        print(&quot;orderedSame&quot;)</span><br><span class="line">    case .orderedDescending:</span><br><span class="line">        print(&quot;orderedDescending&quot;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>更多的比较粒度可以参考 [文档](<a href="https://developer.apple.com/docu" target="_blank" rel="noopener">https://developer.apple.com/docu</a> mentation/foundation/calendar/component)。</p>
+<h2 id="Timeless-Date-和-Dateless-Time"><a href="#Timeless-Date-和-Dateless-Time" class="headerlink" title="Timeless Date 和 Dateless Time"></a>Timeless Date 和 Dateless Time</h2><p>什么是 “Timeless Date” 呢？Date 是包含时间（例：11:30）和日期（2020 年 04 月 21 日）。正如上文所提到的，如果要表示生日的话，我们只需要日期而已。<br>在这种情况下，建议使用 <strong>DateComponents</strong> 或者自定义一个 model。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 使用 DateComponents</span><br><span class="line">var birthDayComp &#x3D; DateComponents()</span><br><span class="line">birthDayComp.year &#x3D; 2000</span><br><span class="line">birthDayComp.month &#x3D; 08</span><br><span class="line">birthDayComp.day &#x3D; 05</span><br></pre></td></tr></table></figure>
+<p>如果自定义一个记录生日的 model 的话，我们需要给这个 model 添加一个属性来记录这个日期对应的历法。如果脱离了历法，2000、08 和 05 就真的只是数字而已。<br>在这种情况下，不要使用用户当前使用的历法。<br>举个例子，用户现在使用的历法是公历，我记录下用户的生日为公历 2000 年 08 月 05 日。但如果用户把使用的历法改为民国纪年，时间就会出现一些偏差：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 采用民国纪年</span><br><span class="line">var cal &#x3D; Calendar(identifier: .republicOfChina)</span><br><span class="line"></span><br><span class="line">var dateFormatter &#x3D; DateFormatter()</span><br><span class="line">dateFormatter.dateFormat &#x3D; &quot;YYYY年MM月dd日&quot;</span><br><span class="line"></span><br><span class="line">let res &#x3D; cal.date(from: birthDayComp) ?? Date()</span><br><span class="line">let timeString &#x3D; dateFormatter.string(from: res)</span><br><span class="line">print(timeString) &#x2F;&#x2F; 输出：3911年08月05日</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：民国纪年法与公历纪年法的换算公式<br>设 x 为公历纪年法下的年份数字，y 为民国纪年法下的年份数字<br>则转换公式为：y = x - 1911 （1911 为民国 0 年，1912 为民国元年）</p>
+</blockquote>
+<p>由公式可知：公历 2000 年 08 月 05 日对应的民国年份是 89 年。</p>
+<p>接下来，Dateless Time 也就十分容易理解了。有些情况下，我们不关心日期是什么，只关心时间。同样地，建议使用 <strong>DateComponents</strong> 或者自定义一个 model。</p>
+<h2 id="如何找到下一个符合匹配条件的-Date？"><a href="#如何找到下一个符合匹配条件的-Date？" class="headerlink" title="如何找到下一个符合匹配条件的 Date？"></a>如何找到下一个符合匹配条件的 Date？</h2><p>很常见的一个例子是：我想让闹钟 App 在下一个 16:30 分提醒我下楼扔垃圾。此时，闹钟 App 就想找到下一个符合匹配条件（下一个 16:30）的 Date。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 此时的公历时间为: 2020 年 4 月 21 日 14:21:05</span><br><span class="line">var matchingComponents &#x3D; DateComponents()</span><br><span class="line">matchingComponents.hour &#x3D; 16</span><br><span class="line">matchingComponents.minute &#x3D; 30</span><br><span class="line"></span><br><span class="line">let nextDate &#x3D; cal.nextDate(after: Date(),</span><br><span class="line">                            matching: matchingComponents,</span><br><span class="line">                            matchingPolicy: .nextTime,</span><br><span class="line">                            repeatedTimePolicy: .first,</span><br><span class="line">                            direction: .forward) ?? Date()</span><br><span class="line">let timeString &#x3D; dateFormatter.string(from: nextDate)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 输出：2020 年 04 月 21 日 16 时 30 分 00 秒</span><br><span class="line">print(timeString)</span><br></pre></td></tr></table></figure>
+<p>Bingo! 用 Calendar 提供的这个方法就能达到目标啦！但第一次看到这个方法的函数签名，我是这样的：🤯。<br>先放出 Apple 官方的解释：</p>
+<blockquote>
+<p>Computes the next date which matches (or most closely matches) a given set of components.</p>
+<ul>
+<li>parameter date: The starting date.</li>
+<li>parameter components: The components to search for.</li>
+<li>parameter matchingPolicy: Specifies the technique the search algorithm uses to find results. Default value is <code>.nextTime</code>.</li>
+<li>parameter repeatedTimePolicy: Specifies the behavior when multiple matches are found. Default value is <code>.first</code>.</li>
+<li>parameter direction: Specifies the direction in time to search. Default is <code>.forward</code>.</li>
+<li>returns: A <code>Date</code> representing the result of the search, or <code>nil</code> if a result could not be found.</li>
+</ul>
+</blockquote>
+<p>可能让人比较困惑的是 <code>matchingPolicy</code> 这个参数。总共有四种 matchingPolicy，分别是：nextTime、nextTimePreservingSmallerComponents、previousTimePreservingSmallerComponents 和 strict。<br>让我们来举个具体的例子来理解这四种 matchingPolicy，但在讲这个例子之前，先回顾一下之前提到的美国夏令时：</p>
+<blockquote>
+<p>2020 年 3 月 8 日，美国在这一天进入夏令时，具体表现为：当 01:59 分 59 秒时，再过一秒，时钟的时间会被人为地拨快一小时，变为：03:00。<br>2020 年 11 月 1 号，美国会在这一天退出夏令时，具体表现为：当 01:59 分 59 秒时，再过一秒，时间会变为 1:00。所以在这一天，其实会有两个 1:30 分。</p>
+</blockquote>
+<p>我有一个朋友，在美国一机场上班。他恰巧在今年 3 月 8 日的凌晨 03:30 有排班。他跟往常一样，打算提前一小时醒来做作准备，然后去工作。他把一个简单闹钟 App 设定为 3 月 8 号 02:30。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/19/%E7%AD%89%E7%AD%89%E6%88%91/" rel="prev" title="等等我">
+      <i class="fa fa-chevron-left"></i> 等等我
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/21/Test/" rel="next" title="Test">
+      Test <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Date、DateFormatter、DateComponents-和-TimeZone"><span class="nav-number">1.</span> <span class="nav-text">Date、DateFormatter、DateComponents 和 TimeZone</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时间日期处理中的常见计算"><span class="nav-number">2.</span> <span class="nav-text">时间日期处理中的常见计算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#午夜时刻？"><span class="nav-number">2.1.</span> <span class="nav-text">午夜时刻？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#午夜时刻可能会很棘手"><span class="nav-number">2.2.</span> <span class="nav-text">午夜时刻可能会很棘手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#把-Date-设置成一个具体时间"><span class="nav-number">2.3.</span> <span class="nav-text">把 Date 设置成一个具体时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#这个-Date-是在今天吗？"><span class="nav-number">2.4.</span> <span class="nav-text">这个 Date 是在今天吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Date-的比较"><span class="nav-number">2.5.</span> <span class="nav-text">Date 的比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Timeless-Date-和-Dateless-Time"><span class="nav-number">3.</span> <span class="nav-text">Timeless Date 和 Dateless Time</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何找到下一个符合匹配条件的-Date？"><span class="nav-number">4.</span> <span class="nav-text">如何找到下一个符合匹配条件的 Date？</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
