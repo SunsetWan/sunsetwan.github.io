@@ -52,7 +52,7 @@
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg">
 <meta property="article:published_time" content="2020-11-27T07:38:37.000Z">
-<meta property="article:modified_time" content="2020-11-27T08:19:04.896Z">
+<meta property="article:modified_time" content="2020-11-27T08:36:27.334Z">
 <meta property="article:author" content="Sunset Wan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg">
@@ -204,7 +204,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-11-27 15:38:37 / 修改时间：16:19:04" itemprop="dateCreated datePublished" datetime="2020-11-27T15:38:37+08:00">2020-11-27</time>
+              <time title="创建时间：2020-11-27 15:38:37 / 修改时间：16:36:27" itemprop="dateCreated datePublished" datetime="2020-11-27T15:38:37+08:00">2020-11-27</time>
             </span>
 
           
@@ -269,25 +269,24 @@
 <p>到这里，我们已经有了个可用的可靠数据传输协议了！</p>
 <h2 id="那性能怎么样呢？"><a href="#那性能怎么样呢？" class="headerlink" title="那性能怎么样呢？"></a>那性能怎么样呢？</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063726360675.jpg" alt=""></p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064650886947.jpg" alt=""></p>
-<p>这样一对比，属实浪费。</p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063749150047.jpg" alt=""></p>
 <p>看完上图，直觉告诉我们可以像流水线般同时发送好几个数据包，以提高吞吐量。<br>要实现如图所示的流水线式发送，需要做到：</p>
 <ul>
 <li>因为每个在传送途中（非重传）的数据包需要独一无二的序列号，且同时会存在多个在传送途中的未被确认的数据包，所以序列号的范围得是递增的。</li>
 <li>发送方和接受方可能会需要缓存多个数据包。发送方至少得缓存已经传送在途且未收到确认的数据包。</li>
 <li>根据一个可靠数据传输协议如何应对：1. 数据传丢；2. 数据被”污染”；3. 数据因网络拥堵而迟到；这三种问题，大体可以分为两种错误恢复的方法：<ul>
-<li><strong>GBN</strong>(Go-Back-N)</li>
-<li><strong>选择重传</strong>(selective repeat)</li>
+<li><strong>GBN</strong>（Go-Back-N）</li>
+<li><strong>选择重传</strong>（selective repeat）</li>
 </ul>
 </li>
 </ul>
 <h2 id="GBN"><a href="#GBN" class="headerlink" title="GBN"></a>GBN</h2><p>在 GBN 协议中，发送方可以在不需要等待收到 ACK 的情况下，同时发送 N 个数据包，这意味发送方最多能保持 N 个未收到 ACK 的数据包，N 也被称为滑动窗口的大小。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063778631352.jpg" alt=""><br>图中的 <code>base</code> 意为：序列号最小的未收到 ACK 的数据包的序列号，而<br><code>nextseqnum</code> 意为：下一个将被发送的数据包的序列号。<br>区间 [0, base - 1] 表示为：序列号落在此区间的数据包均被发送和成功收到 ACK。<br>区间 [base, nextseqnum - 1] 表示为：序列号落在此区间的数据包均被发送且还未收到对应的 ACK。<br>区间 [nextseqnum, base + N - 1] 表示为：序列号落在此区间的数据包均可立即被发送。<br>区间 [base + N, 正无穷] 表示：序列号落在此区间的数据包处于等待发送状态。当序列号为 base 的数据包收到 ACK 之后，整个滑动窗口 N 向后移动，这样序列号 base + N 的数据包才可以被发送。</p>
-<p>// GBN sender 状态机<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063896168564.jpg" alt=""><br>当发送方的上层调用 <code>rdt_send()</code> 时，发送方会首先检查窗口是否已满，如果窗口已满，则拒绝发送数据。<br>当超时事件发生时，发送方启动计时器，且重新发送所有之前已发送过但未收到 ACK 的数据包。<br>当收到某个数据包的 ACK 时，还有已被发送且未收到 ACK 的数据包，发送方需要重启计时器；如果此时不存在已被发送且未收到 ACK 的数据包，发送方需停止计时。</p>
-<p>// GBN receiver 状态机<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063905182408.jpg" alt=""><br>假设接受方已经接受了前 n - 1 个数据包，那么接受方下一个就想收到序列号为 n 的数据包。接受方会抛弃所有下一个到来的序列号非 n 的数据包，并重新发送最近收到的数据包的 ACK（在这个例子中为：ACK n-1）。这就是<strong>累计重传</strong>（cumulative acknowledgments）。  </p>
+<p>下图为 GBN sender 有限状态机表示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063896168564.jpg" alt=""><br>当发送方的上层调用 <code>rdt_send()</code> 时，发送方会首先检查窗口是否已满，如果窗口已满，则拒绝发送数据。<br>当超时事件发生时，发送方启动计时器，且重新发送所有之前已发送过但未收到 ACK 的数据包。<br>当收到某个数据包的 ACK 时，还有已被发送且未收到 ACK 的数据包，发送方需要重启计时器；如果此时不存在已被发送且未收到 ACK 的数据包，发送方需停止计时。</p>
+<p>下图为 GBN receiver 有限状态机表示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063905182408.jpg" alt=""><br>假设接受方已经接受了前 n - 1 个数据包，那么接受方下一个就想收到序列号为 n 的数据包。接受方会抛弃所有下一个到来的序列号非 n 的数据包，并重新发送最近收到的数据包的 ACK（在这个例子中为：ACK n-1）。这就是<strong>累计重传</strong>（cumulative acknowledgments）。  </p>
 <p>GBN 中的接受方拒绝接受失序的数据包，这听起来虽然有点蠢，似乎不尊重发送方的幸苦劳动，但这样做还是有原因的。<br>假设接受方现在正恭迎序列号为 n 的数据包的到来，但序列号为 n + 1 的小老弟先来了，打了一个措手不及。因为收到的数据必须按顺序组装起来，所以此时的接受方选择把序列号为 n + 1 的数据包缓存起来。但是当序列号为 n 的数据包丢了之后，根据发送方重传的规则，序列号为 n 和 n + 1 的数据包都会被重传。这样就能理解接受方不缓存失序数据包的原因了，反正都要一起重传过来的嘛，缓存干嘛！<br>这样，发送方需要记住自己滑动窗口的上下界和下一个要发送的数据包的位置就可以，而接受方这边就更简单了，只需记住自己所期待到来的那个数据包的序列号就行了。<br>当然，这种丢掉正确收到却失序的数据包的做法也是有缺点的，因为之后的重传过来的数据包可能会被传丢或被“污染”，这样就会导致更多的数据重传。</p>
 <h2 id="选择重传（Selective-Repeat）"><a href="#选择重传（Selective-Repeat）" class="headerlink" title="选择重传（Selective Repeat）"></a>选择重传（Selective Repeat）</h2><p>流水线式的同时发送多个数据包的 GBN 协议已经比之前谈论的停止等待协议强不少。但是也有一些场景下，GBN 同样因为性能被人诟病。<br>特别是当前网络的<a href="https://zh.wikipedia.org/wiki/%E5%B8%A6%E5%AE%BD%E6%97%B6%E5%BB%B6%E4%B9%98%E7%A7%AF" target="_blank" rel="noopener">带宽延时乘积</a>很大且滑动窗口 N 也很大时，某个数据包传输出错会导致 GBN 发送方重传一大堆的数据包，这大部分情况是没有必要的。随着数据传输出错率变高，滑动窗口中便会塞满大量重传的数据。<br>让我们来看一看选择重传协议。正如其名，选择重传会避免像 GBN 那样的没必要的大量重传，它只选择性地重新发送它认为没能正确送达的数据包！<br>与 GBN 不同的是，它的滑动窗口里会出现一些被 ACK 过的数据包，换句话说，不管这个被正确收到的数据包是不是失序的，SR 均会确认这些数据包。失序的数据包将会被缓存起来。</p>
-<p>//SR sender<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063947970142.jpg" alt=""></p>
-<p>//SR receiver<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063948151237.jpg" alt=""></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063947970142.jpg" alt=""></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063948151237.jpg" alt=""></p>
 <p>尤其要注意接受方图里的第二点：当收到已经被 ACK 过的数据包时，接受方不能直接忽略这个数据包，仍需发送对应的 ACK。<br>但这样做的原因是什么呢？<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063950129010.jpg" alt=""><br>参照这幅图，设想一个场景：序列号为 <code>send_base</code> 的数据包已经接受方 ACK 了，但发往 sender 的 ACK 半途丢了。计时器时间一到，sender 仍未收到 <code>send_base</code> 数据包的 ACK，sender 有正当理由怀疑这个数据包未能成功送达，并开始选择重传这个数据包。如果在这种情况下，receiver 选择忽略这个数据包，那么 sender 的滑动窗口永远不会向后移动！<br>这个例子说明 SR 协议一个很重要的特点：对某个数据包是否被正确收到，SR 中的 sender 和 receiver 分别持有不同的观点。<br>Sender 和 receiver 之间这种“不同步性”在序列号范围有限的现实面前有重要的后果。</p>
 <p>考虑场景 A：有限的序列号范围是: {0, 1, 2, 3}，滑动窗口大小为 3。如下图所示，数据包从 0 到 2 均成功被 receiver 收到。但这三个数据包对应的 ACK 都传丢了。时间一到，sender 开始重传数据包 0。Receiver 成功收到了数据包 0。此时这个数据包 0 是发送的第一个数据包的拷贝。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16064026737333.jpg" alt=""></p>
 <p>考虑场景 B：ACK 从 0 到 2 均被 sender 成功收到。当收到 ACK 0 时，sender 开始发送数据包 3。当收到 ACK 1 时，sender 开始发送数据包 0。<br>Receiver 也成功收到数据包 0。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16064036962176.jpg" alt=""></p>
@@ -295,11 +294,15 @@
 <p>Receiver 是没法分辨出它刚收到的数据包 0 到底是第五个数据包还是第一个数据包的拷贝。所以当滑动窗口的大小等于序列号个数减一时，这一切都行不通了。</p>
 <p>那把窗口大小改为 2 呢？<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064524353894.jpg" alt=""></p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064525468100.jpg" alt=""><br>这样就解决问题了。<br>书上给出了一个结论：<strong>对于选择重传协议来说，滑动窗口大小必须小于等于序列号个数的一半。</strong></p>
-<p>到这，本文开头的三个假设只剩下这个：「数据总是按照发送的顺序被接收者接收的」。<br>往往现实可能是这样的：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064568665674.jpg" alt=""><br>本来就会因数据丢包或数据对应的 ACK 丢失，而会出现不少重传的数据包。<br>再加上 <code>packet reordering</code> 的影响，重传的数据包变更多，降低了性能。</p>
+<p>到这，本文开头的三个假设只剩下这个：「数据总是按照发送的顺序被接收者接收的」。<br>但往往现实可能是这样的：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064568665674.jpg" alt=""><br>本来就会因数据丢包或数据对应的 ACK 丢失，而会出现不少重传的数据包。<br>再加上 <code>packet reordering</code> 的影响，重传的数据包变更多，降低了性能。</p>
 <p>好了，对于「如何设计一个可靠数据传输协议」这个问题的讨论就此为止。在此基础上，再去学习 TCP 会比较好。</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>啰里八嗦讲了上面一大堆，主要是让自己有个机会复习这部分内容。回想当时学习这块内容时，并没有上述这样一个循序渐进的体验，而是上来就是看 TCP 的定义，再看首部内容等等，学得自己满头包，学习效率可想而知。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>啰里八嗦讲了上面一大堆，主要是让自己有个机会复习这部分内容。回想当初学习这块内容时，并没有上述这样一个循序渐进的体验，而是上来就是看 TCP 的定义，再看首部内容等等，学得自己满头包，学习效率可想而知。</p>
 <p>希望自己以后的学习也能尽量遵循「循序渐进」的原则。</p>
-<p>另外，自己花了点时间，把 CS144 这门课的 Lab 做完了。<br>有几个小心得，想在这里提一下：<br>首先就是配环境，<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg" alt=""><br>我一开始的时候按他这个推荐的方法试了，甲骨文的这个 VirtualBox 感觉很不好用。恰巧，VMware Fusion Player Version 12 对个人使用免费了，自己再去下个 Ubuntu 20 LTS，对着下面这个表，一个一个装就是了。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg" alt="">。当时花了一大半个下午加一个晚上，差点就在这第一步的时候放弃了。<br>第二个容易放弃的点是你遇到 Lab4 的时候，Lab 4 是挺难的。但在准备过测试的时候，建议可以开个国外的主机，把代码放到那上面跑，因为有好像有些测试用例是连接的国外的网站。如果还是出现 timeout 的错误，那就得检查自己的代码了。为了省钱，不开也行，那就多在本地上多跑几次测试看看。我有时候在本地跑测试，出现过 97% Pass、98 % Pass、 99% Pass 和 100% Pass。这时候就要活用控制变量法了。<br>CS 144 的课程视频在 YouTube 上也有，但我自己看下来感觉还是：读课本是主要手段，辅以这 2013 年的课程视频。<br><a href="https://github.com/SunsetWan/144_lab_code" target="_blank" rel="noopener">144_lab_code</a> 这是我自己完成整个 Lab 的代码，加了不少注释，希望能有些帮助。</p>
+<p>另外，自己花了点时间，把 CS144 这门课的 Lab 做完了。<br>有几个小心得，想在这里提一下：<br>首先就是配环境，<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg" alt=""><br>我一开始的时候按他这个推荐的方法试了，最后没成功。甲骨文的这个 VirtualBox 感觉很不好用。恰巧，VMware Fusion Player Version 12 对个人使用免费了，我就采用方法 3，自己再去下个 Ubuntu 20 LTS，对着下面这个表，一个一个装就是了。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg" alt="">    </p>
+<p>当时花了一大半个下午加一个晚上，差点就在这第一步的时候放弃了。</p>
+<p>第二个容易放弃的点是你遇到 Lab4 的时候，Lab 4 是挺难的。但在准备过测试的时候，建议可以开个国外的主机，把代码放到那上面跑，因为有好像有些测试用例是对国外的网站发起请求。如果还是出现 <code>timeout</code> 的错误，那就得检查自己的代码了。为了省钱，不开也行，那就多在本地上多跑几次测试看看。我自己在本地跑测试，出现过 97% Pass、98 % Pass、 99% Pass 和 100% Pass。这时候就要活用控制变量法了。    </p>
+<p>CS 144 的课程视频在 YouTube 上也有，但我自己看下来感觉还是：读课本是主要手段，辅以这 2013 年的课程视频。      </p>
+<p><a href="https://github.com/SunsetWan/144_lab_code" target="_blank" rel="noopener">144_lab_code</a> 这是我自己完成整个 Lab 的代码，加了不少注释，希望能有些帮助。</p>
 
     </div>
 
