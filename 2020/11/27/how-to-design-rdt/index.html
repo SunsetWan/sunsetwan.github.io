@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文是我个人对 《Computer Networking: A Top-down Approach》3.4 节的总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何设计一个可靠数据传输协议？">
+<meta property="og:url" content="https://sunsetwan.github.io/2020/11/27/how-to-design-rdt/index.html">
+<meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="本文是我个人对 《Computer Networking: A Top-down Approach》3.4 节的总结。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063091894453.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063177741459.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063659653383.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063659875543.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063673825018.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063675189756.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063717452835.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063726360675.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063749150047.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063778631352.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063896168564.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063905182408.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063947970142.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063948151237.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063950129010.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16064026737333.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16064036962176.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064524353894.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064525468100.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064568665674.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg">
+<meta property="article:published_time" content="2020-11-27T07:38:37.000Z">
+<meta property="article:modified_time" content="2020-11-27T07:40:03.888Z">
+<meta property="article:author" content="Sunset Wan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg">
+
+<link rel="canonical" href="https://sunsetwan.github.io/2020/11/27/how-to-design-rdt/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>如何设计一个可靠数据传输协议？ | 日落大道</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">日落大道</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2020/11/27/how-to-design-rdt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何设计一个可靠数据传输协议？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-27 15:38:37 / 修改时间：15:40:03" itemprop="dateCreated datePublished" datetime="2020-11-27T15:38:37+08:00">2020-11-27</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文是我个人对 《Computer Networking: A Top-down Approach》3.4 节的总结。<a id="more"></a></p>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
+
+<p>让我们想象这样一个传输数据的管道：<br>    1. 数据不会被“污染”。<br>    2. 数据不会被传丢。<br>    3. 数据总是按照发送的顺序被接收者接收的。<br>满足以上三个条件的管道可以被认为是可靠的数据传输。似乎看起来挺简单，是吧？<br>但当这种可靠数据传输建立在不可靠的基础（Internet Protocol）之上时，这问题就开始难了。</p>
+<h2 id="Reliable-Data-Transfer-1-0"><a href="#Reliable-Data-Transfer-1-0" class="headerlink" title="Reliable Data Transfer 1.0"></a>Reliable Data Transfer 1.0</h2><p>// 本文所提到的数据传输皆为单向传输。<br>这里补充个关于有限状态机的小知识：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg" alt=""></p>
+<p>//在 1.0 版本里，假设要打造的可靠传输管道也是建立在一个可靠传输管道之上的。//</p>
+<p>我们可以用有限状态机来表示发送方和接收方：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063091894453.jpg" alt=""></p>
+<p><code>rdt 1.0</code> 发送方在收到发送数据的事件（<code>rdt_send(data)</code>）后，把数据分割为一个一个 <code>packet</code>，并开始发送数据。<br><code>rdt 1.0</code> 接收方在收到接收数据的事件（<code>rdt_rcv(packet)</code>）后，从 <code>packet</code> 中提取数据，并把数据发给上层。<br>在多种假设之下，<code>rdt 1.0</code> 的设计很简单，也很可靠。这里也隐含了接收方的接收速度能与发送方的发送速度同步。</p>
+<h2 id="Reliable-Data-Transfer-2-0"><a href="#Reliable-Data-Transfer-2-0" class="headerlink" title="Reliable Data Transfer 2.0"></a>Reliable Data Transfer 2.0</h2><p>不得不说，<code>rdt 1.0</code> 的实现条件极为苛刻，过于理想了。更加具有现实意义的是：传输过程中的数据可能会被“污染”，如位翻转。起初的假设由三个变为两个了。再进一步讨论 <code>rdt 2.0</code> 的细节之前，让我们设想一个生活中常出现的场景：张三正在跟李四打电话。当李四说完一个事之后，张三清楚听到之后会回复一句“好的”。但当张三未能听清楚李四所说的事情时，张三会回复一句“能不能再说一遍？我没听清楚”。<br>“好的”可以视为 <strong>positive acknowledgments</strong>，“能不能再说一遍？我没听清楚”可是视为 <strong>negative acknowledgments</strong>。接收者（张三）可以利用这两种信息使发送方（李四）明白：哪条信息已经传达到位和哪条信息需要重传。在计算机网络的范畴内，基于类似重传机制的可靠数据传输协议被称为自动重复请求协议（Automatic Repeat reQuest protocols）。<br>那么如何实现 ARQ 这个协议呢？</p>
+<ol>
+<li>接收方要有检测数据是否出错（被污染）的能力，如添加检验和字段。</li>
+<li>接收方要有发送传输反馈的能力，如上文提到的 ACK（positive acknowledgment）和 NAK（negative acknowledgments）。</li>
+<li>在接收方收到一个出错的数据后，发送方要有重新发送该数据的能力。</li>
+</ol>
+<p>下图是 <code>rdt 2.0</code> 的有限状态机表示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063177741459.jpg" alt=""></p>
+<p><code>rdt 2.0</code> 发送方在收到 NAK 时，会重新发送最近刚发送过的数据，并继续等待接收方对此重发数据的回应。需要注意的是：当发送方处于 <code>Wait for ACK or NAK</code> 状态时，<code>rdt_send(data)</code> 事件不会出现。换句话说，只有发送方离开 <code>Wait for ACK or NAK</code> 状态之后，才能响应 <code>rdt_send(data)</code> 事件。<br>因此，除非发送方确认接收方已经正确地收到它当前发送的数据，发送方是不会发送新数据的。像 <code>rdt 2.0</code> 类似这样的行为特征，我们称之为<strong>停止等待</strong>协议（stop-and-wait protocol）。</p>
+<h2 id="Reliable-Data-Transfer-2-1"><a href="#Reliable-Data-Transfer-2-1" class="headerlink" title="Reliable Data Transfer 2.1"></a>Reliable Data Transfer 2.1</h2><p>目前为止，<code>rdt 2.0</code> 看起来不错哟，但其实它有一个致命的问题：假如发送方收到的 ACK/NAK 被“污染”了，发送方是没有办法知道接受方是否正确收到它发送的最后一块数据！<br>那么该如何处理这种情况呢？</p>
+<ol>
+<li>添加足够多的检验和比特位，使得发送法不仅能检测到数据出错，而且能把错误数据恢复过来。</li>
+<li>当发送方收到被“污染”的 ACK/NAK 时，它就直接重新发送当前的数据。但这又会引入一个新问题——<strong>重复数据包</strong>（duplicate packets）。接受方没有办法确认发送方是否正确收到它发送的 ACK/NAK，因此它也没法判断下一个到来的数据包是新的数据还是重传的旧数据。</li>
+</ol>
+<p>对于<strong>重复数据包</strong>这个新问题，有个简单的解决方法：在数据包首部添加<strong>序列号</strong>字段。这样，接受方可以利用数据包的序列号来判断下一个到来的数据包是新的数据还是重传的旧数据了！<br><code>rdt 2.0</code> 作为停止等待协议的一个简单实现，序列号字段长为 1 位就够了。<br>目前仍是假设这个数据传输管道是不会传丢数据的，所以 ACK/NAK 数据包是无需使用序列号来表示它们是对某个数据包的回应。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063659653383.jpg" alt=""><br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063659875543.jpg" alt=""></p>
+<h2 id="Reliable-Data-Transfer-2-2"><a href="#Reliable-Data-Transfer-2-2" class="headerlink" title="Reliable Data Transfer 2.2"></a>Reliable Data Transfer 2.2</h2><p><code>rdt 2.1</code> 在发送方和接受方均使用了 ACK/NAK。当失序数据到达接受方时，接受方发送 ACK。当被“污染”的数据到达接受方时，接受方发送 NAK。我们尝试换一种思路：当被”污染“的数据到达接受方时，接受方不发送 NAK，取而代之的是发送一个对最近正确收到的数据的 ACK。</p>
+<p>那当发送方收到这个 ACK 时，它该怎么办判断这个 ACK 是代表接受方正确接受了它刚发送的数据（实则在路途中被“污染”）还是代表接受方正确接受了它上一个发送的数据呢？这种情况下，ACK 数据包也需要加入序列号了。</p>
+<p>当发送方收到两个对同一个数据包确认的 ACK 时，即收到重复的 ACK，发送方就可以意识到：<strong>接受方没能正确收到被确认两次的数据包的下一个数据包！</strong></p>
+<p>这样就迎来了 NAK-free 的 <code>rdt 2.2</code>!</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063673825018.jpg" alt=""></p>
+<p><code>rdt 2.2</code> 和 <code>rdt 2.1</code> 的区别在于：发送方现在必须得在发送 ACK 时，添加对应的序列号了。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063675189756.jpg" alt=""></p>
+<h2 id="Reliable-Data-Transfer-3-0"><a href="#Reliable-Data-Transfer-3-0" class="headerlink" title="Reliable Data Transfer 3.0"></a>Reliable Data Transfer 3.0</h2><p>在真实世界里，特别是计算机网络的范畴内，数据随时都有可能传丢。<br>对于一个可靠数据传输协议来说，它必须解决：</p>
+<ol>
+<li>如何检测数据传丢了？</li>
+<li>当数据传丢了，它该做什么？</li>
+</ol>
+<p><code>rdt 2.2</code> 很好地替我们回应了第二个问题。<br>有不少的方法来解决第一个问题，但在这里，我们把检测数据丢失和数据恢复的重担放在发送方。<br>设想这样一个场景：发送方把数据发送出去，第一种情况：数据在发送途中丢失了。第二种情况：接受方发回的 ACK 丢失了。在这其中任意一种情况下，发送方均不会收到关于刚刚发送出去的数据的任何反馈。但是，如果发送方可以<strong>等足够久</strong>，以至于它可以很肯定：刚发出去的数据丢了，这样它就可以直接重新发送这个数据。<br>至于这个等待时间是多少，我们可以暂且理解为：一个 RTT（Round Trip Time）再加在物理介质上传输该数据的时间。<br>需要注意的是：如果一个数据包经历了一个特别大的延迟（网络特别拥堵），即使数据包和它的 ACK 都没有丢失，发送方也会重新发送数据包。我们就又遇到在 <code>rdt 2.0</code> 中遇到的老问题——<strong>重复数据包</strong>。没关系，<code>rdt 2.0</code> 已经妥善处理好这个问题了。</p>
+<p>当遇到以下情况时：</p>
+<ol>
+<li>发出的数据在途中丢了</li>
+<li>接受方发回的 ACK 丢了</li>
+<li>发出的数据或它的 ACK 经历了很大的延迟（网络特别拥堵）<br>从发送方的角度看，重新发送数据是万能灵药。为了实现基于时间的重传机制，我们需要一个倒计时器。<br>这个倒计时器在计时结束后中断发送方。在发生中断后，发送方需要采取以下三种行为：</li>
+<li>无论是第一次发送某个数据，还是重传某个数据，重置计时器，重新开始计时。</li>
+<li>响应计时中断，并采取恰当的行动。</li>
+<li>暂停计时。</li>
+</ol>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063717452835.jpg" alt=""></p>
+<p>到这里，我们已经有了个可用的可靠数据传输协议了！</p>
+<h2 id="那性能怎么样呢？"><a href="#那性能怎么样呢？" class="headerlink" title="那性能怎么样呢？"></a>那性能怎么样呢？</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063726360675.jpg" alt=""><br>假设这样一个场景：这里有一条以三藩市为起点，波士顿为终点的物理链接，<br>它的数据传输速率为：\(R = 1 * 10^9\) bits/second    </p>
+<p>假设一个数据包大小为：\(L = 8000\) bits</p>
+<p>这样，发送一个数据包所需的时间为：\(d_{trans} = \frac{L}{R} = \frac{8000,bits/packet}{1 * 10^9,bits/second} = 0.8 * 10^{-2},millisecond\)    </p>
+<p>所以总的传输时间为：\(t_{total} = RTT +  d_{trans} = 30 + 0.008 = 30.008,millisecond\)    </p>
+<p>发送方的发送效率为：\(U_{sender} = \frac{\frac{L}{R}}{RTT + \frac{L}{R}} = \frac{0.008,millisecond}{30.008,millisecond} = 0.00027\)   </p>
+<p>吞吐量为：\(T_{throughput} = \frac{8000,bits/packet}{30.008 * 10^{-3},second/packet} = 267,kbps\)   </p>
+<p>而物理限制是为: \(1 * 10^6,kbps\)    </p>
+<p>这样一对比，属实浪费。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063749150047.jpg" alt=""></p>
+<p>看完上图，直觉告诉我们可以像流水线般同时发送好几个数据包，以提高吞吐量。<br>要实现如图所示的流水线式发送，需要做到：</p>
+<ul>
+<li>因为每个在传送途中（非重传）的数据包需要独一无二的序列号，且同时会存在多个在传送途中的未被确认的数据包，所以序列号的范围得是递增的。</li>
+<li>发送方和接受方可能会需要缓存多个数据包。发送方至少得缓存已经传送在途且未收到确认的数据包。</li>
+<li>根据一个可靠数据传输协议如何应对：1. 数据传丢；2. 数据被”污染”；3. 数据因网络拥堵而迟到；这三种问题，大体可以分为两种错误恢复的方法：<ul>
+<li><strong>GBN</strong>(Go-Back-N)</li>
+<li><strong>选择重传</strong>(selective repeat)</li>
+</ul>
+</li>
+</ul>
+<h2 id="GBN"><a href="#GBN" class="headerlink" title="GBN"></a>GBN</h2><p>在 GBN 协议中，发送方可以在不需要等待收到 ACK 的情况下，同时发送 N 个数据包，这意味发送方最多能保持 N 个未收到 ACK 的数据包，N 也被称为滑动窗口的大小。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063778631352.jpg" alt=""><br>图中的 <code>base</code> 意为：序列号最小的未收到 ACK 的数据包的序列号，而<br><code>nextseqnum</code> 意为：下一个将被发送的数据包的序列号。<br>区间 [0, base - 1] 表示为：序列号落在此区间的数据包均被发送和成功收到 ACK。<br>区间 [base, nextseqnum - 1] 表示为：序列号落在此区间的数据包均被发送且还未收到对应的 ACK。<br>区间 [nextseqnum, base + N - 1] 表示为：序列号落在此区间的数据包均可立即被发送。<br>区间 [base + N, 正无穷] 表示：序列号落在此区间的数据包处于等待发送状态。当序列号为 base 的数据包收到 ACK 之后，整个滑动窗口 N 向后移动，这样序列号 base + N 的数据包才可以被发送。</p>
+<p>// GBN sender 状态机<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063896168564.jpg" alt=""><br>当发送方的上层调用 <code>rdt_send()</code> 时，发送方会首先检查窗口是否已满，如果窗口已满，则拒绝发送数据。<br>当超时事件发生时，发送方启动计时器，且重新发送所有之前已发送过但未收到 ACK 的数据包。<br>当收到某个数据包的 ACK 时，还有已被发送且未收到 ACK 的数据包，发送方需要重启计时器；如果此时不存在已被发送且未收到 ACK 的数据包，发送方需停止计时。</p>
+<p>// GBN receiver 状态机<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063905182408.jpg" alt=""><br>假设接受方已经接受了前 n - 1 个数据包，那么接受方下一个就想收到序列号为 n 的数据包。接受方会抛弃所有下一个到来的序列号非 n 的数据包，并重新发送最近收到的数据包的 ACK（在这个例子中为：ACK n-1）。这就是<strong>累计重传</strong>（cumulative acknowledgments）。  </p>
+<p>GBN 中的接受方拒绝接受失序的数据包，这听起来虽然有点蠢，似乎不尊重发送方的幸苦劳动，但这样做还是有原因的。<br>假设接受方现在正恭迎序列号为 n 的数据包的到来，但序列号为 n + 1 的小老弟先来了，打了一个措手不及。因为收到的数据必须按顺序组装起来，所以此时的接受方选择把序列号为 n + 1 的数据包缓存起来。但是当序列号为 n 的数据包丢了之后，根据发送方重传的规则，序列号为 n 和 n + 1 的数据包都会被重传。这样就能理解接受方不缓存失序数据包的原因了，反正都要一起重传过来的嘛，缓存干嘛！<br>这样，发送方需要记住自己滑动窗口的上下界和下一个要发送的数据包的位置就可以，而接受方这边就更简单了，只需记住自己所期待到来的那个数据包的序列号就行了。<br>当然，这种丢掉正确收到却失序的数据包的做法也是有缺点的，因为之后的重传过来的数据包可能会被传丢或被“污染”，这样就会导致更多的数据重传。</p>
+<h2 id="选择重传（Selective-Repeat）"><a href="#选择重传（Selective-Repeat）" class="headerlink" title="选择重传（Selective Repeat）"></a>选择重传（Selective Repeat）</h2><p>流水线式的同时发送多个数据包的 GBN 协议已经比之前谈论的停止等待协议强不少。但是也有一些场景下，GBN 同样因为性能被人诟病。<br>特别是当前网络的<a href="https://zh.wikipedia.org/wiki/%E5%B8%A6%E5%AE%BD%E6%97%B6%E5%BB%B6%E4%B9%98%E7%A7%AF" target="_blank" rel="noopener">带宽延时乘积</a>很大且滑动窗口 N 也很大时，某个数据包传输出错会导致 GBN 发送方重传一大堆的数据包，这大部分情况是没有必要的。随着数据传输出错率变高，滑动窗口中便会塞满大量重传的数据。<br>让我们来看一看选择重传协议。正如其名，选择重传会避免像 GBN 那样的没必要的大量重传，它只选择性地重新发送它认为没能正确送达的数据包！<br>与 GBN 不同的是，它的滑动窗口里会出现一些被 ACK 过的数据包，换句话说，不管这个被正确收到的数据包是不是失序的，SR 均会确认这些数据包。失序的数据包将会被缓存起来。</p>
+<p>//SR sender<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063947970142.jpg" alt=""></p>
+<p>//SR receiver<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063948151237.jpg" alt=""></p>
+<p>尤其要注意接受方图里的第二点：当收到已经被 ACK 过的数据包时，接受方不能直接忽略这个数据包，仍需发送对应的 ACK。<br>但这样做的原因是什么呢？<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063950129010.jpg" alt=""><br>参照这幅图，设想一个场景：序列号为 <code>send_base</code> 的数据包已经接受方 ACK 了，但发往 sender 的 ACK 半途丢了。计时器时间一到，sender 仍未收到 <code>send_base</code> 数据包的 ACK，sender 有正当理由怀疑这个数据包未能成功送达，并开始选择重传这个数据包。如果在这种情况下，receiver 选择忽略这个数据包，那么 sender 的滑动窗口永远不会向后移动！<br>这个例子说明 SR 协议一个很重要的特点：对某个数据包是否被正确收到，SR 中的 sender 和 receiver 分别持有不同的观点。<br>Sender 和 receiver 之间这种“不同步性”在序列号范围有限的现实面前有重要的后果。</p>
+<p>考虑场景 A：有限的序列号范围是: {0, 1, 2, 3}，滑动窗口大小为 3。如下图所示，数据包从 0 到 2 均成功被 receiver 收到。但这三个数据包对应的 ACK 都传丢了。时间一到，sender 开始重传数据包 0。Receiver 成功收到了数据包 0。此时这个数据包 0 是发送的第一个数据包的拷贝。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16064026737333.jpg" alt=""></p>
+<p>考虑场景 B：ACK 从 0 到 2 均被 sender 成功收到。当收到 ACK 0 时，sender 开始发送数据包 3。当收到 ACK 1 时，sender 开始发送数据包 0。<br>Receiver 也成功收到数据包 0。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16064036962176.jpg" alt=""></p>
+<p>Receiver 是没法看到 sender 的行为的，所以可以想象，receiver 和 sender 之间存在“看不见的铁幕”。现在，请从 receiver 的角度考虑场景 A 和 B。对于 receiver 来说，场景 A 和场景 B 是一模一样的，然而站在上帝视角的我们能很轻易地分辨出 A 与 B 之间的不同。</p>
+<p>Receiver 是没法分辨出它刚收到的数据包 0 到底是第五个数据包还是第一个数据包的拷贝。所以当滑动窗口的大小等于序列号个数减一时，这一切都行不通了。</p>
+<p>那把窗口大小改为 2 呢？<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064524353894.jpg" alt=""></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064525468100.jpg" alt=""><br>这样就解决问题了。<br>书上给出了一个结论：<strong>对于选择重传协议来说，滑动窗口大小必须小于等于序列号个数的一半。</strong></p>
+<p>到这，本文开头的三个假设只剩下这个：「数据总是按照发送的顺序被接收者接收的」。<br>往往现实可能是这样的：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064568665674.jpg" alt=""><br>本来就会因数据丢包或数据对应的 ACK 丢失，而会出现不少重传的数据包。<br>再加上 <code>packet reordering</code> 的影响，重传的数据包变更多，降低了性能。</p>
+<p>好了，对于「如何设计一个可靠数据传输协议」这个问题的讨论就此为止。在此基础上，再去学习 TCP 会比较好。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>啰里八嗦讲了上面一大堆，主要是让自己有个机会复习这部分内容。回想当时学习这块内容时，并没有上述这样一个循序渐进的体验，而是上来就是看 TCP 的定义，再看首部内容等等，学得自己满头包，学习效率可想而知。</p>
+<p>希望自己以后的学习也能尽量遵循「循序渐进」的原则。</p>
+<p>另外，自己花了点时间，把 CS144 这门课的 Lab 做完了。<br>有几个小心得，想在这里提一下：<br>首先就是配环境，<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg" alt=""><br>我一开始的时候按他这个推荐的方法试了，甲骨文的这个 VirtualBox 感觉很不好用。恰巧，VMware Fusion Player Version 12 对个人使用免费了，自己再去下个 Ubuntu 20 LTS，对着下面这个表，一个一个装就是了。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg" alt="">。当时花了一大半个下午加一个晚上，差点就在这第一步的时候放弃了。<br>第二个容易放弃的点是你遇到 Lab4 的时候，Lab 4 是挺难的。但在准备过测试的时候，建议可以开个国外的主机，把代码放到那上面跑，因为有好像有些测试用例是连接的国外的网站。如果还是出现 timeout 的错误，那就得检查自己的代码了。为了省钱，不开也行，那就多在本地上多跑几次测试看看。我有时候在本地跑测试，出现过 97% Pass、98 % Pass、 99% Pass 和 100% Pass。这时候就要活用控制变量法了。<br>CS 144 的课程视频在 YouTube 上也有，但我自己看下来感觉还是：读课本是主要手段，辅以这 2013 年的课程视频。<br><a href="https://github.com/SunsetWan/144_lab_code" target="_blank" rel="noopener">144_lab_code</a> 这是我自己完成整个 Lab 的代码，加了不少注释，希望能有些帮助。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/03/WWDC20%2010168%20-%20Explore%20logging%20in%20Swift/" rel="prev" title="WWDC20 10168 - Explore logging in Swift">
+      <i class="fa fa-chevron-left"></i> WWDC20 10168 - Explore logging in Swift
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reliable-Data-Transfer-1-0"><span class="nav-number">1.</span> <span class="nav-text">Reliable Data Transfer 1.0</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reliable-Data-Transfer-2-0"><span class="nav-number">2.</span> <span class="nav-text">Reliable Data Transfer 2.0</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reliable-Data-Transfer-2-1"><span class="nav-number">3.</span> <span class="nav-text">Reliable Data Transfer 2.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reliable-Data-Transfer-2-2"><span class="nav-number">4.</span> <span class="nav-text">Reliable Data Transfer 2.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reliable-Data-Transfer-3-0"><span class="nav-number">5.</span> <span class="nav-text">Reliable Data Transfer 3.0</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那性能怎么样呢？"><span class="nav-number">6.</span> <span class="nav-text">那性能怎么样呢？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GBN"><span class="nav-number">7.</span> <span class="nav-text">GBN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选择重传（Selective-Repeat）"><span class="nav-number">8.</span> <span class="nav-text">选择重传（Selective Repeat）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后记"><span class="nav-number">9.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
