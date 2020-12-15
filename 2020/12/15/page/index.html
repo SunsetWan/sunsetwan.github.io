@@ -49,9 +49,9 @@
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079563714920.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080086909737.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080003273663.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080003273663.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16079984137590.jpg">
 <meta property="article:published_time" content="2020-12-15T08:29:38.000Z">
-<meta property="article:modified_time" content="2020-12-15T08:38:45.781Z">
+<meta property="article:modified_time" content="2020-12-15T08:47:35.156Z">
 <meta property="article:author" content="Sunset Wan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/11/16076722742049.jpg">
@@ -203,7 +203,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-15 16:29:38 / 修改时间：16:38:45" itemprop="dateCreated datePublished" datetime="2020-12-15T16:29:38+08:00">2020-12-15</time>
+              <time title="创建时间：2020-12-15 16:29:38 / 修改时间：16:47:35" itemprop="dateCreated datePublished" datetime="2020-12-15T16:29:38+08:00">2020-12-15</time>
             </span>
 
           
@@ -252,7 +252,7 @@
 <li>在视图层级上添加或删除 view    </li>
 </ol>
 <p><code>needsLayout</code> 会自动设置为 <code>true</code>。<br>相反地，当 layout pass 结束时（<code>layoutsubViews()</code> 执行完毕时）， <code>needsLayout</code> 会自动设置为 <code>false</code>。</p>
-<p>但有时候，你会需要手动把当前的布局标记为失效状态（即把 <code>needsLayout</code> 为 <code>True</code>），你可以手动调用 <code>setNeedsLayout()</code>。这样在下一个 layout pass 出现时，会强制调用 <code>layoutsubViews()</code>。</p>
+<p>但有时候，你会需要手动把当前的布局标记为失效状态（即把 <code>needsLayout</code> 设置为 <code>True</code>），你可以手动调用 <code>setNeedsLayout()</code>。这样在下一个 layout pass 出现时，会强制调用 <code>layoutsubViews()</code>。</p>
 <p>将 <code>setNeedsLayout()</code> 和 <code>layoutIfNeeded()</code> 组合使用，可以立即触发 layout pass，即会很快触发 <code>layoutsubViews()</code>。</p>
 <p>我们当然可以 override <code>layoutsubViews()</code> 来实现一些自定义的布局，但需要谨慎的是：只有当某个布局不能通过设定 constraints 来解决时，才真正需要 override <code>layoutsubViews()</code>。</p>
 <p>当 override <code>layoutsubViews()</code> 时，我们不能调用 <code>setNeedsUpdateConstraints()</code>，这样会很容易导致布局反馈循环（layout feedback loop）。这篇 <a href="https://www.hackingwithswift.com/articles/59/debugging-auto-layout-feedback-loops" target="_blank" rel="noopener">文章</a> 介绍了如何调试这一问题。</p>
@@ -265,12 +265,12 @@
 <p>但有些时候我们可能需要修改大量的 constraints 时，沿用上述的方法，可能会觉得很慢。这时候我们就可以选择去 override <code>updateConstraints()</code>。Layout engine 就可以在同一时刻批量处理这些 constraints 的改变，从而提升性能。但需要记住的是：只有当同时修改大量 constraints 时，才需要去 override 这个方法。</p>
 <p><code>updateConstraints()</code> 往往在 layout pass 出现之前且一些 constraints 处于失效状态时（即需要更新时）被调用。我们也可以手动调用 <code>updateConstraintsIfNeeded()</code> 来使 <code>updateConstraints()</code> 被调用。</p>
 <p>类似地，我们可以调用 <code>setNeedsUpdateConstraints()</code> 来手动把当前的 constraints 标记为失效状态。</p>
-<h2 id="Auto-Layout-Debug-技巧"><a href="#Auto-Layout-Debug-技巧" class="headerlink" title="Auto Layout Debug 技巧"></a>Auto Layout Debug 技巧</h2><h3 id="translatesAutoresizingMaskIntoConstraints"><a href="#translatesAutoresizingMaskIntoConstraints" class="headerlink" title="translatesAutoresizingMaskIntoConstraints"></a>translatesAutoresizingMaskIntoConstraints</h3><p>从 IB 中生成的 UIView 的 <code>translatesAutoresizingMaskIntoConstraints</code> （之后简称为 <code>tAMIC</code>）默认为 <code>false</code>，而代码生成的 UIView 的<code>tAMIC</code> 默认为 <code>true</code>。<br>当某个 view 是使用 Auto Layout 来布局时，需要保证它的 <code>tAMIC</code> 为 <code>true</code>，反之，如果是通过手动设置它的 frame 来布局的话，它的 <code>tAMIC</code> 需为 <code>false</code>。其实，手动设置 view 的 frame 的布局方式背地里仍然是使用 auto layout 的方式在布局。<br>举个例子，我在 viewDidLoad() 中添加如下代码：</p>
+<h2 id="Auto-Layout-Debug-技巧"><a href="#Auto-Layout-Debug-技巧" class="headerlink" title="Auto Layout Debug 技巧"></a>Auto Layout Debug 技巧</h2><h3 id="translatesAutoresizingMaskIntoConstraints"><a href="#translatesAutoresizingMaskIntoConstraints" class="headerlink" title="translatesAutoresizingMaskIntoConstraints"></a>translatesAutoresizingMaskIntoConstraints</h3><p>从 IB 中生成的 UIView 的 <code>translatesAutoresizingMaskIntoConstraints</code> （之后简称为 <code>tAMIC</code>）默认为 <code>false</code>，而代码生成的 UIView 的 <code>tAMIC</code> 默认为 <code>true</code>。<br>当某个 view 是使用 Auto Layout 来布局时，需要保证它的 <code>tAMIC</code> 为 <code>true</code>，反之，如果是通过手动设置它的 frame 来布局的话，它的 <code>tAMIC</code> 需为 <code>false</code>。其实，手动设置 view 的 frame 的布局方式背地里仍然是使用 auto layout 的方式在布局。<br>举个例子，我在 viewDidLoad() 中添加如下代码：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">label.translatesAutoresizingMaskIntoConstraints &#x3D; true</span><br><span class="line">view.addSubview(label)</span><br><span class="line">label.frame &#x3D; CGRect(x: 100, y: 100, width: 100, height: 100)</span><br></pre></td></tr></table></figure>
 
 <p>打断点进入调试状态，查看该 label 的 constraints:<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/11/16076908613923.jpg" alt=""></p>
-<p>可以看出，手动设置的 frame 在背地里转换成对应的<code>NSAutoresizingMaskLayoutConstraint</code> 来进行布局了。</p>
-<h3 id="Unsatisfiable-Constraints"><a href="#Unsatisfiable-Constraints" class="headerlink" title="Unsatisfiable Constraints"></a>Unsatisfiable Constraints</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/11/16077023483488.jpg" alt=""><br>以 layout engine 主动选择 break 的那条 constraint 为突破点去研究到底是哪里发生冲突了。还可以对可疑的 constraint 和 view 各自加上 identifier 和 accessibilityIdentifier 来提高上图 log 的可读性。<br>详见 <a href="https://developer.apple.com/videos/play/wwdc2015/219/" target="_blank" rel="noopener">Mysteries of Auto Layout, Part 2</a> [20:18] 处</p>
+<p>可以看出，手动设置的 frame 在背地里转换成对应的 <code>NSAutoresizingMaskLayoutConstraint</code> 来进行布局了。</p>
+<h3 id="Unsatisfiable-Constraints"><a href="#Unsatisfiable-Constraints" class="headerlink" title="Unsatisfiable Constraints"></a>Unsatisfiable Constraints</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/11/16077023483488.jpg" alt=""><br>以 layout engine 主动选择 break 的那条 constraint 为突破点去研究到底是哪里发生冲突了。还可以对可疑的 constraint 和 view 各自加上 <code>identifier</code> 和 <code>accessibilityIdentifier</code> 来提高上图 log 的可读性。<br>详见 <a href="https://developer.apple.com/videos/play/wwdc2015/219/" target="_blank" rel="noopener">Mysteries of Auto Layout, Part 2</a> [20:18] 处</p>
 <h3 id="Ambiguous-Layouts"><a href="#Ambiguous-Layouts" class="headerlink" title="Ambiguous Layouts"></a>Ambiguous Layouts</h3><p>这种情况可能原因有：</p>
 <ol>
 <li>constraint 太少，无法计算出确定的 frame</li>
@@ -296,15 +296,15 @@
 <p>回头看这段代码：<br><a href="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/12/16077488913676.jpg" target="_blank" rel="noopener"></a><br>之前说过 <code>updateConstraints()</code> 是可以同 <code>layoutSubviews()</code> 类比的。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/12/16077525026076.jpg" alt=""><br>在 <code>layoutsubViews()</code> 每次被调用时，所有的 subviews 都被销毁，然后再重新创建 subviews，并把它们添加到 superview 上。<br>绝大多数人看到 <code>layoutsubViews()</code> 这段代码时，肯定会有一种「这样做会影响到性能」的直觉。    </p>
 <p>同理，那段 <code>updateConstraints()</code> 也是如此！    </p>
 <p>所以我们只需想方设法确保 <code>updateConstraints()</code> 内的做法只执行一次就可以避免对性能的损耗。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/12/16077531178518.jpg" alt=""></p>
-<p>我们通过类比，开始明白 <code>updateConstraints()</code> 那段代码是不好的代码。但我们的目的不是为了仅是说明这段代码不好，而是要尽量抽丝剥茧，理解背后的原理。</p>
+<p>我们通过类比，开始明白之前那段 <code>updateConstraints()</code> 代码是不好的代码。但我们的目的不是为了仅是说明这段代码不好，而是要尽量抽丝剥茧，理解背后的原理。</p>
 <h3 id="Activate-constraints-背后发生了什么？"><a href="#Activate-constraints-背后发生了什么？" class="headerlink" title="Activate constraints 背后发生了什么？"></a>Activate constraints 背后发生了什么？</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079497159474.jpg" alt=""><br>在对 view 添加 constraints 之后，engine 会开始计算表示 constraints 的方程组，然后再把方程组的解（该 view 的 frame 数据，即 minX、minY、width 和 height）告知 view。</p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079519649081.jpg" alt=""><br>以上图这个简单布局为例（仅关注水平方向上的布局）。<br>Layout engine 就开始计算一个简单的方程组：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079523622900.jpg" alt=""></p>
 <p>计算完毕后，layout engine 会通知 view。然后 view 向它自己的 superview 发送 <code>setNeedsLayout()</code> 信息。</p>
 <p>此时就进入 Render Loop 的第二阶段 <code>Layout</code>：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079529519159.jpg" alt=""></p>
 <p>在 <code>layoutSubViews()</code> 中，view 从 engine 中读取方程组的解（frame 数据）进行布局。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079530878940.jpg" alt=""></p>
-<p>到此为止，我们就循序渐进地走过一遍 layout 的过程。相信你对这整个过程有了比较直观的了解，这样会利于你对 auto layout 的性能做出恰当的判断。</p>
+<p>到此为止，我们就循序渐进地走过一遍 layout 的过程。相信你对这整个过程有了比较直观的了解，这样会利于你对 Auto Layout 的性能做出恰当的判断。</p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/14/16079563714920.jpg" alt=""><br>让我们回顾这段代码。在 Render Loop 可能以每秒 120 次调用 <code>updateConstraints()</code> 的情况下，这段代码中先 deactivate constraints，然后再 activate constraints。我们可以粗浅地理解为 engine 一秒钟解 120 次<strong>同样的</strong>方程组！虽然 engine 解一次方程组会很快，但是累计下来在这儿会产生很大的开销，会对性能表现有不小的影响！</p>
-<p>大多数情况下，我们都是在同一 superview 内对 subviews 添加约束。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080086909737.jpg" alt=""><br>如上图所示：text1 和 text2 拥有同样的 superview，text3 和 text4 拥有同样的 superview。text1 和 text3 分别在两个不同的视图层级里。<br>此时布局的时间复杂度是线性的，因为 layout engine 实际上是在解两个独立无关的方程组。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080003273663.jpg" alt=""><br>而当需要 text1 和 text3 左对齐时：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080003273663.jpg" alt=""><br>Layout engine 就需要解两个有依赖关系的方程组了。可想而知此时的时间复杂度就不再是线性的，计算量相较之前会增大。</p>
+<p>大多数情况下，我们都是在同一 superview 内对 subviews 添加约束。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080086909737.jpg" alt=""><br>如上图所示：text1 和 text2 拥有同样的 superview，text3 和 text4 拥有同样的 superview。text1 和 text3 分别在两个不同的视图层级里。<br>此时布局的时间复杂度是线性的，因为 layout engine 实际上是在解两个独立无关的方程组。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16080003273663.jpg" alt=""><br>而当需要 text1 和 text3 左对齐时：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/12/15/16079984137590.jpg" alt=""><br>Layout engine 就需要解两个有依赖关系的方程组了。可想而知此时的时间复杂度就不再是线性的，计算量相较之前会增大。</p>
 <p>通过上面的说明，我们可以逐渐体会到这样一件事：</p>
 <blockquote>
 <p>The layout engine is a layout cache and dependency tracker</p>
@@ -312,32 +312,17 @@
 <p>光对 Auto Layout 这个黑盒有较为直观的认知还不够，还需要通过实际具体的例子来强化这份认知，强烈推荐看完 <a href="https://developer.apple.com/videos/play/wwdc2018/220/" target="_blank" rel="noopener">High Performance Auto Layout</a> [26: 15] 处的例子。</p>
 <h3 id="Intrinsic-Content-Size"><a href="#Intrinsic-Content-Size" class="headerlink" title="Intrinsic Content Size"></a>Intrinsic Content Size</h3><p>常见的 UI 控件，如 UILabel 和 UIImageView。在为它们设定完显示的文字和图片后，它们会有 <code>intrinsicContentSize</code>，layout engine 利用这个 <code>intrinsicContentSize</code> 生成 <code>NSContentSizeLayoutConstraint</code> 对它们进行布局。<br>当需要 text measurement 时，选择性地去 override <code>intrinsicContentSize</code> 可以提高布局性能。Text measurement 的开销是很大的，特别是在那些大量显示文本的 app 中。    </p>
 <p>如果在无需 text measurement 就可以确定文本显示的大小，就可以直接 override <code>intrinsicContentSize</code>，返回这个确定的值。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">override var intrinsicContentSize: CGSize &#123;</span><br><span class="line">    &#x2F;&#x2F; 返回某个确定的 CGSize</span><br><span class="line">    return CGSize(width: 100, height: 100)</span><br><span class="line">&#125;</span><br><span class="line">&#96;&#96;&#96;     </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">如果是利用 constraints 来确定文本显示的大小而不是文本本身的大小，可以这样：</span><br></pre></td></tr></table></figure>
-<p>override var intrinsicContentSize: CGSize {<br>    return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)<br>}</p>
-<pre><code>这样做是在告诉 superview：我已经可以通过 constraints 来确定我自己的大小啦，没必要进行 text measurement 了。
-
-谈及 `intrinsicContentSize`，就不得不提一嘴 `systemLayoutSizeFitting(_:)`，因为有时候会把它俩混为一谈。实际上它俩可以说是正反面。`intrinsicContentSize` 是传递给 layout engine 的信息，而 `systemLayoutSizeFitting(_:)` 是 layout engine 计算得出的信息。
-
-## 后记
-本文仅是上面内容的粗浅的个人总结，如有误，欢迎批评指正！
-希望自己以后在写 UI 的时候能减少些许痛苦。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">override var intrinsicContentSize: CGSize &#123;</span><br><span class="line">    &#x2F;&#x2F; 返回某个确定的 CGSize</span><br><span class="line">    return CGSize(width: 100, height: 100)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
+<p>如果是利用 constraints 来确定文本显示的大小而不是文本本身的大小，可以这样：    </p>
+<pre><code>override var intrinsicContentSize: CGSize {
+    return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+}</code></pre><p>这样做是在告诉 superview：我已经可以通过 constraints 来确定我自己的大小啦，没必要进行 text measurement 了。</p>
+<p>谈及 <code>intrinsicContentSize</code>，就不得不提一嘴 <code>systemLayoutSizeFitting(_:)</code>，因为有时候会把它俩混为一谈。实际上它俩可以说是正反面。<code>intrinsicContentSize</code> 是传递给 layout engine 的信息，而 <code>systemLayoutSizeFitting(_:)</code> 是 layout engine 计算得出的信息。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>本文仅是上面内容的粗浅的个人总结，如有误，欢迎批评指正！<br>希望自己以后在写 UI 的时候能减少些许痛苦。</p>
 
-
-
-
-
-
-
-
-
-
-
-
-
-</code></pre>
     </div>
 
     
@@ -414,7 +399,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-layout-？"><span class="nav-number">1.</span> <span class="nav-text">什么是 layout ？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#那怎么确定-subviews-的-frame-呢？"><span class="nav-number">1.1.</span> <span class="nav-text">那怎么确定 subviews 的 frame 呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#那么该如何手动触发-layout-pass-呢？"><span class="nav-number">1.2.</span> <span class="nav-text">那么该如何手动触发 layout pass 呢？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#那如何检查当前-constraints-是否发生改变呢？"><span class="nav-number">1.2.1.</span> <span class="nav-text">那如何检查当前 constraints 是否发生改变呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#那么如何把当前的布局标记为失效状态呢？"><span class="nav-number">1.2.2.</span> <span class="nav-text">那么如何把当前的布局标记为失效状态呢？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那-updateConstraints-又是干啥的？"><span class="nav-number">2.</span> <span class="nav-text">那 updateConstraints() 又是干啥的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Auto-Layout-Debug-技巧"><span class="nav-number">3.</span> <span class="nav-text">Auto Layout Debug 技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#translatesAutoresizingMaskIntoConstraints"><span class="nav-number">3.1.</span> <span class="nav-text">translatesAutoresizingMaskIntoConstraints</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unsatisfiable-Constraints"><span class="nav-number">3.2.</span> <span class="nav-text">Unsatisfiable Constraints</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ambiguous-Layouts"><span class="nav-number">3.3.</span> <span class="nav-text">Ambiguous Layouts</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#High-Performance-Auto-Layout"><span class="nav-number">4.</span> <span class="nav-text">High Performance Auto Layout</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Render-Loop"><span class="nav-number">4.1.</span> <span class="nav-text">Render Loop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Activate-constraints-背后发生了什么？"><span class="nav-number">4.2.</span> <span class="nav-text">Activate constraints 背后发生了什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Intrinsic-Content-Size"><span class="nav-number">4.3.</span> <span class="nav-text">Intrinsic Content Size</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-layout-？"><span class="nav-number">1.</span> <span class="nav-text">什么是 layout ？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#那怎么确定-subviews-的-frame-呢？"><span class="nav-number">1.1.</span> <span class="nav-text">那怎么确定 subviews 的 frame 呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#那么该如何手动触发-layout-pass-呢？"><span class="nav-number">1.2.</span> <span class="nav-text">那么该如何手动触发 layout pass 呢？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#那如何检查当前-constraints-是否发生改变呢？"><span class="nav-number">1.2.1.</span> <span class="nav-text">那如何检查当前 constraints 是否发生改变呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#那么如何把当前的布局标记为失效状态呢？"><span class="nav-number">1.2.2.</span> <span class="nav-text">那么如何把当前的布局标记为失效状态呢？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那-updateConstraints-又是干啥的？"><span class="nav-number">2.</span> <span class="nav-text">那 updateConstraints() 又是干啥的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Auto-Layout-Debug-技巧"><span class="nav-number">3.</span> <span class="nav-text">Auto Layout Debug 技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#translatesAutoresizingMaskIntoConstraints"><span class="nav-number">3.1.</span> <span class="nav-text">translatesAutoresizingMaskIntoConstraints</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unsatisfiable-Constraints"><span class="nav-number">3.2.</span> <span class="nav-text">Unsatisfiable Constraints</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ambiguous-Layouts"><span class="nav-number">3.3.</span> <span class="nav-text">Ambiguous Layouts</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#High-Performance-Auto-Layout"><span class="nav-number">4.</span> <span class="nav-text">High Performance Auto Layout</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Render-Loop"><span class="nav-number">4.1.</span> <span class="nav-text">Render Loop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Activate-constraints-背后发生了什么？"><span class="nav-number">4.2.</span> <span class="nav-text">Activate constraints 背后发生了什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Intrinsic-Content-Size"><span class="nav-number">4.3.</span> <span class="nav-text">Intrinsic Content Size</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后记"><span class="nav-number">5.</span> <span class="nav-text">后记</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
