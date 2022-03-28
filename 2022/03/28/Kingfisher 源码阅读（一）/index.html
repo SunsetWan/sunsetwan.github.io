@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Kingfisher 源码阅读（一）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kingfisher 源码阅读（一）">
+<meta property="og:url" content="https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/index.html">
+<meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="Kingfisher 源码阅读（一）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_03.png">
+<meta property="article:published_time" content="2022-03-28T01:41:00.000Z">
+<meta property="article:modified_time" content="2022-03-28T14:50:21.147Z">
+<meta property="article:author" content="Sunset Wan">
+<meta property="article:tag" content="Kingfisher">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg">
+
+<link rel="canonical" href="https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kingfisher 源码阅读（一） | 日落大道</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">日落大道</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kingfisher 源码阅读（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-28 09:41:00 / 修改时间：22:50:21" itemprop="dateCreated datePublished" datetime="2022-03-28T09:41:00+08:00">2022-03-28</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Kingfisher 源码阅读（一）<a id="more"></a></p>
+<h1 id="Kingfisher-源码阅读（一）"><a href="#Kingfisher-源码阅读（一）" class="headerlink" title="Kingfisher 源码阅读（一）"></a>Kingfisher 源码阅读（一）</h1><p>最近想了解如何设计一个简单的缓存系统，于是找了 Kingfisher 7.1.2 版本的源代码读一读，有些收获，记录于此。</p>
+<p>缓存系统一般可分为：内存缓存（memory cache）和硬盘缓存（disk cache）。</p>
+<h2 id="内存缓存"><a href="#内存缓存" class="headerlink" title="内存缓存"></a>内存缓存</h2><p>内存缓存背后支撑的数据结构是 Foundation 框架中的 <code>NSCache</code>。<br><code>NSCache</code> 有两个限制：<code>countLimit</code> 和 <code>totalCostLimit</code>。前者是表示能存储多少个对象，后者是表示缓存的容量有多大。但这两个限制是软限制——如果超过限制，<code>NSCache</code> 中保存的对象不一定会被及时地从其中移出。根据 <a href="https://developer.apple.com/documentation/foundation/nscache?language=objc" target="_blank" rel="noopener">官方文档</a>，超过限制之后，对象的移出时机取决与 <code>NSCache</code> 背后的实现。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="kf_01"></p>
+<p><code>NSCache</code> 是个范型类，所以我们得定义好 <code>KeyType</code> 和 <code>ObjectType</code>。<br>根据声明的类型约束，<code>KeyType</code> 的类型得是一个类。一般地，类似 key 的数据结构会采用 <code>String</code>。而这里 <code>KeyType</code> 得是引用类型而不是值类型，所以我们会选择 <code>NSString</code>。但在 API 设计时，对外暴露的那一层 API，还是可以使用 <code>String</code>。到调用 <code>NSCache</code> 的<code>setObject(_:forKey:cost:)</code> 方法时，再把 <code>String</code> 转为 <code>NSString</code>。之所以这样做，是因为值类型更符合当前场景的需求。<br>Kingfisher 中 <code>ObjectType</code> 对应的数据结构是这么设计的：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StorageObject</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> value: <span class="type">T</span> <span class="comment">// 图片的数据</span></span><br><span class="line">    <span class="keyword">let</span> expiration: <span class="type">StorageExpiration</span> <span class="comment">// 过期策略</span></span><br><span class="line">    <span class="keyword">let</span> key: <span class="type">String</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span>(<span class="keyword">set</span>) <span class="keyword">var</span> estimatedExpiration: <span class="type">Date</span> <span class="comment">// 预计到期时间</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="number">_</span> value: <span class="type">T</span>, key: <span class="type">String</span>, expiration: <span class="type">StorageExpiration</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.value = value</span><br><span class="line">        <span class="keyword">self</span>.key = key</span><br><span class="line">        <span class="keyword">self</span>.expiration = expiration</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">self</span>.estimatedExpiration = expiration.estimatedExpirationSinceNow</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 根据当前缓存对象的续期策略，进行续期。</span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">extendExpiration</span><span class="params">(<span class="number">_</span> extendingExpiration: ExpirationExtending = .cacheTime)</span></span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> extendingExpiration &#123;</span><br><span class="line">            <span class="keyword">case</span> .<span class="keyword">none</span>:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">            <span class="keyword">case</span> .cacheTime:</span><br><span class="line">            <span class="keyword">self</span>.estimatedExpiration = expiration.estimatedExpirationSinceNow</span><br><span class="line">            <span class="keyword">case</span> .expirationTime(<span class="keyword">let</span> expirationTime):</span><br><span class="line">            <span class="keyword">self</span>.estimatedExpiration = expirationTime.estimatedExpirationSinceNow</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> expired: <span class="type">Bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> estimatedExpiration.isPast</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="硬盘缓存"><a href="#硬盘缓存" class="headerlink" title="硬盘缓存"></a>硬盘缓存</h2><p>所谓硬盘缓存，就是把缓存数据写入一个文件。当对象写入硬盘缓存时，需要的是图片的数据，缓存的 Key 以及过期策略（StorageExpiration）。写入文件的 URL 是通过缓存的 Key 计算可得。</p>
+<p>Kingfisher 利用操作系统中的文件系统来快捷地存储该缓存对象的 <strong>上一次访问时间</strong> 和 <strong>预计到期时间</strong>。Kingfisher 把写入文件的 <strong>创建时间</strong> 写为 <strong>上一次访问时间</strong>，把写入文件的 <strong>修改日期</strong> 写为 <strong>预计到期时间</strong>，还挺巧妙的 🤯。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> now = <span class="type">Date</span>()</span><br><span class="line"><span class="keyword">let</span> attributes: [<span class="type">FileAttributeKey</span> : <span class="type">Any</span>] = [</span><br><span class="line">    <span class="comment">// The last access date.</span></span><br><span class="line">    .creationDate: now.fileAttributeDate,</span><br><span class="line">    <span class="comment">// The estimated expiration date.</span></span><br><span class="line">    .modificationDate: expiration.estimatedExpirationSinceNow.fileAttributeDate</span><br><span class="line">]</span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> config.fileManager.setAttributes(attributes, ofItemAtPath: fileURL.path)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="keyword">try</span>? config.fileManager.removeItem(at: fileURL)</span><br><span class="line">    <span class="keyword">throw</span> <span class="type">KingfisherError</span>.cacheError(</span><br><span class="line">        reason: .cannotSetCacheFileAttribute(</span><br><span class="line">            filePath: fileURL.path,</span><br><span class="line">            attributes: attributes,</span><br><span class="line">            error: error</span><br><span class="line">        )</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当从硬盘中访问缓存时，Kingfisher 设计了 <code>FileMeta</code> 数据结构：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FileMeta</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> url: <span class="type">URL</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> lastAccessDate: <span class="type">Date?</span></span><br><span class="line">    <span class="keyword">let</span> estimatedExpirationDate: <span class="type">Date?</span></span><br><span class="line">    <span class="keyword">let</span> isDirectory: <span class="type">Bool</span></span><br><span class="line">    <span class="keyword">let</span> fileSize: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(</span><br><span class="line">        fileURL: <span class="type">URL</span>,</span><br><span class="line">        lastAccessDate: <span class="type">Date?</span>,</span><br><span class="line">        estimatedExpirationDate: <span class="type">Date?</span>,</span><br><span class="line">        isDirectory: <span class="type">Bool</span>,</span><br><span class="line">        fileSize: <span class="type">Int</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">self</span>.url = fileURL</span><br><span class="line">        <span class="keyword">self</span>.lastAccessDate = lastAccessDate</span><br><span class="line">        <span class="keyword">self</span>.estimatedExpirationDate = estimatedExpirationDate</span><br><span class="line">        <span class="keyword">self</span>.isDirectory = isDirectory</span><br><span class="line">        <span class="keyword">self</span>.fileSize = fileSize</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">expired</span><span class="params">(referenceDate: Date)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> estimatedExpirationDate?.isPast(referenceDate: referenceDate) ?? <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 根据当前缓存对象的续期策略，进行续期。</span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">extendExpiration</span><span class="params">(with fileManager: FileManager, extendingExpiration: ExpirationExtending)</span></span> &#123;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> lastAccessDate = lastAccessDate,</span><br><span class="line">        <span class="keyword">let</span> lastEstimatedExpiration = estimatedExpirationDate <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> attributes: [<span class="type">FileAttributeKey</span> : <span class="type">Any</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">switch</span> extendingExpiration &#123;</span><br><span class="line">            <span class="keyword">case</span> .<span class="keyword">none</span>:</span><br><span class="line">            <span class="comment">// not extending expiration time here</span></span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">            <span class="keyword">case</span> .cacheTime:</span><br><span class="line">            <span class="keyword">let</span> originalExpiration: <span class="type">StorageExpiration</span> =</span><br><span class="line">            .seconds(lastEstimatedExpiration.timeIntervalSince(lastAccessDate))</span><br><span class="line">            attributes = [</span><br><span class="line">                .creationDate: <span class="type">Date</span>().fileAttributeDate,</span><br><span class="line">                .modificationDate: originalExpiration.estimatedExpirationSinceNow.fileAttributeDate</span><br><span class="line">            ]</span><br><span class="line">            <span class="keyword">case</span> .expirationTime(<span class="keyword">let</span> expirationTime):</span><br><span class="line">            attributes = [</span><br><span class="line">                .creationDate: <span class="type">Date</span>().fileAttributeDate,</span><br><span class="line">                .modificationDate: expirationTime.estimatedExpirationSinceNow.fileAttributeDate</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">try</span>? fileManager.setAttributes(attributes, ofItemAtPath: url.path)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>不难看出：<code>FileMeta</code> 的设计思路与 <code>StorageObject</code> 的设计思路有不少相似的地方。</p>
+<h2 id="缓存过期策略"><a href="#缓存过期策略" class="headerlink" title="缓存过期策略"></a>缓存过期策略</h2><p>Kingfisher 有设计 5 种缓存对象的过期策略：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">StorageExpiration</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> never <span class="comment">// 缓存对象永不过期</span></span><br><span class="line">    <span class="keyword">case</span> seconds(<span class="type">TimeInterval</span>) <span class="comment">// 缓存对象在当前时间点后的 x 秒过期</span></span><br><span class="line">    <span class="keyword">case</span> days(<span class="type">Int</span>) <span class="comment">// 缓存对象在当前时间点后的 x 天过期</span></span><br><span class="line">    <span class="keyword">case</span> date(<span class="type">Date</span>) <span class="comment">// 缓存对象在指定 Date 过期</span></span><br><span class="line">    <span class="keyword">case</span> expired <span class="comment">// 缓存对象已过期</span></span><br><span class="line">		...</span><br><span class="line">		...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="缓存续期策略"><a href="#缓存续期策略" class="headerlink" title="缓存续期策略"></a>缓存续期策略</h2><p>根据程序局部性的原理，被访问过的缓存很有可能再被访问一次，所以也应有缓存续期策略。<br>Kingfisher 有设计 3 种缓存续期策略：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">ExpirationExtending</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="keyword">none</span> <span class="comment">// 不续期，到期时间不变</span></span><br><span class="line">    <span class="keyword">case</span> cacheTime <span class="comment">// 以当前时间点为基础续期</span></span><br><span class="line">    <span class="keyword">case</span> expirationTime(<span class="number">_</span> expiration: <span class="type">StorageExpiration</span>) <span class="comment">// 以指定到期策略续期</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>无论是内存缓存还是硬盘缓存，默认的缓存续期策略均为：<code>cacheTime</code>。</p>
+<h2 id="缓存清除策略"><a href="#缓存清除策略" class="headerlink" title="缓存清除策略"></a>缓存清除策略</h2><h3 id="内存缓存清除策略"><a href="#内存缓存清除策略" class="headerlink" title="内存缓存清除策略"></a>内存缓存清除策略</h3><p>内存缓存的清除策略分为两种：</p>
+<ol>
+<li>系统控制：超过 <code>NSCache</code> 的“软限制”，系统自动清除。</li>
+<li>自己控制：定期扫描已缓存的对象，移出已过期的对象。</li>
+</ol>
+<p>对于缓存系统来说，策略 1 是可能有负面影响的，因为系统可能会清除一个仍未过期的对象，从而降低了缓存的命中率。可行的解决办法是：提高 <code>NSCache</code> 的 <code>totalCostLimit</code>。然而这会导致缓存对象所占用的内存变大，需要自己把握这之间的平衡。</p>
+<p>内存缓存的对象默认的有效期是 5 分钟。关于策略 2，Kingfisher 设计了一个 <code>timer</code> 来周期性（默认周期为 2 分钟）地清除过期的缓存对象。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">cleanTimer = .scheduledTimer(withTimeInterval: config.cleanInterval, repeats: <span class="literal">true</span>) &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="number">_</span> <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> <span class="keyword">self</span> = <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">    <span class="keyword">self</span>.removeExpired()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">removeExpired</span><span class="params">()</span></span> &#123;</span><br><span class="line">    lock.lock()</span><br><span class="line">    <span class="keyword">defer</span> &#123; lock.unlock() &#125;</span><br><span class="line">    <span class="keyword">for</span> key <span class="keyword">in</span> keys &#123;</span><br><span class="line">        <span class="keyword">let</span> nsKey = key <span class="keyword">as</span> <span class="type">NSString</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> object = storage.object(forKey: nsKey) <span class="keyword">else</span> &#123;</span><br><span class="line">            keys.remove(key)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> object.estimatedExpiration.isPast &#123;</span><br><span class="line">            storage.removeObject(forKey: nsKey)</span><br><span class="line">            keys.remove(key)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="硬盘缓存清除策略"><a href="#硬盘缓存清除策略" class="headerlink" title="硬盘缓存清除策略"></a>硬盘缓存清除策略</h3><p>硬盘缓存的对象默认的有效期是 7 天，其清除策略是自己控制的。<br>类似地，Kingfisher 也对硬盘缓存的可用容量做了限制，通过 <code>sizeLimit</code> 来控制。但 Kingfisher 在对象存入硬盘缓存时，并未对对象的大小做检查。我的猜想是一方面是可以提高缓存的命中率，另一方面是有其他更好的时机来核查缓存对象的大小，并清除过大的缓存对象。</p>
+<p>如果 app 进入了 <code>UIApplication.State.background</code> 状态，Kingfisher 就会开始清理过期的对象和过大的缓存对象。</p>
+<p>清理过期对象的做法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">removeExpiredValues</span><span class="params">(referenceDate: Date)</span></span> <span class="keyword">throws</span> -&gt; [<span class="type">URL</span>] &#123;</span><br><span class="line">    <span class="keyword">let</span> propertyKeys: [<span class="type">URLResourceKey</span>] = [</span><br><span class="line">        .isDirectoryKey,</span><br><span class="line">        .contentModificationDateKey</span><br><span class="line">    ]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> urls = <span class="keyword">try</span> allFileURLs(<span class="keyword">for</span>: propertyKeys)</span><br><span class="line">    <span class="keyword">let</span> keys = <span class="type">Set</span>(propertyKeys)</span><br><span class="line">    <span class="keyword">let</span> expiredFiles = urls.<span class="built_in">filter</span> &#123; fileURL <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> meta = <span class="keyword">try</span> <span class="type">FileMeta</span>(fileURL: fileURL, resourceKeys: keys)</span><br><span class="line">            <span class="keyword">if</span> meta.isDirectory &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> meta.expired(referenceDate: referenceDate)</span><br><span class="line">        &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> expiredFiles.forEach &#123; url <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">try</span> removeFile(at: url)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> expiredFiles</span><br><span class="line">&#125;</span><br><span class="line">```    </span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">清理过大对象的做法：</span><br><span class="line">```swift</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">removeSizeExceededValues</span><span class="params">()</span></span> <span class="keyword">throws</span> -&gt; [<span class="type">URL</span>] &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> config.sizeLimit == <span class="number">0</span> &#123; <span class="keyword">return</span> [] &#125; <span class="comment">// 0 意味着无大小限制。</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> size = <span class="keyword">try</span> totalSize()</span><br><span class="line">    <span class="keyword">if</span> size &lt; config.sizeLimit &#123; <span class="keyword">return</span> [] &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> propertyKeys: [<span class="type">URLResourceKey</span>] = [</span><br><span class="line">        .isDirectoryKey,</span><br><span class="line">        .creationDateKey,</span><br><span class="line">        .fileSizeKey</span><br><span class="line">    ]</span><br><span class="line">    <span class="keyword">let</span> keys = <span class="type">Set</span>(propertyKeys)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> urls = <span class="keyword">try</span> allFileURLs(<span class="keyword">for</span>: propertyKeys)</span><br><span class="line">    <span class="keyword">var</span> pendings: [<span class="type">FileMeta</span>] = urls.compactMap &#123; fileURL <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> meta = <span class="keyword">try</span>? <span class="type">FileMeta</span>(fileURL: fileURL, resourceKeys: keys) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> meta</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以上一次访问时间从大到小排序，最近访问的对象排在最前。</span></span><br><span class="line">    pendings.<span class="built_in">sort</span>(by: <span class="type">FileMeta</span>.lastAccessDate)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> removed: [<span class="type">URL</span>] = []</span><br><span class="line">    <span class="keyword">let</span> target = config.sizeLimit / <span class="number">2</span></span><br><span class="line">    <span class="keyword">while</span> size &gt; target, <span class="keyword">let</span> meta = pendings.popLast() &#123;</span><br><span class="line">        size -= <span class="type">UInt</span>(meta.fileSize)</span><br><span class="line">        <span class="keyword">try</span> removeFile(at: meta.url)</span><br><span class="line">        removed.append(meta.url)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> removed</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>「清理过大对象」这个说法其实有些模糊，更准确地说明是：如果当前硬盘缓存的容量大于 <code>sizeLimit</code>，则根据对象的上一次访问时间进行排序，最近访问的对象排在前面。Kingfisher 的做法是：从最不经常访问的对象开始删除，直到当前存储的对象的总大小缩减至一半及其以下，才停止删除。这是经典的 LRU 缓存淘汰算法。</p>
+<h2 id="出错处理"><a href="#出错处理" class="headerlink" title="出错处理"></a>出错处理</h2><p>Kingfisher 把自身模块内的错误细分为 5 类，分别为：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Represents the error reason during networking request phase.</span></span><br><span class="line"><span class="keyword">case</span> requestError(reason: <span class="type">RequestErrorReason</span>)</span><br><span class="line"><span class="comment">/// Represents the error reason during networking response phase.</span></span><br><span class="line"><span class="keyword">case</span> responseError(reason: <span class="type">ResponseErrorReason</span>)</span><br><span class="line"><span class="comment">/// Represents the error reason during Kingfisher caching system.</span></span><br><span class="line"><span class="keyword">case</span> cacheError(reason: <span class="type">CacheErrorReason</span>)</span><br><span class="line"><span class="comment">/// Represents the error reason during image processing phase.</span></span><br><span class="line"><span class="keyword">case</span> processorError(reason: <span class="type">ProcessorErrorReason</span>)</span><br><span class="line"><span class="comment">/// Represents the error reason during image setting in a view related class.</span></span><br><span class="line"><span class="keyword">case</span> imageSettingError(reason: <span class="type">ImageSettingErrorReason</span>)</span><br></pre></td></tr></table></figure>
+<p>每类错误还会携带对应出错原因。从错误的分类，可以大致看出 Kingfisher 分为图片下载模块、图片缓存模块、图片处理模块等模块。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>在阅读 Kingfisher 缓存系统相关代码时，我还发现了其他值得学习的代码，一并记录。</p>
+<h3 id="网络请求重试机制"><a href="#网络请求重试机制" class="headerlink" title="网络请求重试机制"></a>网络请求重试机制</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="kf_02.001"><br>Kingfisher 设计一个 <code>RetryStrategy</code>协议，由遵循该协议的对象来作出决定（<code>RetryDecision</code>）。<code>RetryDecision</code> 有两种：继续重试和停止重试。</p>
+<p>遵循<code>RetryStrategy</code>协议的对象内部设计了三种重试模式：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">DelayRetryStrategy</span>: <span class="title">RetryStrategy</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Interval</span> </span>&#123;</span><br><span class="line">        <span class="keyword">case</span> seconds(<span class="type">TimeInterval</span>) <span class="comment">// 指定 n 秒后重试</span></span><br><span class="line">        <span class="keyword">case</span> accumulated(<span class="type">TimeInterval</span>) <span class="comment">// 指定 n 秒以累加的方式重试，例如第一次为 3s 后重试，第二次就是 6s 后重试，以此类推。</span></span><br><span class="line">        <span class="keyword">case</span> custom(block: (<span class="number">_</span> retriedCount: <span class="type">Int</span>) -&gt; <span class="type">TimeInterval</span>) <span class="comment">// 告诉你已经重试的次数，自行决定几秒后进行重试</span></span><br><span class="line">        </span><br><span class="line">        <span class="function"><span class="keyword">func</span> <span class="title">timeInterval</span><span class="params">(<span class="keyword">for</span> retriedCount: Int)</span></span> -&gt; <span class="type">TimeInterval</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> retryAfter: <span class="type">TimeInterval</span></span><br><span class="line">            <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">                <span class="keyword">case</span> .seconds(<span class="keyword">let</span> interval):</span><br><span class="line">                retryAfter = interval</span><br><span class="line">                <span class="keyword">case</span> .accumulated(<span class="keyword">let</span> interval):</span><br><span class="line">                retryAfter = <span class="type">Double</span>(retriedCount + <span class="number">1</span>) * interval</span><br><span class="line">                <span class="keyword">case</span> .custom(<span class="keyword">let</span> block):</span><br><span class="line">                retryAfter = block(retriedCount)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> retryAfter</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>其核心方法实现如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">retry</span><span class="params">(context: RetryContext, retryHandler: @escaping <span class="params">(RetryDecision)</span></span></span> -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">    <span class="comment">// 超过最大重试次数后，停止重试</span></span><br><span class="line">    <span class="keyword">guard</span> context.retriedCount &lt; maxRetryCount <span class="keyword">else</span> &#123;</span><br><span class="line">        retryHandler(.stop)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 当出错原因是用户取消该任务时，不进行重试</span></span><br><span class="line">    <span class="keyword">guard</span> !context.error.isTaskCancelled <span class="keyword">else</span> &#123;</span><br><span class="line">        retryHandler(.stop)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 仅在网络请求响应出错时，进行重试</span></span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">case</span> <span class="type">KingfisherError</span>.responseError = context.error <span class="keyword">else</span> &#123;</span><br><span class="line">        retryHandler(.stop)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 根据当前所使用的重试策略，结合当前已重试次数，计算出 interval 秒后进行重试</span></span><br><span class="line">    <span class="keyword">let</span> interval = retryInterval.timeInterval(<span class="keyword">for</span>: context.retriedCount)</span><br><span class="line">    <span class="keyword">if</span> interval == <span class="number">0</span> &#123; <span class="comment">// 立即进行重试</span></span><br><span class="line">        retryHandler(.retry(userInfo: <span class="literal">nil</span>))</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 延迟 interval 秒后，提交重试任务。</span></span><br><span class="line">        <span class="type">DispatchQueue</span>.main.asyncAfter(deadline: .now() + interval) &#123;</span><br><span class="line">            retryHandler(.retry(userInfo: <span class="literal">nil</span>))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="委托模式"><a href="#委托模式" class="headerlink" title="委托模式"></a>委托模式</h3><p>iOS 开发者最熟悉的设计模式之一就是 <code>Delegate</code>，常见于 <code>UITableViewDelegate</code> 等。<br>平时自定义的类有时也需要把某个方法的实现委托给另一个类去实现。<br>例如，<code>Task</code> 的 <code>finish(taskID: String)</code> 方法需要交给外部去实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Task</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> onFinished: ((<span class="type">String</span>) -&gt; <span class="type">String?</span>)?</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">finish</span><span class="params">(taskID: String)</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> string = onFinished?(taskID)</span><br><span class="line">        <span class="built_in">print</span>(<span class="type">String</span>(describing: string))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">KFViewController</span>: <span class="title">UIViewController</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> subtaskAmount = <span class="number">3</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">viewDidLoad</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.viewDidLoad()</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">let</span> task = <span class="type">Task</span>()</span><br><span class="line">        task.onFinished = &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] taskID <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> <span class="keyword">self</span> = <span class="keyword">self</span> <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">let</span> string = <span class="string">"Task \(taskID) is finished, the number of subtasks is \(self.subtaskAmount)"</span></span><br><span class="line">            <span class="keyword">return</span> string</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 输出：Optional("Task 123 is finished, the number of subtasks is 3")</span></span><br><span class="line">        task.finish(taskID: <span class="string">"123"</span>)</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+<p>这样的写法是可行的，但每次必须记得在 <code>onFinished</code> 闭包中弱引用 <code>self</code> 以免出现循环引用的问题，导致内存泄漏。</p>
+<p>Kingfisher 中有这样一个好用的工具类：<code>class Delegate&lt;Input, Output&gt;</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Delegate</span>&lt;<span class="title">Input</span>, <span class="title">Output</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>() &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> block: ((<span class="type">Input</span>) -&gt; <span class="type">Output?</span>)?</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">delegate</span>&lt;T: AnyObject&gt;<span class="params">(on target: T, block: <span class="params">(<span class="params">(T, Input)</span></span></span></span> -&gt; <span class="type">Output</span>)?) &#123;</span><br><span class="line">        <span class="keyword">self</span>.block = &#123; [<span class="keyword">weak</span> target] input <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> target = target <span class="keyword">else</span> &#123; <span class="keyword">return</span> <span class="literal">nil</span> &#125;</span><br><span class="line">            <span class="keyword">return</span> block?(target, input)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">call</span><span class="params">(<span class="number">_</span> input: Input)</span></span> -&gt; <span class="type">Output?</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> block?(input)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">callAsFunction</span><span class="params">(<span class="number">_</span> input: Input)</span></span> -&gt; <span class="type">Output?</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> call(input)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>借助这个工具类，让我们看看优化后的版本：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Task</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> onFinished = <span class="type">Delegate</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt;()</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">finish</span><span class="params">(<span class="number">_</span> taskID: String)</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> string = onFinished.call(taskID)</span><br><span class="line">        <span class="built_in">print</span>(<span class="type">String</span>(describing: string))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">KFViewController</span>: <span class="title">UIViewController</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> subtaskAmount = <span class="number">3</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">viewDidLoad</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.viewDidLoad()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> task = <span class="type">Task</span>()</span><br><span class="line">        task.onFinished.delegate(on: <span class="keyword">self</span>) &#123; (<span class="keyword">self</span>, taskID) <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> string = <span class="string">"Task \(taskID) is finished, the amount of its subtask is \(self.subtaskAmount)"</span></span><br><span class="line">            <span class="keyword">return</span> string</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        task.finish(<span class="string">"123"</span>)</span><br><span class="line">        ...</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+
+<p>下面第二个 <code>self</code> 已是弱引用后的版本，无需每次得加 <code>weak</code> 关键字了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">task.onFinished.delegate(on: <span class="keyword">self</span>) &#123; (<span class="keyword">self</span>, taskID) <span class="keyword">in</span></span><br></pre></td></tr></table></figure>
+<p>再者，把匿名函数（Closure）包装成一个 <code>Delegate</code> 对象使用使得代码更加清晰。</p>
+<h4 id="提问-1：为啥-onFinished-call-taskID-返回的是可选类型-String？"><a href="#提问-1：为啥-onFinished-call-taskID-返回的是可选类型-String？" class="headerlink" title="提问 1：为啥 onFinished.call(taskID) 返回的是可选类型 String？"></a>提问 1：为啥 onFinished.call(taskID) 返回的是可选类型 String？</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里的范型约束明明是 String 类型</span></span><br><span class="line"><span class="keyword">var</span> onFinished = <span class="type">Delegate</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt;()</span><br></pre></td></tr></table></figure>
+<p>因为 <code>Delegate</code> 内部实现是弱引用 <code>self</code>，所以 <code>self</code> 处于一种可能有可能没有的状态，这就导致返回值的类型均是可选类型的了。</p>
+<h4 id="提问-2-如果把-Output-范型约束为可选类型，那返回值类型不就是可选的可选类型（-）吗？"><a href="#提问-2-如果把-Output-范型约束为可选类型，那返回值类型不就是可选的可选类型（-）吗？" class="headerlink" title="提问 2: 如果把 Output 范型约束为可选类型，那返回值类型不就是可选的可选类型（??）吗？"></a>提问 2: 如果把 Output 范型约束为可选类型，那返回值类型不就是可选的可选类型（??）吗？</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Delegate</span>&lt;<span class="title">Input</span>, <span class="title">Output</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>() &#123;&#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> block: ((<span class="type">Input</span>) -&gt; <span class="type">Output?</span>)?</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>Kingfisher 已对这种情况做了处理：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Delegate</span> <span class="title">where</span> <span class="title">Output</span>: <span class="title">OptionalProtocol</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 此时 Output 的类型为可选类型</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">call</span><span class="params">(<span class="number">_</span> input: Input)</span></span> -&gt; <span class="type">Output</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> result = block?(input) &#123;</span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="type">Output</span>._createNil</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">callAsFunction</span><span class="params">(<span class="number">_</span> input: Input)</span></span> -&gt; <span class="type">Output</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> call(input)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">OptionalProtocol</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> _createNil: <span class="type">Self</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Optional</span> : <span class="title">OptionalProtocol</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">var</span> _createNil: <span class="type">Optional</span>&lt;<span class="type">Wrapped</span>&gt; &#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当 <code>Output</code> 类型为可选类型时，新增一个直接返回 <code>Output</code> 的 <code>call</code> 方法。</p>
+<p>Kingfisher 还使用了 Swift <code>callAsFunction</code> 的新特性，这意味着可以无需再调用 <code>call</code> 方法，如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Task</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> onFinished = <span class="type">Delegate</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt;()</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">finish</span><span class="params">(<span class="number">_</span> taskID: String)</span></span> &#123;</span><br><span class="line"><span class="comment">//        let string = onFinished.call(taskID)</span></span><br><span class="line">        <span class="comment">/// 利用 callAsFunction 的特性</span></span><br><span class="line">        <span class="keyword">let</span> string = onFinished(taskID)</span><br><span class="line">        <span class="built_in">print</span>(<span class="type">String</span>(describing: string))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CacheCallbackCoordinator"><a href="#CacheCallbackCoordinator" class="headerlink" title="CacheCallbackCoordinator"></a>CacheCallbackCoordinator</h3><p>顾名思义就是缓存模块内的异步回调方法的协调器。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 是否需要缓存原始图片</span></span><br><span class="line"><span class="keyword">let</span> needToCacheOriginalImage = options.cacheOriginalImage &amp;&amp;</span><br><span class="line">options.processor != <span class="type">DefaultImageProcessor</span>.<span class="keyword">default</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> coordinator = <span class="type">CacheCallbackCoordinator</span>(</span><br><span class="line">    shouldWaitForCache: options.waitForCache, shouldCacheOriginal: needToCacheOriginalImage)</span><br><span class="line"><span class="keyword">let</span> result = <span class="type">RetrieveImageResult</span>(</span><br><span class="line">    image: options.imageModifier?.modify(value.image) ?? value.image,</span><br><span class="line">    cacheType: .<span class="keyword">none</span>,</span><br><span class="line">    source: source,</span><br><span class="line">    originalSource: context.originalSource</span><br><span class="line">)</span><br><span class="line"><span class="comment">// Add image to cache.</span></span><br><span class="line"><span class="keyword">let</span> targetCache = options.targetCache ?? <span class="keyword">self</span>.cache</span><br><span class="line">targetCache.store(</span><br><span class="line">    value.image,</span><br><span class="line">    original: value.originalData,</span><br><span class="line">    forKey: source.cacheKey,</span><br><span class="line">    options: options,</span><br><span class="line">    toDisk: !options.cacheMemoryOnly)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="number">_</span> <span class="keyword">in</span></span><br><span class="line">    coordinator.apply(.cachingImage) &#123;</span><br><span class="line">        completionHandler?(.success(result))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> needToCacheOriginalImage &#123;</span><br><span class="line">    <span class="keyword">let</span> originalCache = options.originalCache ?? targetCache</span><br><span class="line">    originalCache.storeToDisk(</span><br><span class="line">        value.originalData,</span><br><span class="line">        forKey: source.cacheKey,</span><br><span class="line">        processorIdentifier: <span class="type">DefaultImageProcessor</span>.<span class="keyword">default</span>.identifier,</span><br><span class="line">        expiration: options.diskCacheExpiration)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="number">_</span> <span class="keyword">in</span></span><br><span class="line">        coordinator.apply(.cachingOriginalImage) &#123;</span><br><span class="line">            completionHandler?(.success(result))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">coordinator.apply(.cacheInitiated) &#123;</span><br><span class="line">    completionHandler?(.success(result))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有两个布尔值在控制 <code>completionHandler?(.success(result))</code> 执行的时机，它们分别是：</p>
+<ol>
+<li>是否需要缓存原始图片（needToCacheOriginalImage）</li>
+<li>是否等待缓存过程结束（shouldWaitForCache）</li>
+</ol>
+<p>在这两个变量的排列组合下，Kingfisher 需要确保该回调执行的次数<strong>有且只有一次！</strong></p>
+<p>因此，<code>CacheCallbackCoordinator</code> 内部维护了一个包含四种状态的枚举 <code>State</code>、导致状态发生转移的三种 <code>Action</code>，以及描述状态是如何转移的 <code>apply</code> 方法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">State</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> idle</span><br><span class="line">    <span class="keyword">case</span> imageCached</span><br><span class="line">    <span class="keyword">case</span> originalImageCached</span><br><span class="line">    <span class="keyword">case</span> done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Action</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> cacheInitiated</span><br><span class="line">    <span class="keyword">case</span> cachingImage</span><br><span class="line">    <span class="keyword">case</span> cachingOriginalImage</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">apply</span><span class="params">(<span class="number">_</span> action: Action, trigger: <span class="params">()</span></span></span> -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">    <span class="keyword">switch</span> (state, action) &#123;</span><br><span class="line">        <span class="keyword">case</span> (.done, <span class="number">_</span>):</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// From .idle</span></span><br><span class="line">        <span class="keyword">case</span> (.idle, .cacheInitiated):</span><br><span class="line">        <span class="keyword">if</span> !shouldWaitForCache &#123;</span><br><span class="line">            state = .done</span><br><span class="line">            trigger()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> (.idle, .cachingImage):</span><br><span class="line">        <span class="keyword">if</span> shouldCacheOriginal &#123;</span><br><span class="line">            state = .imageCached</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            state = .done</span><br><span class="line">            trigger()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> (.idle, .cachingOriginalImage):</span><br><span class="line">        state = .originalImageCached</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// From .imageCached</span></span><br><span class="line">        <span class="keyword">case</span> (.imageCached, .cachingOriginalImage):</span><br><span class="line">        state = .done</span><br><span class="line">        trigger()</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// From .originalImageCached</span></span><br><span class="line">        <span class="keyword">case</span> (.originalImageCached, .cachingImage):</span><br><span class="line">        state = .done</span><br><span class="line">        trigger()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">        <span class="built_in">assertionFailure</span>(<span class="string">"This case should not happen in CacheCallbackCoordinator: \(state) - \(action)"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了这些，便可以画出一个有限状态机的状态转移图：<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_03.png" alt="CacheCallbackCoordinator 状态机"><br>从图中可以看出：在从 <code>idle</code> 状态到 <code>done</code> 状态的任意一条路线上，<code>trigger</code> 方法的执行次数<strong>有且只有一次</strong>！这样设计的代码清晰，也容易测试，是很值得学习的案例了！</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>读 Kingfisher 源码要分享的第一部分就到此结束了，还有图片下载流程、图片处理流程、对多平台的支持（Kingfisher 还支持 watchOS、tvOS 和 macOS）等。</p>
+<p>这也是我第一次比较认真地花大段时间仔细读开源代码，收获颇丰。</p>
+<p>就这样慢慢进步吧！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Kingfisher/" rel="tag"># Kingfisher</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/15/page/" rel="prev" title="我所理解的 Auto Layout">
+      <i class="fa fa-chevron-left"></i> 我所理解的 Auto Layout
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kingfisher-源码阅读（一）"><span class="nav-number">1.</span> <span class="nav-text">Kingfisher 源码阅读（一）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存缓存"><span class="nav-number">1.1.</span> <span class="nav-text">内存缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#硬盘缓存"><span class="nav-number">1.2.</span> <span class="nav-text">硬盘缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存过期策略"><span class="nav-number">1.3.</span> <span class="nav-text">缓存过期策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存续期策略"><span class="nav-number">1.4.</span> <span class="nav-text">缓存续期策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存清除策略"><span class="nav-number">1.5.</span> <span class="nav-text">缓存清除策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存缓存清除策略"><span class="nav-number">1.5.1.</span> <span class="nav-text">内存缓存清除策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#硬盘缓存清除策略"><span class="nav-number">1.5.2.</span> <span class="nav-text">硬盘缓存清除策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#出错处理"><span class="nav-number">1.6.</span> <span class="nav-text">出错处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">1.7.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网络请求重试机制"><span class="nav-number">1.7.1.</span> <span class="nav-text">网络请求重试机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#委托模式"><span class="nav-number">1.7.2.</span> <span class="nav-text">委托模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#提问-1：为啥-onFinished-call-taskID-返回的是可选类型-String？"><span class="nav-number">1.7.2.1.</span> <span class="nav-text">提问 1：为啥 onFinished.call(taskID) 返回的是可选类型 String？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#提问-2-如果把-Output-范型约束为可选类型，那返回值类型不就是可选的可选类型（-）吗？"><span class="nav-number">1.7.2.2.</span> <span class="nav-text">提问 2: 如果把 Output 范型约束为可选类型，那返回值类型不就是可选的可选类型（??）吗？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CacheCallbackCoordinator"><span class="nav-number">1.7.3.</span> <span class="nav-text">CacheCallbackCoordinator</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">1.8.</span> <span class="nav-text">结语</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
