@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Xcode Cloud 概览Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WWDC21 10267 一窥 Xcode Cloud">
+<meta property="og:url" content="https://sunsetwan.github.io/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/index.html">
+<meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="Xcode Cloud 概览Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%201.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%202.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%203.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%204%20%E6%96%B0.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%205.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%206.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%207.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%208.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%209.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2010.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2012.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2018%20%EF%BC%88%E6%9C%AA%E4%B8%8A%E4%BC%A0%E8%87%B3%E5%9B%BE%E5%BA%8A%EF%BC%89.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2014.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2015%20%E6%96%B0.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2016.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2017.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2019.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2020.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2021.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2022.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2023.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2024.jpg">
+<meta property="article:published_time" content="2021-08-09T01:41:00.000Z">
+<meta property="article:modified_time" content="2022-03-28T15:37:31.946Z">
+<meta property="article:author" content="Sunset Wan">
+<meta property="article:tag" content="WWDC21">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%201.jpg">
+
+<link rel="canonical" href="https://sunsetwan.github.io/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WWDC21 10267 一窥 Xcode Cloud | 日落大道</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">日落大道</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WWDC21 10267 一窥 Xcode Cloud
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-09 09:41:00" itemprop="dateCreated datePublished" datetime="2021-08-09T09:41:00+08:00">2021-08-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-28 23:37:31" itemprop="dateModified" datetime="2022-03-28T23:37:31+08:00">2022-03-28</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Xcode-Cloud-概览"><a href="#Xcode-Cloud-概览" class="headerlink" title="Xcode Cloud 概览"></a>Xcode Cloud 概览</h2><p>Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。<a id="more"></a></p>
+<blockquote>
+<p>持续集成指的是周期性地合并发生变动的代码，这样能尽早地发现问题解决问题，以提高代码质量。</p>
+</blockquote>
+<p>一个典型的持续集成工作流程如下图所示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%201.jpg" alt=""></p>
+<ol>
+<li>将发生变动的代码推送至远端代码仓库。</li>
+<li>项目开始构建、运行测试代码和其他自定义步骤。</li>
+<li>如若通过质量测试（构建成功、测试通过等），保存构建产物，并发出通知至其他团队成员。</li>
+</ol>
+<p>再让我们看一下 iOS 应用常见的开发流程：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%202.jpg" alt=""></p>
+<ol>
+<li>修复 Bug 和完成新的需求。</li>
+<li>根据团队内部 Code Review 的反馈，对代码作相应的修改。</li>
+<li>通过自测后，将应用分发至测试团队手中。</li>
+<li>根据测试用户的反馈，及时地修复问题。</li>
+</ol>
+<p>高效地运作上图所示流程是构建高质量应用的关键。</p>
+<p>嘭! Xcode Cloud 此时闪亮登场！<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%203.jpg" alt=""><br>在上述持续集成的流程之上，Xcode Cloud 把应用开发、应用测试和应用分发三点连接起来，提供给开发者一条完整的开发流水线：</p>
+<ol>
+<li>应用开发</li>
+<li>应用测试</li>
+<li>应用分发</li>
+<li>收集使用反馈</li>
+<li>根据反馈，进行快速迭代</li>
+</ol>
+<h3 id="立马上手-Xcode-Cloud"><a href="#立马上手-Xcode-Cloud" class="headerlink" title="立马上手 Xcode Cloud"></a>立马上手 Xcode Cloud</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%204%20%E6%96%B0.jpg" alt=""></p>
+<p>Fruta 是 Apple 用来演示 Xcode Cloud 的 App。在 Xcode 13 本地打开的 Xcode Cloud 控制台页面大致如上图所示，左边侧边栏展示了已完成/正在执行中的工作流，右边则是对多个工作流的总览，从中我们可以粗略了解整个团队开发的进度。</p>
+<h4 id="什么是-Xcode-Cloud-Workflow？"><a href="#什么是-Xcode-Cloud-Workflow？" class="headerlink" title="什么是 Xcode Cloud Workflow？"></a>什么是 Xcode Cloud Workflow？</h4><p>我们可以把 Xcode Cloud 工作流理解成某种配置。Xcode Cloud 会读取该配置的内容，从而明白自己在何时执行何种任务。某个工作流执行的过程称为一次构建。Xcode Cloud 依托于 Apple 自管理的云端基础设施。该基础设施提供代码签名，同时也能帮助开发者访问多种不同版本的操作系统和 Xcode，例如最新版的 macOS Monterey 和 Xcode 13。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%205.jpg" alt=""></p>
+<p>在左侧边栏中点选某个工作流，展现在我们面前的是该工作流单次运行的总览。从这里，我们能看到测试代码运行的结果与相应的日志，甚至可以双击报错处，直接定位到导致出错的某一行代码。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%206.jpg" alt=""></p>
+<p>这些内容可不只是在 Xcode 本地才能看到，也可以在 App Store Connect 网页中获取到，包括开始构建、管理工作流、检阅构建产物、与团队成员共享构建报告和管理通知等。比如，在构建完成后，可以在网页中设置结果通知到 Slack 等交流协作工具，以帮助团队成员在第一时间知道结果。</p>
+<p>值得一提的是：网页版的 Xcode Cloud 提供与 Xcode 应用内一致的<strong>全功能体验</strong>。</p>
+<h4 id="One-More-Thing…"><a href="#One-More-Thing…" class="headerlink" title="One More Thing…"></a>One More Thing…</h4><p> Xcode Cloud 不光是团队开发以及协作流程的好帮手，而且 Apple 一贯良好的隐私保护也未曾在它身上缺席，源代码的管理是软件工程中的核心之一。Xcode Cloud 的方方面面均是为保护用户数据而设计的：</p>
+<ul>
+<li>构建环境的信息过一段时间会被删除</li>
+<li>从不存储项目源代码</li>
+<li>构建数据会被加密存储在 CloudKit 数据库中</li>
+<li>用户可随时随地删除数据，且数据会被从 Xcode Cloud 系统中完全移除</li>
+</ul>
+<h2 id="为你的工程配置-Xcode-Cloud"><a href="#为你的工程配置-Xcode-Cloud" class="headerlink" title="为你的工程配置 Xcode Cloud"></a>为你的工程配置 Xcode Cloud</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%207.jpg" alt=""><br> 在 Xcode 13 中（满足一些前提条件之后）仅需几步操作即可为你的工程配置 Xcode Cloud。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%208.jpg" alt=""><br>接着，选中接入 Xcode Cloud 的应用（这里以 Fruta 为例），·</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%209.jpg" alt=""><br>然后，开始预览一个工作流。工作流最基本的四个要素为：</p>
+<ul>
+<li>启动的条件</li>
+<li>构建的环境</li>
+<li>执行的任务</li>
+<li>结束后执行的任务</li>
+</ul>
+<p>想要深入了解工作流的编辑过程，请参考 <a href="https://developer.apple.com/videos/play/wwdc2021/10268/" target="_blank" rel="noopener">WWDC21 10268 探索 Xcode Cloud 工作流</a>。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2010.jpg" alt=""><br>然后需要给 Xcode Cloud 授权以获取 Fruta 源代码。授权范围不光光是代码主仓库，也包括名下的子模块以及私有的 Swift Package。</p>
+<p>Fruta App 使用到两个托管于 GitHub 上的私有仓库，所以点击「Grant Access」会跳转到 App Store Connect 网页界面。值得一提的是：这个流程取决于工程代码是如何托管的。Xcode Cloud 要求使用 Git 来管理工程代码，且仅支持以下几种源代码管理提供商：</p>
+<ul>
+<li>Bitbucket Cloud 和 Bitbucket Server</li>
+<li>GitHub 和 GitHub 企业版</li>
+<li>GitLab 和自建版本的 GitLab</li>
+</ul>
+<p>Xcode Cloud 也支持 Git 大文件存储（Git LFS）。</p>
+<p>整个授权过程将 Apple ID 与源代码管理提供商的账号相关联，并使用源代码管理提供商原生的授权方式与 Xcode Cloud 的安全加密，以确保源代码和用户信息处于保护之下。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2012.jpg" alt=""><br>在 App Store Connect 上完成授权后就可以回到 Xcode 本地继续之前的流程。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2018%20%EF%BC%88%E6%9C%AA%E4%B8%8A%E4%BC%A0%E8%87%B3%E5%9B%BE%E5%BA%8A%EF%BC%89.jpg" alt=""><br>点击 <code>Complete</code> 按钮，Xcode Cloud 将会帮助开发者把应用信息注册至 App Store Connect。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2014.jpg" alt=""><br>终于到了最后一步！点击 <code>Start Build</code> 按钮，就可以开始第一次构建。</p>
+<h2 id="检阅-Xcode-Cloud-构建报告"><a href="#检阅-Xcode-Cloud-构建报告" class="headerlink" title="检阅 Xcode Cloud 构建报告"></a>检阅 Xcode Cloud 构建报告</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2015%20%E6%96%B0.jpg" alt=""><br>以 Fruta 这次构建为例：从该构建报告中，我们可以清晰明了地知道构建耗时以及构建环境的配置。点击右上角的 <code>Rebuild</code> 按钮也能帮助我们重新开始构建。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2016.jpg" alt=""><br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2017.jpg" alt=""><br>在 <code>Actions</code> 一列中，点击单个 action，可以看到该次 Action 的日志和相应的产物。这样的设计使得整个团队都能很方便地获取到当前 CI 的信息。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2019.jpg" alt=""><br>喔嚯，在 Build 1 中的「 在 macOS 上归档（Archive）」这一任务失败了！是因为无法在 macOS 上使用 UIKit 框架。我们可以把鼠标移至报错处，点击 ➡️ 小箭头，会直接跳转到对应出错的代码文件。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2020.jpg" alt=""><br>根据之前的报错提示，我们可以快速定位问题。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2021.jpg" alt=""><br>在 Git 上推送最新的代码之后，Xcode Cloud 自动触发了新的构建——Build 2。</p>
+<h2 id="Xcode-Cloud-中的团队协作"><a href="#Xcode-Cloud-中的团队协作" class="headerlink" title="Xcode Cloud 中的团队协作"></a>Xcode Cloud 中的团队协作</h2><p>当团队中的另一位成员打开 Xcode Cloud 时，他/她也可以看到之前构建失败的 Build 1 和构建成功的 Build 2。</p>
+<p>Build 1 和 Build 2 均是名为 <code>Default</code> 的工作流的两次不同的构建。但 Default 这个名字取得不够具体，让我们在它上面点击鼠标右键并在弹出的菜单中选择 <code>Edit Workflow...</code>，来看看是如何简单地编辑一个 Xcode Cloud 工作流吧！</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2022.jpg" alt=""><br>将工作流的名称从 <code>Default</code> 修改为 <code>Releases</code> 更加符合该工作流的意图。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2023.jpg" alt=""><br>点选左侧边栏的 <code>Start Condition</code> 就可以开始编辑该工作流的触发条件。<br>类似地，我们在 <code>Custom Branches</code> 一栏中点击 + 号，添加 <code>release/v1</code> 分支。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2024.jpg" alt=""><br><code>Releases</code> 工作流怎么能少了测试任务呢！点击 <code>Actions</code> 右边的小加号，并在弹出的菜单中选择 <code>Test</code> 即可添加对应的测试任务。</p>
+<p>点选左侧边栏的 <code>Environment</code> 就可以开始编辑该工作流的环境配置。其中有一个可勾选的 <code>Clean</code> 选项。一旦勾选，Xcode Cloud 会在每次开始构建时清空 <code>DerivedData</code> 缓存文件夹。更多详细内容，请参考 <a href="https://developer.apple.com/videos/play/wwdc2021/10268/" target="_blank" rel="noopener">WWDC21 10268 探索 Xcode Cloud 工作流</a> [06:02] 处。</p>
+<p>由此可见，借助于 Apple 云基础设施的力量，整个团队的协作效能将大大提高。</p>
+<h2 id="一点自己的思考"><a href="#一点自己的思考" class="headerlink" title="一点自己的思考"></a>一点自己的思考</h2><h3 id="鱼儿游于水，却困于水"><a href="#鱼儿游于水，却困于水" class="headerlink" title="鱼儿游于水，却困于水"></a>鱼儿游于水，却困于水</h3><p>Xcode Cloud 在 Apple 生态圈中如鱼得水，然而现实是：公司中往往需要搭建一套通用 CI、CD 流程，把 iOS 与 Android 两端统一管理。在这种情况下，第一顺位可能是社区内容更完善的 <a href="https://docs.fastlane.tools/" target="_blank" rel="noopener">Fastlane</a>。Fastlane 对 iOS、Android 和跨平台方案（如 Flutter）均提供不同程度的支持，也能方便地配合 GitLab CI、Jenkins 等一起协同工作。</p>
+<h3 id="何…何时能开始使用它呢？"><a href="#何…何时能开始使用它呢？" class="headerlink" title="何…何时能开始使用它呢？"></a>何…何时能开始使用它呢？</h3><p>WWDC21 上一公布 Xcode Cloud，我就第一时间申请 beta 版测试资格，到现在过去大半个月了，也没拥有测试资格。利用搜索引擎，我也只发现 @PastePalApp 的作者有收到测试资格，他用简单的图文描述了下 Xcode Cloud 的体验（<a href="https://twitter.com/onmyway133/status/1404856151058141185" target="_blank" rel="noopener">相关链接</a>）。</p>
+<p>Xcode Cloud 应该会是依托于 Apple 基础设施的云服务，回想起国区 iBooks Store、iTunes Store 的昙花一现，Xcode Cloud 会如期而至吗？</p>
+<h3 id="“那么，古尔丹，代价是什么呢？”"><a href="#“那么，古尔丹，代价是什么呢？”" class="headerlink" title="“那么，古尔丹，代价是什么呢？”"></a>“那么，古尔丹，代价是什么呢？”</h3><p>你以为你的项目会像 Fruta 那样点一点就能很顺利地接入 Xcode Cloud 了吗？你错啦！<br>接入 Xcode Cloud 的前置条件还不少：</p>
+<ul>
+<li>得使用自 Xcode 10 以来的新版构建系统</li>
+<li>得使用自动代码签名</li>
+<li>得使用符合条件的源代码管理服务</li>
+<li>……</li>
+</ul>
+<p>更多详情，请参考 <a href="https://developer.apple.com/documentation/xcode/requirements-for-using-xcode-cloud" target="_blank" rel="noopener">Xcode Cloud 的使用要求</a>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/WWDC21/" rel="tag"># WWDC21</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/15/page/" rel="prev" title="我所理解的 Auto Layout">
+      <i class="fa fa-chevron-left"></i> 我所理解的 Auto Layout
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/" rel="next" title="Kingfisher 源码阅读（一）">
+      Kingfisher 源码阅读（一） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Xcode-Cloud-概览"><span class="nav-number">1.</span> <span class="nav-text">Xcode Cloud 概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#立马上手-Xcode-Cloud"><span class="nav-number">1.1.</span> <span class="nav-text">立马上手 Xcode Cloud</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是-Xcode-Cloud-Workflow？"><span class="nav-number">1.1.1.</span> <span class="nav-text">什么是 Xcode Cloud Workflow？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#One-More-Thing…"><span class="nav-number">1.1.2.</span> <span class="nav-text">One More Thing…</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为你的工程配置-Xcode-Cloud"><span class="nav-number">2.</span> <span class="nav-text">为你的工程配置 Xcode Cloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检阅-Xcode-Cloud-构建报告"><span class="nav-number">3.</span> <span class="nav-text">检阅 Xcode Cloud 构建报告</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Xcode-Cloud-中的团队协作"><span class="nav-number">4.</span> <span class="nav-text">Xcode Cloud 中的团队协作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一点自己的思考"><span class="nav-number">5.</span> <span class="nav-text">一点自己的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#鱼儿游于水，却困于水"><span class="nav-number">5.1.</span> <span class="nav-text">鱼儿游于水，却困于水</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何…何时能开始使用它呢？"><span class="nav-number">5.2.</span> <span class="nav-text">何…何时能开始使用它呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#“那么，古尔丹，代价是什么呢？”"><span class="nav-number">5.3.</span> <span class="nav-text">“那么，古尔丹，代价是什么呢？”</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
