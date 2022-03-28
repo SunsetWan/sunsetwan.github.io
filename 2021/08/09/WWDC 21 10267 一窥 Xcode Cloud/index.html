@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Xcode Cloud 概览Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。">
+  <meta name="description" content="Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="WWDC21 10267 一窥 Xcode Cloud">
 <meta property="og:url" content="https://sunsetwan.github.io/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/index.html">
 <meta property="og:site_name" content="日落大道">
-<meta property="og:description" content="Xcode Cloud 概览Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。">
+<meta property="og:description" content="Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%201.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%202.jpg">
@@ -50,7 +50,7 @@
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2023.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2024.jpg">
 <meta property="article:published_time" content="2021-08-09T01:41:00.000Z">
-<meta property="article:modified_time" content="2022-03-28T15:37:31.946Z">
+<meta property="article:modified_time" content="2022-03-28T15:39:37.280Z">
 <meta property="article:author" content="Sunset Wan">
 <meta property="article:tag" content="WWDC21">
 <meta name="twitter:card" content="summary">
@@ -209,7 +209,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-28 23:37:31" itemprop="dateModified" datetime="2022-03-28T23:37:31+08:00">2022-03-28</time>
+                <time title="修改时间：2022-03-28 23:39:37" itemprop="dateModified" datetime="2022-03-28T23:39:37+08:00">2022-03-28</time>
               </span>
 
           
@@ -223,7 +223,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="Xcode-Cloud-概览"><a href="#Xcode-Cloud-概览" class="headerlink" title="Xcode Cloud 概览"></a>Xcode Cloud 概览</h2><p>Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。<a id="more"></a></p>
+        <p>Xcode Cloud 是为 Apple 平台开发者所设计的一项易用的集持续集成（Continuous Integration）和持续交付（Continuous Delivery）于一体的服务。<a id="more"></a></p>
 <blockquote>
 <p>持续集成指的是周期性地合并发生变动的代码，这样能尽早地发现问题解决问题，以提高代码质量。</p>
 </blockquote>
@@ -392,7 +392,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Xcode-Cloud-概览"><span class="nav-number">1.</span> <span class="nav-text">Xcode Cloud 概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#立马上手-Xcode-Cloud"><span class="nav-number">1.1.</span> <span class="nav-text">立马上手 Xcode Cloud</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是-Xcode-Cloud-Workflow？"><span class="nav-number">1.1.1.</span> <span class="nav-text">什么是 Xcode Cloud Workflow？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#One-More-Thing…"><span class="nav-number">1.1.2.</span> <span class="nav-text">One More Thing…</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为你的工程配置-Xcode-Cloud"><span class="nav-number">2.</span> <span class="nav-text">为你的工程配置 Xcode Cloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检阅-Xcode-Cloud-构建报告"><span class="nav-number">3.</span> <span class="nav-text">检阅 Xcode Cloud 构建报告</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Xcode-Cloud-中的团队协作"><span class="nav-number">4.</span> <span class="nav-text">Xcode Cloud 中的团队协作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一点自己的思考"><span class="nav-number">5.</span> <span class="nav-text">一点自己的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#鱼儿游于水，却困于水"><span class="nav-number">5.1.</span> <span class="nav-text">鱼儿游于水，却困于水</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何…何时能开始使用它呢？"><span class="nav-number">5.2.</span> <span class="nav-text">何…何时能开始使用它呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#“那么，古尔丹，代价是什么呢？”"><span class="nav-number">5.3.</span> <span class="nav-text">“那么，古尔丹，代价是什么呢？”</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#立马上手-Xcode-Cloud"><span class="nav-number">1.</span> <span class="nav-text">立马上手 Xcode Cloud</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是-Xcode-Cloud-Workflow？"><span class="nav-number">1.1.</span> <span class="nav-text">什么是 Xcode Cloud Workflow？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#One-More-Thing…"><span class="nav-number">1.2.</span> <span class="nav-text">One More Thing…</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为你的工程配置-Xcode-Cloud"><span class="nav-number"></span> <span class="nav-text">为你的工程配置 Xcode Cloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检阅-Xcode-Cloud-构建报告"><span class="nav-number"></span> <span class="nav-text">检阅 Xcode Cloud 构建报告</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Xcode-Cloud-中的团队协作"><span class="nav-number"></span> <span class="nav-text">Xcode Cloud 中的团队协作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一点自己的思考"><span class="nav-number"></span> <span class="nav-text">一点自己的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#鱼儿游于水，却困于水"><span class="nav-number">1.</span> <span class="nav-text">鱼儿游于水，却困于水</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何…何时能开始使用它呢？"><span class="nav-number">2.</span> <span class="nav-text">何…何时能开始使用它呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#“那么，古尔丹，代价是什么呢？”"><span class="nav-number">3.</span> <span class="nav-text">“那么，古尔丹，代价是什么呢？”</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
