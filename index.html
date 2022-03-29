@@ -319,7 +319,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 11:28:20" itemprop="dateModified" datetime="2022-03-29T11:28:20+08:00">2022-03-29</time>
+                <time title="修改时间：2022-03-29 11:32:39" itemprop="dateModified" datetime="2022-03-29T11:32:39+08:00">2022-03-29</time>
               </span>
 
           
@@ -333,134 +333,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="什么是-Layout"><a href="#什么是-Layout" class="headerlink" title="什么是 Layout?"></a>什么是 Layout?</h2><p>Layout 的职责是回答这两个问题：</p>
-<ul>
-<li>What to draw?</li>
-<li>Where to draw?</li>
-</ul>
-<p>第一个问题很好回答：Layout 是负责布局视图（UIView）及其子类。<br>关于第二个问题，Layout 要确定子视图（Subview）的 frame。根据它们的 frame，把子视图布局在屏幕上。</p>
-<h3 id="那怎么确定子视图的-frame-呢？"><a href="#那怎么确定子视图的-frame-呢？" class="headerlink" title="那怎么确定子视图的 frame 呢？"></a>那怎么确定子视图的 frame 呢？</h3><ol>
-<li>手动设置子视图的 frame 大小。</li>
-<li>利用约束来描述子视图之间 frame 的关系。</li>
-</ol>
-<p>随着 iPhone 的屏幕尺寸种类越来越多，第一种方法的用武之地已经很有限了。<br>所以我们常用第二种方法：使用线性方程组来描述 Constraint Anchor 之间的关系。Auto Layout 引擎则会根据这个方程组来计算出子视图的 frame。线性方程组中的等式格式如下图所示：</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image1.jpg" alt="auto_layout_image1"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">width &#x3D; trailing - leading</span><br><span class="line">height &#x3D; bottom - top</span><br><span class="line">centerX &#x3D; (leading + trailing) &#x2F; 2</span><br><span class="line">centerY &#x3D; (top + bottom) &#x2F; 2</span><br></pre></td></tr></table></figure>
-<p>在已知 leading、top、trailing 和 bottom 四种 anchor 的情况下，Auto Layout 引擎通过以上简单推算就能算出子视图的 frame。</p>
-<p>不难得出一个结论：如果一个视图知道自己的 frame，就能通过线性方程组计算出子视图的 frame。那么开始递归，只要知道了根视图的 frame，这样子视图的 frame 都能通过线性方程组算出来。而根视图（即 UIWindow）在运行时是能确定 frame（即屏幕尺寸）的。</p>
-<p>计算好的 frame 数据会通知给对应视图的父视图，父视图会根据此数据对子视图进行布局，即调用 <code>layoutSubviews</code> 方法。<code>layoutSubviews</code> 方法会在一个 <code>Layout Pass</code> 出现时被调用。</p>
-<h2 id="The-Layout-Cycle"><a href="#The-Layout-Cycle" class="headerlink" title="The Layout Cycle"></a>The Layout Cycle</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image2.jpg" alt="auto_layout_image2"></p>
-<h3 id="Constraints-Change"><a href="#Constraints-Change" class="headerlink" title="Constraints Change"></a>Constraints Change</h3><p>视图的各个约束在 Auto Layout 的世界里是一堆线性等式（不等式）组。视图约束的改动即影响这些线性等式（不等式）组。</p>
-<p>一般的约束改动有以下几类：</p>
-<ol>
-<li>启用（activate）某项约束</li>
-<li>停用（deactivate）某项约束</li>
-<li>修改约束的优先级</li>
-<li>修改约束对应的值</li>
-<li>在视图层级上添加或移除某个视图</li>
-</ol>
-<p>第五点很容易被忽略。</p>
-<h3 id="Deferred-Layout-Pass"><a href="#Deferred-Layout-Pass" class="headerlink" title="Deferred Layout Pass"></a>Deferred Layout Pass</h3><p><code>Deferred Layout Pass</code> 可以分为两个部分：</p>
-<ol>
-<li>更新约束（update constraints）</li>
-<li>对视图进行重新布局（view repositioning）</li>
-</ol>
-<p>第一步是为了确保如果有未生效的约束改动，让这些约束生效。第二步是从 Auto Layout 引擎 读取布局数据，然后遍历整个视图层级并更新布局，此操作相对来说是比较耗时的。</p>
-<p>假设如果没有第一步，就可能会导致「对视图进行重新布局」这一步多次进行，产生了多余的计算。</p>
-<h4 id="updateConstraints-方法使用小结"><a href="#updateConstraints-方法使用小结" class="headerlink" title="updateConstraints 方法使用小结"></a>updateConstraints 方法使用小结</h4><p>一般来说，在调用 <code>setNeedsUpdateConstraints</code> 方法之后的某个时机，iOS 系统会在布局前调用我们自己 <code>updateConstraints</code> 方法的实现。</p>
-<p>那么所有自定义约束更新的代码都得放在 <code>updateConstraints</code> 方法里吗？<br>摘录部分 <a href="https://developer.apple.com/documentation/uikit/uiview/1622512-updateconstraints" target="_blank" rel="noopener">官方文档</a>：</p>
-<blockquote>
-<p>It is almost always cleaner and easier to update a constraint immediately after the affecting change has occurred. For example, if you want to change a constraint in response to a button tap, make that change directly in the button’s action method.<br>You should only override this method when changing constraints in place is too slow, or when a view is producing a number of redundant changes.</p>
-</blockquote>
-<p>先上结论：在 <code>updateConstraints</code> 方法中修改视图的约束往往是比在别处更快。<br>但一般来说，只需在视图约束需要改变的时机去更新它们，这样做的好处是增强代码的易读性和可维护性。     </p>
-<p>但有些时候我们需要同时修改很多视图约束时，沿用上述的方法，可能会觉得很慢。此时就可以选择去覆盖 <code>updateConstraints</code> 方法。Auto Layout 引擎就可以在同一时刻批量处理这些视图约束的改动，从而提升性能。    </p>
-<p>当视图的约束发生改动后，Auto Layout 引擎需要重新计算视图的 frame，然后视图从 Auto Layout 引擎读取 frame 的数据，并调用 <code>superview.setNeedsLayout()</code>，最终更新界面。这一过程称之为 <code>Deferred Layout Pass</code>。Deferred（推迟出现的）一词表明：视图的约束发生改动后，视图的 frame 是不会<strong>立即</strong>发生对应的更改的。</p>
-<h4 id="layoutSubviews-方法使用小结"><a href="#layoutSubviews-方法使用小结" class="headerlink" title="layoutSubviews 方法使用小结"></a>layoutSubviews 方法使用小结</h4><p>摘录部分 <a href="https://developer.apple.com/documentation/uikit/uiview/1622482-layoutSubviews" target="_blank" rel="noopener">官方文档</a>：</p>
-<blockquote>
-<p>You should override this method only if the autoresizing and constraint-based behaviors of the subviews do not offer the behavior you want. You can use your implementation to set the frame rectangles of your subviews directly.</p>
-</blockquote>
-<p>通过覆盖 <code>layoutSubviews</code> 方法，我们可以添加自定义布局的代码。但需要注意的是：只有当某个布局不能通过设定约束来实现时，才真正需要这么做。</p>
-<p>在 <code>layoutSubviews</code> 方法被调用时，此时正处于<strong>布局进行中</strong>，即：有些视图已经完成布局，而有些视图还没完成布局，或是将要完成布局。</p>
-<p>当覆盖 <code>layoutSubviews</code> 方法时，不能调用 <code>setNeedsUpdateConstraints</code> 方法，这样会很容易导致布局反馈循环（Layout Feedback Loop）。这篇 <a href="https://www.hackingwithswift.com/articles/59/debugging-auto-layout-feedback-loops" target="_blank" rel="noopener">文章</a> 介绍了如何调试这一问题。</p>
-<h2 id="Auto-Layout-Debug-技巧"><a href="#Auto-Layout-Debug-技巧" class="headerlink" title="Auto Layout Debug 技巧"></a>Auto Layout Debug 技巧</h2><p>在使用 Auto Layout 时，常见的两种问题是：</p>
-<ul>
-<li>Unsatisfiable Constraints -&gt; 线性方程组无解</li>
-<li>Ambiguous Layouts -&gt; 线性方程组有多个解</li>
-</ul>
-<h3 id="Unsatisfiable-Constraints"><a href="#Unsatisfiable-Constraints" class="headerlink" title="Unsatisfiable Constraints"></a>Unsatisfiable Constraints</h3><p>遇到这种情况，可以 Auto Layout 引擎主动选择打破的那条约束为突破点，去研究到底是哪里发生冲突，还可以对可疑的约束和视图各自加上 <code>identifier</code> 和 <code>accessibilityIdentifier</code> 来提高调试日志的可读性。</p>
-<h3 id="Ambiguous-Layouts"><a href="#Ambiguous-Layouts" class="headerlink" title="Ambiguous Layouts"></a>Ambiguous Layouts</h3><p>导致 Ambiguous Layouts 的原因可能为：</p>
-<ul>
-<li>视图的约束太少，无法计算出确定的 frame。</li>
-<li>视图约束的优先级发生冲突。</li>
-</ul>
-<p>当发生这种情况时，某个视图计算出来的 frame 是有多种可能的结果，Auto Layout 引擎选择其中一种来完成布局，但这种布局往往不会是理想的布局。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image3.jpg" alt="auto_layout_image3"><br>我们可以使用：<code>po view.value(forKey: &quot;_autolayoutTrace&quot;)!</code> 打印出当前视图层级，可以很直观地看出是哪个子视图出现了 ambiguous layouts 的问题。<br>我们甚至还可以继续执行 <code>e label.exerciseAmbiguityInLayout()</code>，然后执行<code>continue</code> 命令，就可以看到其他可能的布局。这样，两种布局一对比就比较容易找到问题所在。</p>
-<h2 id="High-Performance-Auto-Layout"><a href="#High-Performance-Auto-Layout" class="headerlink" title="High Performance Auto Layout"></a>High Performance Auto Layout</h2><p>我们来看这个简单例子：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image4.jpg" alt="auto_layout_image4"><br>这样一个简单布局是无须大费周章去覆盖 <code>updateConstraints</code> 方法的。这里举一个反例，以更好地理解 Auto Layout 这个黑盒。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image5.jpg" alt="auto_layout_image5"><br>在这个方法里：首先停用现有的约束，然后重新添加约束，最后再启用新添加的约束。从直觉上来看，这样做好像看不出有什么损耗性能的地方。</p>
-<h3 id="Render-Loop"><a href="#Render-Loop" class="headerlink" title="Render Loop"></a>Render Loop</h3><p>为了理解上述代码对性能的影响，我们需要更具体地了解 <code>updateConstraints</code> 方法，这里引入一个新概念：<code>Render Loop</code>。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image6.jpg" alt="auto_layout_image6"><br>Render Loop 是每秒可能运行 120 次的进程，以确保每个子视图均恰当地显示在屏幕上。它包括三个阶段，分别是：Update Constraints、Layout 以及 Display。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image7.jpg" alt="auto_layout_image7"><br>第一阶段：从视图层级的底部到顶部，每个视图都会调用 <code>updateConstraints</code> 方法。<br>第二阶段：从视图层级的顶部到底部，每个视图都会调用 <code>layoutSubviews</code> 方法。<br>第三阶段：从视图层级的顶部到底部，每个视图会判断自己是否需要显示在屏幕上。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image8.jpg" alt="auto_layout_image8"><br>上图这样把这几种方法列在表格中是为了说明这些方法虽是在不同阶段，但却可以<strong>用来作类比</strong>。</p>
-<p>整个 Render Loop 存在的目的就是：</p>
-<ol>
-<li>避免无用的计算过程。</li>
-<li>推迟一些计算过程（为的是在某个时刻进行集中计算）。</li>
-<li>如果有可能，跳过这些计算过程。</li>
-</ol>
-<p>回头看这段代码：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image9.jpg.jpg" alt="auto_layout_image9"><br>上文提及过 <code>updateConstraints</code> 方法是可以同 <code>layoutSubviews</code> 方法类比的。<br>在 <code>layoutSubviews</code> 方法每次被调用时，所有的子视图都被销毁，然后再重新创建它们，并把它们添加到父视图上。绝大多数人看到上面这段代码时，肯定会有一种「这样做会影响到性能表现」的直觉。</p>
-<p>同理，那段 <code>updateConstraints</code> 方法也是如此！</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image10.jpg" alt="auto_layout_image10"><br>我们只需想方设法确保 <code>updateConstraints</code> 方法内的做法只执行一次就可以避免多余的计算。</p>
-<p>通过上面的类比，我们逐渐明白之前那段 <code>updateConstraints</code> 方法内的代码是有待优化的代码。但我们的目的不是为了仅仅说明这段代码不好，而是要尽量抽丝剥茧，尝试理解背后的原理。</p>
-<h3 id="Activate-constraints-背后发生了什么？"><a href="#Activate-constraints-背后发生了什么？" class="headerlink" title="Activate constraints 背后发生了什么？"></a>Activate constraints 背后发生了什么？</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image11.jpg" alt="auto_layout_image11"><br>在对视图添加约束之后，Auto Layout 引擎会开始计算表示约束的方程组，然后再把方程组的解（该视图的 frame 数据，即 minX、minY、width 和 height）告知该视图。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image12.jpg" alt="auto_layout_image12"><br>以上图这个简单布局为例（仅关注水平方向上的布局）。Auto Layout 引擎开始计算一个简单的方程组：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image13.jpg" alt="auto_layout_image13"></p>
-<p>计算完毕后，Auto Layout 引擎会通知视图，然后视图向它的父视图发送 <code>setNeedsLayout</code> 信息。</p>
-<p>此时就进入 Render Loop 的第二阶段 Layout：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image14.jpg" alt="auto_layout_image14"></p>
-<p>在 <code>layoutSubviews</code> 方法中，视图从 Auto Layout 引擎中读取方程组的解（frame 数据）对子视图进行布局。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image15.jpg" alt="auto_layout_image15"></p>
-<p>到此为止，我们循序渐进地走过一遍布局的过程。相信你现在对这个过程有了比较直观的了解，这样会有助于你对当前布局性能的好坏做出恰当的判断。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image16.jpg" alt="auto_layout_image16"></p>
-<p>让我们回顾这段代码，在 Render Loop 可能以每秒 120 次调用 <code>updateConstraints</code> 方法的情况下，这段代码中先停用现有的约束，然后再启用新添加的约束。我们可以粗浅地理解为  Auto Layout 引擎一秒钟解 120 次同样的方程组！虽然 Auto Layout 引擎解一次方程组会很快，但是累计下来在这儿会产生很大的开销，会对性能表现有不小的影响！</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image17.jpg" alt="auto_layout_image17"><br>大多数情况下，我们都是在同一父视图内对子视图添加约束。</p>
-<p>如上图所示：text1 和 text2 拥有同一个父视图，text3 和 text4 拥有同一个父视图。text1 和 text3 分别在两个不同的视图层级里。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image18.jpg" alt="auto_layout_image18"><br>此时布局的时间复杂度是线性的，因为 Auto Layout 引擎实际上是在解两个独立无关的方程组。</p>
-<p>而当需要 text1 和 text3 左对齐时：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image19.jpg" alt="auto_layout_image19"><br>Auto Layout 引擎就需要解两个有依赖关系的方程组了。可想而知此时的时间复杂度就不再是线性的，计算量相较之前会增大。</p>
-<p>通过上面的说明，我们可以逐渐领悟到这样一件事：</p>
-<blockquote>
-<p>The layout engine is a layout cache and dependency tracker</p>
-</blockquote>
-<p>光对 Auto Layout 这个黑盒有较为直观的认知还不够，还需要通过实际具体的例子来强化这份认知，强烈推荐看完 <a href="https://developer.apple.com/videos/play/wwdc2018/220/" target="_blank" rel="noopener">High Performance Auto Layout</a> [26:15] 处的例子。</p>
-<h3 id="translatesAutoresizingMaskIntoConstraints"><a href="#translatesAutoresizingMaskIntoConstraints" class="headerlink" title="translatesAutoresizingMaskIntoConstraints"></a>translatesAutoresizingMaskIntoConstraints</h3><p>从 Interface Builder 中生成的 UIView 的 <code>translatesAutoresizingMaskIntoConstraints</code>（之后简称为 <code>tAMIC</code>）默认为 false，而代码生成的 UIView 的 <code>tAMIC</code> 默认为 true。</p>
-<p>手动设置视图的 frame 的布局方式背地里仍然是使用 Auto Layout 在布局。</p>
-<p>举个例子，在 <code>viewDidLoad</code> 方法中添加如下代码：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">label.translatesAutoresizingMaskIntoConstraints = <span class="literal">true</span></span><br><span class="line">view.addSubview(label)</span><br><span class="line">label.frame = <span class="type">CGRect</span>(x: <span class="number">100</span>, y: <span class="number">100</span>, width: <span class="number">100</span>, height: <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
-
-<p>打断点进入调试状态，查看该 label 的约束:<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image20.jpg" alt="auto_layout_image20"><br>可以看出：手动设置的 frame 在背地里转换成对应的<code>NSAutoresizingMaskLayoutConstraint</code> 来进行布局了。</p>
-<p>当用代码来创建视图约束时，一定要记得把 <code>tAMIC</code> 设为 false，以避免约束冲突。</p>
-<h3 id="Alignment-Rect"><a href="#Alignment-Rect" class="headerlink" title="Alignment Rect"></a>Alignment Rect</h3><p>「Auto Layout 引擎计算出的结果是视图 frame 的数据」这往往是不少人的误区。<br>Auto Layout 引擎计算出的结果其实是视图 Alignment rectangle 的数据。换言之，Auto Layout 使用 Alignment rectangle 来布局而不是 frame。</p>
-<p>但一般来说，视图 Alignment rectangle 和 frame 的数据是一致的。    </p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image21.jpg" alt="auto_layout_image21"></p>
-<p>上图黄色虚线所标识的范围为两个视图的 Alignment rectangle。<br>Alignment rectangle 与 frame 的区别在于：前者仅包含视图的<strong>核心视觉元素</strong>，而后者不光包含视图的核心视觉元素，还包含其他修饰性的元素。<br>值得一提的是：<code>UIView.transform</code> 并不会改变 Alignment rectangle 的大小。</p>
-<p>举个例子，这里有一张图片，其宽高分别为：180 x 80，绿色矩形的大小为：150 x 50。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image22.jpeg" alt="auto_layout_image22"><br>如果想要使这张图片居中显示，对应的布局代码为：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">imageView.translatesAutoresizingMaskIntoConstraints = <span class="literal">false</span></span><br><span class="line">view.addSubview(imageView)</span><br><span class="line"></span><br><span class="line"><span class="type">NSLayoutConstraint</span>.activate([</span><br><span class="line">    imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),</span><br><span class="line">    imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
-
-<p>但如果想要以绿色矩形的中心为参照进行居中对齐的话，就得修改 UIImageView 的 Alignment rectangle。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">let</span> dogImageView = <span class="type">UIImageView</span>(named: <span class="string">"alignment_rect"</span>, top: <span class="number">0</span>, <span class="keyword">left</span>: <span class="number">0</span>, bottom: <span class="number">30</span>, <span class="keyword">right</span>: <span class="number">30</span>)!</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">UIImageView</span> </span>&#123;</span><br><span class="line">  <span class="keyword">convenience</span> <span class="keyword">init</span>?(named name: <span class="type">String</span>, top: <span class="type">CGFloat</span>, <span class="keyword">left</span>: <span class="type">CGFloat</span>, bottom: <span class="type">CGFloat</span>, <span class="keyword">right</span>: <span class="type">CGFloat</span>) &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> image = <span class="type">UIImage</span>(named: name) <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">let</span> insets = <span class="type">UIEdgeInsets</span>(top: top, <span class="keyword">left</span>: <span class="keyword">left</span>, bottom: bottom, <span class="keyword">right</span>: <span class="keyword">right</span>)</span><br><span class="line">    <span class="keyword">let</span> insetImage = image.withAlignmentRectInsets(insets)</span><br><span class="line">    <span class="keyword">self</span>.<span class="keyword">init</span>(image: insetImage)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p> <img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image23.jpg" alt="auto_layout_image23"></p>
-<p>至此，能证明「Auto Layout 使用 Alignment rectangle 来布局而不是 frame」。</p>
-<h3 id="Intrinsic-Content-Size"><a href="#Intrinsic-Content-Size" class="headerlink" title="Intrinsic Content Size"></a>Intrinsic Content Size</h3><p>常见的 UI 控件，如 <code>UILabel</code> 和 <code>UIImageView</code>。在为它们设定完显示的文字和图片后，它们会有 <code>intrinsicContentSize</code>，Auto Layout 引擎利用这个<code>intrinsicContentSize</code> 生成 <code>NSContentSizeLayoutConstraint</code> 对它们进行布局。</p>
-<p>当需要 Text measurement 时，选择性地去覆盖 <code>intrinsicContentSize</code> 可以提高布局性能。Text measurement 带来的性能开销是很大的，在那些显示大量文本的 app 中尤甚。</p>
-<p>如果在无需 Text measurement 就可以确定文本显示的大小，就可以直接覆盖 <code>intrinsicContentSize</code>，返回这个确定的值。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">var</span> intrinsicContentSize: <span class="type">CGSize</span> &#123;</span><br><span class="line">    <span class="comment">// 返回某个确定的 CGSize</span></span><br><span class="line">    <span class="keyword">return</span> <span class="type">CGSize</span>(width: <span class="number">100</span>, height: <span class="number">100</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果是利用约束来确定文本显示的大小而不是文本本身的大小，可以这样：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">var</span> intrinsicContentSize: <span class="type">CGSize</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">CGSize</span>(width: <span class="type">UIView</span>.noIntrinsicMetric, height: <span class="type">UIView</span>.noIntrinsicMetric)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样做是在告诉父视图：我已经可以通过约束来确定我自己的大小啦，没必要进行 Text measurement 了。</p>
-<p>谈及 <code>intrinsicContentSize</code>，就不得不提一嘴 <code>systemLayoutSizeFitting</code> 方法，因为有时候会把它俩混为一谈，实际上它俩可以说是正反面。<code>intrinsicContentSize</code> 是传递给 Auto Layout 引擎的信息，而 <code>systemLayoutSizeFitting</code> 方法是 Auto Layout 引擎计算得出的信息。</p>
-<h2 id="参考信息"><a href="#参考信息" class="headerlink" title="参考信息"></a>参考信息</h2><ul>
-<li><a href="https://developer.apple.com/videos/play/wwdc2015/218/" target="_blank" rel="noopener">Mysteries of Auto Layout, Part 1</a>（<a href="https://developer.apple.com/videos/play/wwdc2015/218/）" target="_blank" rel="noopener">https://developer.apple.com/videos/play/wwdc2015/218/）</a></li>
-<li><a href="https://developer.apple.com/videos/play/wwdc2015/219/" target="_blank" rel="noopener">Mysteries of Auto Layout, Part 2</a>（<a href="https://developer.apple.com/videos/play/wwdc2015/219/）" target="_blank" rel="noopener">https://developer.apple.com/videos/play/wwdc2015/219/）</a></li>
-<li><a href="https://developer.apple.com/videos/play/wwdc2018/220/" target="_blank" rel="noopener">High Performance Auto Layout</a>（<a href="https://developer.apple.com/videos/play/wwdc2018/220/）" target="_blank" rel="noopener">https://developer.apple.com/videos/play/wwdc2018/220/）</a></li>
-</ul>
-
+          <p>拾人牙慧而已，並非创见。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/15/uncover_mysteries_of_auto_layout/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -886,10 +767,6 @@
           <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">日志</span>
         </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
-        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
