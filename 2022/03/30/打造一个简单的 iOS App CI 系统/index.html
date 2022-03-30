@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="除了 Xcode Cloud，你还有别的选择。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="打造一个简单的 iOS App CI 系统">
+<meta property="og:url" content="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="除了 Xcode Cloud，你还有别的选择。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_02.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_03.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_04.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_05.jpg">
+<meta property="article:published_time" content="2022-03-30T01:41:00.000Z">
+<meta property="article:modified_time" content="2022-03-30T13:59:07.026Z">
+<meta property="article:author" content="Sunset Wan">
+<meta property="article:tag" content="Continuous Integration">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png">
+
+<link rel="canonical" href="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>打造一个简单的 iOS App CI 系统 | 日落大道</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">日落大道</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          打造一个简单的 iOS App CI 系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-30 09:41:00 / 修改时间：21:59:07" itemprop="dateCreated datePublished" datetime="2022-03-30T09:41:00+08:00">2022-03-30</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>除了 Xcode Cloud，你还有别的选择。<a id="more"></a><br>本文介绍如何在 macOS 上使用 <a href="https://fastlane.tools/" target="_blank" rel="noopener">fastlane</a> 来帮助你打造一个简单的 iOS App CI 系统。</p>
+<h2 id="在安装-fastlane-之前"><a href="#在安装-fastlane-之前" class="headerlink" title="在安装 fastlane 之前"></a>在安装 fastlane 之前</h2><h3 id="与-macOS-系统自带的-Ruby-环境隔离"><a href="#与-macOS-系统自带的-Ruby-环境隔离" class="headerlink" title="与 macOS 系统自带的 Ruby 环境隔离"></a>与 macOS 系统自带的 Ruby 环境隔离</h3><p>fastlane 对 Ruby 的最低要求是 2.5 及以上版本。虽然 macOS 自带 Ruby 环境，但强烈建议单独配置个 Ruby 环境，与系统自带的 Ruby 环境隔离。Ruby 官方有给出管理多版本 Ruby 的 <a href="https://www.ruby-lang.org/en/documentation/installation/#managers" target="_blank" rel="noopener">方法</a>，我个人常使用的是 <a href="https://github.com/rbenv/rbenv#readme" target="_blank" rel="noopener">rbenv</a>。</p>
+<h3 id="使用-bundler-管理-gem"><a href="#使用-bundler-管理-gem" class="headerlink" title="使用 bundler 管理 gem"></a>使用 bundler 管理 gem</h3><p>使用 <a href="https://bundler.io/" target="_blank" rel="noopener">bundler</a> 管理 gem，这能确保团队协作时 gem（<code>cocoapods</code> 和 <code>fastlane</code> 等） 版本的统一。举个例子，如果团队成员的 <code>cocoapods</code> 版本不统一，Podfile.lock 这个文件经常会出现不必要的改动。</p>
+<p>跟 <code>cocoapods</code> 管理 pod 类似，<code>bundler</code> 通过 Gemfile 来安装所需的 gem。</p>
+<p>本文所使用的 Gemfile 内容为：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source <span class="string">"https://rubygems.org"</span></span><br><span class="line">gem <span class="string">"fastlane"</span>, <span class="string">'2.195.0'</span></span><br><span class="line">gem <span class="string">"cocoapods"</span></span><br></pre></td></tr></table></figure>
+<p>值得一提的是：要在 <code>bundler</code> 管理的环境下，执行相关 <code>gem</code> 的命令，得加上 <code>bundle exec</code> 的前缀。对 <code>bundle exec</code> 命令的详细介绍，请参考这篇 <a href="https://bundler.io/v2.3/man/bundle-exec.1.html" target="_blank" rel="noopener">文档</a>。</p>
+<h2 id="使用-fastlane-接管应用的打包和上传-App-store-流程"><a href="#使用-fastlane-接管应用的打包和上传-App-store-流程" class="headerlink" title="使用 fastlane 接管应用的打包和上传 App store 流程"></a>使用 fastlane 接管应用的打包和上传 App store 流程</h2><h3 id="1-设置打包参数"><a href="#1-设置打包参数" class="headerlink" title="1. 设置打包参数"></a>1. 设置打包参数</h3><p>一般地，在开始打包之前，需要的参数为：</p>
+<ol>
+<li>代码对应的分支名：<code>branchName</code>（String Type）</li>
+<li>App scheme 名：<code>scheme</code>（String Type）</li>
+<li>是否需要上传 App store：<code>deployToProd</code> （Boolean）</li>
+</ol>
+<p>其他的参数，可以根据自己的需要来设定。</p>
+<h3 id="2-自动同步签名证书和-Provisioning-Profile"><a href="#2-自动同步签名证书和-Provisioning-Profile" class="headerlink" title="2. 自动同步签名证书和 Provisioning Profile"></a>2. 自动同步签名证书和 Provisioning Profile</h3><p>fastlane 的 <a href="https://docs.fastlane.tools/actions/match/" target="_blank" rel="noopener">match</a>  可以帮助在多台 macOS 设备自动同步签名证书和 Provisioning Profile。<code>match</code> 支持以多种方式存储签名证书和 Provisioning Profile，如存在 Git 仓库中、存在云上（Azure、Google Cloud 和 AWS）等。</p>
+<p>一般地，会选择使用 <code>match</code> 把签名证书和  Provisioning Profile 加密保存在 Git 仓库上。此时，为了安全，<code>match</code> 会提醒你设置一个密码，这样在新的 macOS 设备上同步证书信息时，会提示输入密码，提高数据的安全性。</p>
+<p>在 <code>match</code> 初始化配置完毕后，敲以下命令，可以同步三种导出方式对应的证书信息至本地，然后重启下 Xcode，点进 <code>Signing &amp; Capabilities</code> 查看是否生效。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bundle exec fastlane match appstore</span><br><span class="line">bundle exec fastlane match development</span><br><span class="line">bundle exec fastlane match adhoc</span><br></pre></td></tr></table></figure>
+
+<p>虽然 <code>match</code> 的文档上写明：第一次初始化 <code>match</code> 前，建议使用 <code>match nuke</code> 命令来清理现有的签名证书和 Provisioning Profiles，但经验而谈，最好是用 <code>match</code> 管理签名证书和 Provisioning Profiles 的这套做法在组内成功推广开来之后再用 😜。</p>
+<h3 id="3-更新代码"><a href="#3-更新代码" class="headerlink" title="3. 更新代码"></a>3. 更新代码</h3><p>根据第一步获取的 <code>branchName</code>，在 ruby 脚本内执行 git 命令即可。</p>
+<h3 id="4-安装-Pod-依赖"><a href="#4-安装-Pod-依赖" class="headerlink" title="4. 安装 Pod 依赖"></a>4. 安装 Pod 依赖</h3><p>fastlane 的 <a href="https://docs.fastlane.tools/actions/cocoapods/" target="_blank" rel="noopener">cocoapods</a> 可用来安装 iOS 工程的 Pod 依赖，指定 <code>Podfile</code> 的路径即可。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">podFilePath = File.absolute_path(<span class="string">"../"</span>).to_s</span><br><span class="line"><span class="comment"># install_dependencies</span></span><br><span class="line">cocoapods(</span><br><span class="line">	<span class="symbol">clean_install:</span> <span class="literal">true</span>,</span><br><span class="line">	<span class="symbol">podfile:</span> podFilePath,</span><br><span class="line">	<span class="symbol">verbose:</span> <span class="literal">true</span>,</span><br><span class="line">	<span class="symbol">repo_update:</span> <span class="literal">true</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-清除-Xcode-缓存"><a href="#5-清除-Xcode-缓存" class="headerlink" title="5. 清除 Xcode 缓存"></a>5. 清除 Xcode 缓存</h3><p>fastlane 的 <a href="https://docs.fastlane.tools/actions/clear_derived_data/" target="_blank" rel="noopener">clear_derived_data</a> 可用来清除 Xcode 缓存。</p>
+<h3 id="6-开始打包"><a href="#6-开始打包" class="headerlink" title="6. 开始打包"></a>6. 开始打包</h3><p>fastlane 的 <a href="https://docs.fastlane.tools/actions/gym/" target="_blank" rel="noopener">gym</a> 可用来执行 Xcode 打包命令。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">gym(</span><br><span class="line">	<span class="symbol">workspace:</span> workspaceName, <span class="comment"># 以 .xcworkspace.xcworkspace 结尾的 iOS 工程名</span></span><br><span class="line">	<span class="symbol">scheme:</span> fullScheme, <span class="comment"># iOS 工程的 scheme 名</span></span><br><span class="line">	<span class="symbol">export_method:</span> exportMethod, <span class="comment"># 所选的导出方法，与 fastlane match type 有关</span></span><br><span class="line">	<span class="symbol">silent:</span> <span class="literal">false</span>,</span><br><span class="line">	<span class="symbol">clean:</span> <span class="literal">false</span>,</span><br><span class="line">	<span class="symbol">output_directory:</span> ipaOutputPath,</span><br><span class="line">	<span class="symbol">output_name:</span> iPAOutputName,</span><br><span class="line">	<span class="symbol">suppress_xcode_output:</span> <span class="literal">true</span>,</span><br><span class="line">	<span class="symbol">include_symbols:</span> <span class="literal">false</span>,</span><br><span class="line">	<span class="symbol">include_bitcode:</span> <span class="literal">false</span>,</span><br><span class="line">	<span class="symbol">build_path:</span> fastlaneBuildPath,</span><br><span class="line">	<span class="symbol">archive_path:</span> archivePath,</span><br><span class="line">	<span class="symbol">derived_data_path:</span> fastlaneDerivedDataPath,</span><br><span class="line">	<span class="symbol">buildlog_path:</span> logPath,</span><br><span class="line">	<span class="symbol">analyze_build_time:</span> <span class="literal">false</span>,</span><br><span class="line">	<span class="symbol">destination:</span> <span class="string">"generic/platform=iOS"</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>iOS App scheme、match type 和 gym export method 三者之间可能对应的关系如下图所示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png" alt="01"></p>
+<h3 id="7-上传至-App-store"><a href="#7-上传至-App-store" class="headerlink" title="7. 上传至 App store"></a>7. 上传至 App store</h3><p>fastlane 老式的做法是用 Apple ID 的账号密码去登陆 App store connect，这样不光得设置一大堆环境变量，如下：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">FASTLANE_USER = <span class="string">"sunsetwan@gmail.com"</span></span><br><span class="line">FASTLANE_ITC_TEAM_NAME = <span class="string">"Sunset Technology Co. LTD"</span></span><br><span class="line">FASTLANE_PASSWORD = <span class="string">"xxx"</span></span><br><span class="line">app_identifier = <span class="string">"com.sunset.test"</span></span><br><span class="line">SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER = <span class="string">"+86xxx"</span></span><br><span class="line">FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD = <span class="string">"xxx"</span></span><br></pre></td></tr></table></figure>
+<p>而且登陆态一般只能维持两个礼拜。一旦过期，得重新输入 Apple ID 两步验证发来的短信验证码，这一点是比较令人困扰的，会直接打断自动化的流程，且现在 Apple ID 一旦开启了两步验证，就没法关闭了。</p>
+<p>现在推荐使用 <a href="https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api" target="_blank" rel="noopener">App Store Connect API</a> 的方式来完成 Apple ID 的认证授权。</p>
+<p>主要的三个步骤如下：</p>
+<ol>
+<li>用「账户持有者」权限的 Apple ID 登陆 App Store Connect，创建 API Key 文件（<code>.p8</code>）。</li>
+<li>把这 API Key 文件保存在 CI 机器上</li>
+<li>使用 fastlane 的 <a href="https://docs.fastlane.tools/actions/app_store_connect_api_key/" target="_blank" rel="noopener">app_store_connect_api_key</a> 来完成验证。</li>
+</ol>
+<p>参考代码：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">desc <span class="string">"使用 App Store Connect API 的 deliver"</span></span><br><span class="line">private_lane <span class="symbol">:swizzed_deliver</span> <span class="keyword">do</span> <span class="params">|options|</span></span><br><span class="line">	ipa_file_absolute_path = options[<span class="symbol">:ipa_file_absolute_path</span>]</span><br><span class="line">	<span class="keyword">if</span> ipa_file_absolute_path.to_s.empty? </span><br><span class="line">		raise <span class="string">"ipa_file_absolute_path is empty"</span></span><br><span class="line">	<span class="keyword">end</span></span><br><span class="line">	</span><br><span class="line">	app_connect_api_key_path = <span class="string">""</span></span><br><span class="line">	Dir.chdir(<span class="string">"../app_connect_api_key"</span>) <span class="keyword">do</span></span><br><span class="line">		searchPattern = <span class="string">"AuthKey_xxx.p8"</span></span><br><span class="line">		files = Dir.glob(searchPattern)</span><br><span class="line">		<span class="keyword">if</span> files.empty?</span><br><span class="line">			raise <span class="string">"Error: can't find AuthKey_xxx.p8\nsearchPattern: <span class="subst">#&#123;searchPattern&#125;</span>\nCurrentPWD: <span class="subst">#&#123;Dir.pwd&#125;</span>"</span></span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			path = files[<span class="number">0</span>].to_s</span><br><span class="line">			app_connect_api_key_path = File.absolute_path(path)</span><br><span class="line">		<span class="keyword">end</span> </span><br><span class="line">	<span class="keyword">end</span> </span><br><span class="line">	</span><br><span class="line">	api_key = app_store_connect_api_key(</span><br><span class="line">		<span class="symbol">key_id:</span> <span class="string">"xxx"</span>,</span><br><span class="line">		<span class="symbol">issuer_id:</span> <span class="string">"xxx"</span>,</span><br><span class="line">		<span class="symbol">key_filepath:</span> app_connect_api_key_path, </span><br><span class="line">		<span class="symbol">duration:</span> <span class="number">1200</span>, <span class="comment"># optional (maximum 1200)</span></span><br><span class="line">		<span class="symbol">in_house:</span> <span class="literal">false</span> <span class="comment"># optional but may be required if using match/sigh</span></span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> api_key.<span class="literal">nil</span>? </span><br><span class="line">		raise <span class="string">"api key is missing!"</span></span><br><span class="line">	<span class="keyword">end</span></span><br><span class="line">	</span><br><span class="line">	deliver(</span><br><span class="line">		<span class="symbol">ipa:</span> ipa_file_absolute_path,</span><br><span class="line">		<span class="symbol">skip_screenshots:</span> <span class="literal">true</span>,</span><br><span class="line">		<span class="symbol">skip_metadata:</span> <span class="literal">true</span>,</span><br><span class="line">		<span class="symbol">skip_app_version_update:</span> <span class="literal">true</span>,</span><br><span class="line">		<span class="symbol">force:</span> <span class="literal">true</span>,</span><br><span class="line">		<span class="symbol">api_key:</span> api_key,</span><br><span class="line">		<span class="symbol">run_precheck_before_submit:</span> <span class="literal">false</span></span><br><span class="line">	)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>最后，可以配合使用 Gitlab Runner，来自动触发上述构建流程。</p>
+<h2 id="CI-的核心是什么？"><a href="#CI-的核心是什么？" class="headerlink" title="CI 的核心是什么？"></a>CI 的核心是什么？</h2><p>我带着这问题去读了下《Software Engineering at Google》的第 23 章节 Continuous Integration。我个人觉得这问题的答案是：</p>
+<blockquote>
+<p>A CI system decides what tests to use, and when.</p>
+</blockquote>
+<p>当然，我认为这里提到的 <code>test</code> 不一定就是单元测试，可能还包含 lint 工具的执行结果等。</p>
+<p>我前阵子读 <code>Kingfisher</code> 源码的时候，发现它也有写不少测试代码。</p>
+<p>于是，我找到 Jon Reid 写的《iOS Unit Testing by Example: XCTest Tips and Techniques Using Swift》，决定读一读，学习如何使用 <code>XCTest</code>。</p>
+<p>其中有关 <code>XCTestCase</code> 的生命周期的介绍，令人印象深刻，记录于此。<br>假设我们要测试的类为 <code>MyClass</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">var</span> allInstances = <span class="number">0</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">let</span> instance: <span class="type">Int</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        <span class="type">MyClass</span>.allInstances += <span class="number">1</span></span><br><span class="line">        instance = <span class="type">MyClass</span>.allInstances</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"&gt;&gt; MyClass.init() #\(instance)"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">deinit</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"&gt;&gt; MyClass.deinit #\(instance)"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">methodOne</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"&gt;&gt; methodOne"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">methodTwo</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"&gt;&gt; methodTwo"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的测试代码 <code>MyClassTests</code> 为：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> XCTest</span><br><span class="line"><span class="meta">@testable</span> <span class="keyword">import</span> TestLifeCycle</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClassTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test_methodOne</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> sut = <span class="type">MyClass</span>()</span><br><span class="line">        sut.methodOne()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test_methodTwo</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> sut = <span class="type">MyClass</span>()</span><br><span class="line">        sut.methodTwo()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_02.jpg" alt="02"><br>点击运行按钮，可以看到如下测试日志：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_03.jpg" alt="03"><br>以 <code>test_methodOne</code> 方法为例，整个测试流程方法调用顺序为：</p>
+<ol>
+<li>MyClass.init()</li>
+<li>methodOne</li>
+<li>MyClass.deinit()</li>
+</ol>
+<p>但 <code>test_methodOne</code> 方法和 <code>test_methodTwo</code> 方法内分别创建了一个 <code>MyClass</code> 实例，是不是代码有些重复了？</p>
+<p>于是，我尝试这样优化：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClassTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">let</span> sut = <span class="type">MyClass</span>()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test_methodOne</span><span class="params">()</span></span> &#123;</span><br><span class="line">        sut.methodOne()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test_methodTwo</span><span class="params">()</span></span> &#123;</span><br><span class="line">        sut.methodTwo()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再次点击运行按钮，得到如下测试日志：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_04.jpg" alt="04"><br>咦！怎么 <code>MyClass.init()</code> 调用了两次？<code>MyClass.deinit()</code> 方法没被调用！<br>在测试代码开始运行之前，两个 <code>MyClass</code> 的实例被创建了，且从未被销毁！这样会有两个潜在的问题：</p>
+<ol>
+<li>如果 <code>MyClass</code> 的 <code>init</code> 方法出了问题，测试代码很难捕捉到这个问题，因为问题发生的时机在任何测试代码运行之前。</li>
+<li>如果 <code>MyClass</code> 的 <code>deinit</code> 方法出了问题，测试代码很难捕捉到这个问题，因为这些对象未被销毁。</li>
+</ol>
+<h3 id="XCTest-是如何管理-Test-case-的？"><a href="#XCTest-是如何管理-Test-case-的？" class="headerlink" title="XCTest 是如何管理 Test case 的？"></a>XCTest 是如何管理 Test case 的？</h3><p>我想当然觉得是这样的：</p>
+<ol>
+<li>创建 <code>XCTestCase</code> 子类的实例对象</li>
+<li>执行创建好的实例对象的测试方法</li>
+<li>执行完毕，销毁创建好饿的实力对象</li>
+</ol>
+<p>但实际上是这样的：</p>
+<ol>
+<li><code>XCTest</code> 找到所有 <code>XCTestCase</code> 的子类</li>
+<li>在每一个这样的子类中，找到每个测试方法</li>
+<li>对于每个测试方法，<code>XCTest</code> 会创建一个对应的实例</li>
+<li><code>XCTest</code>  把每种 <code>XCTestCase</code> 的子类的实例包装成一个个的 <code>test suite</code></li>
+<li>当前四个步骤完成后，<code>XCTest</code> 开始运行测试代码。</li>
+</ol>
+<p>以 <code>MyClassTests</code> 为例：</p>
+<ol>
+<li><code>XCTest</code> 找到 <code>XCTestCase</code> 的子类：<code>MyClassTests</code></li>
+<li>在 <code>MyClassTests</code> 中，找到两个测试方法：<code>test_methodOne</code> 和 <code>test_methodTwo</code></li>
+<li>创建两个 <code>MyClassTests</code> 的实例</li>
+<li>把这两个实例包装成一个 <code>test suite</code></li>
+</ol>
+<p>因为这两个 <code>MyClassTests</code> 的实例均持有 <code>MyClass</code> 属性，所以这就是 <code>MyClass.init()</code> 调用了两次的原因。</p>
+<h3 id="避免重复测试代码的正确方式"><a href="#避免重复测试代码的正确方式" class="headerlink" title="避免重复测试代码的正确方式"></a>避免重复测试代码的正确方式</h3><p>这里介绍 <code>XCTest</code> 的两个方法：<code>setUp()</code> 和 <code>tearDown()</code><br><code>setUp()</code> 方法是在每个测试方法执行<strong>前</strong>执行，用来设置初始状态。<br><code>tearDown()</code> 方法是在每个测试方法执行<strong>后</strong>执行，用来执行清理动作。<br>使用这两个方法优化之后的代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> XCTest</span><br><span class="line"><span class="meta">@testable</span> <span class="keyword">import</span> TestLifeCycle</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClassTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> sut: <span class="type">MyClass!</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        sut = <span class="type">MyClass</span>()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        sut = <span class="literal">nil</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test_methodOne</span><span class="params">()</span></span> &#123;</span><br><span class="line">        sut.methodOne()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test_methodTwo</span><span class="params">()</span></span> &#123;</span><br><span class="line">        sut.methodTwo()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再次点击运行按钮，得到如下测试日志：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_05.jpg" alt="05"><br>Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
+<p>fastlane 的 <a href="https://docs.fastlane.tools/getting-started/ios/running-tests/" target="_blank" rel="noopener">run_tests</a> 可用来在 ruby 脚本中执行测试代码。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>有人会说：搞个 CI 成本太高了，但我觉得它带来的价值是高于成本的。<br>这里引用《Software Engineering at Google》第 23 章节的一段话：</p>
+<blockquote>
+<p>CI leads to a more stable product and happier developer culture in which engineers feel more confident that “the system” will catch problems, and they can focus more on features and less on fixing.</p>
+</blockquote>
+<p>让工程师们 focus more on features and less on fixing，这一点真的很重要。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Continuous-Integration/" rel="tag"># Continuous Integration</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/" rel="prev" title="Kingfisher 源码阅读（一）">
+      <i class="fa fa-chevron-left"></i> Kingfisher 源码阅读（一）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#在安装-fastlane-之前"><span class="nav-number">1.</span> <span class="nav-text">在安装 fastlane 之前</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#与-macOS-系统自带的-Ruby-环境隔离"><span class="nav-number">1.1.</span> <span class="nav-text">与 macOS 系统自带的 Ruby 环境隔离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-bundler-管理-gem"><span class="nav-number">1.2.</span> <span class="nav-text">使用 bundler 管理 gem</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-fastlane-接管应用的打包和上传-App-store-流程"><span class="nav-number">2.</span> <span class="nav-text">使用 fastlane 接管应用的打包和上传 App store 流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-设置打包参数"><span class="nav-number">2.1.</span> <span class="nav-text">1. 设置打包参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-自动同步签名证书和-Provisioning-Profile"><span class="nav-number">2.2.</span> <span class="nav-text">2. 自动同步签名证书和 Provisioning Profile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-更新代码"><span class="nav-number">2.3.</span> <span class="nav-text">3. 更新代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-安装-Pod-依赖"><span class="nav-number">2.4.</span> <span class="nav-text">4. 安装 Pod 依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-清除-Xcode-缓存"><span class="nav-number">2.5.</span> <span class="nav-text">5. 清除 Xcode 缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-开始打包"><span class="nav-number">2.6.</span> <span class="nav-text">6. 开始打包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-上传至-App-store"><span class="nav-number">2.7.</span> <span class="nav-text">7. 上传至 App store</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CI-的核心是什么？"><span class="nav-number">3.</span> <span class="nav-text">CI 的核心是什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#XCTest-是如何管理-Test-case-的？"><span class="nav-number">3.1.</span> <span class="nav-text">XCTest 是如何管理 Test case 的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免重复测试代码的正确方式"><span class="nav-number">3.2.</span> <span class="nav-text">避免重复测试代码的正确方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
