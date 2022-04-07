@@ -52,7 +52,7 @@
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg">
 <meta property="article:published_time" content="2020-11-27T07:38:37.000Z">
-<meta property="article:modified_time" content="2020-11-27T12:08:22.832Z">
+<meta property="article:modified_time" content="2022-04-07T02:33:48.625Z">
 <meta property="article:author" content="Sunset Wan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg">
@@ -202,10 +202,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-11-27 15:38:37 / 修改时间：20:08:22" itemprop="dateCreated datePublished" datetime="2020-11-27T15:38:37+08:00">2020-11-27</time>
+              <time title="创建时间：2020-11-27 15:38:37" itemprop="dateCreated datePublished" datetime="2020-11-27T15:38:37+08:00">2020-11-27</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-07 10:33:48" itemprop="dateModified" datetime="2022-04-07T10:33:48+08:00">2022-04-07</time>
+              </span>
 
           
 
@@ -252,7 +258,7 @@
 <li>如何检测数据传丢了？</li>
 <li>当数据传丢了，它该做什么？</li>
 </ol>
-<p><code>rdt 2.2</code> 很好地替我们回应了第二个问题。<br>有不少的方法来解决第一个问题，但在这里，我们把检测数据丢失和数据恢复的重担放在 sender。<br>设想这样一个场景：sender 把数据发送出去，第一种情况：数据在发送途中丢失了。第二种情况：receiver 发回的 ACK 丢失了。在这其中任意一种情况下，sender 均不会收到关于刚刚发送出去的数据的任何反馈。但是，如果 sender 可以<strong>等足够久</strong>，以至于它可以很肯定：刚发出去的数据丢了，这样它就可以直接重新发送这个数据。<br>至于这个等待时间是多少，我们可以暂且理解为：一个 RTT（Round Trip Time）加上在物理介质上传输该数据的时间。<br>需要注意的是：如果一个数据包经历了一个特别大的延迟（网络特别拥堵），即使数据包和它的 ACK 都没有丢失，sender也会重新发送数据包。我们就又遇到在 <code>rdt 2.0</code> 中遇到的老问题——<strong>重复数据包</strong>。没关系，<code>rdt 2.0</code> 已经妥善处理好这个问题了。</p>
+<p><code>rdt 2.2</code> 很好地替我们回应了第二个问题。<br>有不少的方法来解决第一个问题，但在这里，我们把检测数据丢失和数据恢复的重担放在 sender。<br>设想这样一个场景：sender 把数据发送出去，第一种情况：数据在发送途中丢失了。第二种情况：receiver 发回的 ACK 丢失了。在这其中任意一种情况下，sender 均不会收到关于刚刚发送出去的数据的任何反馈。但是，如果 sender 可以<strong>等足够久</strong>，以至于它可以很肯定：刚发出去的数据丢了，这样它就可以直接重新发送这个数据。<br>至于这个等待时间是多少，我们可以暂且理解为：一个 RTT（Round Trip Time）加上在物理介质上传输该数据的时间。<br>需要注意的是：如果一个数据包经历了一个特别大的延迟（网络特别拥堵），即使数据包和它的 ACK 都没有丢失，sender也会重新发送数据包。我们就又遇到在 <code>rdt 2.0</code> 中遇到的老问题——<strong>重复数据包</strong>。没关系，<code>rdt 2.2</code> 已经妥善处理好这个问题了。</p>
 <p>当遇到以下情况时：</p>
 <ol>
 <li>发出的数据在途中丢了</li>
