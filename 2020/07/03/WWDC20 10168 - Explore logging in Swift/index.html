@@ -2,9 +2,9 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
@@ -13,14 +13,13 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"sunsetwan.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
-  </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-  <meta name="description" content="有幸参与《WWDC 20 内参》的工作，欢迎 订阅 该专栏！">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="有幸参与《WWDC 20 内参》的工作，欢迎 订阅 该专栏！">
 <meta property="og:type" content="article">
 <meta property="og:title" content="WWDC20 10168 - Explore logging in Swift">
 <meta property="og:url" content="https://sunsetwan.github.io/2020/07/03/WWDC20%2010168%20-%20Explore%20logging%20in%20Swift/index.html">
@@ -47,169 +46,199 @@
 <meta property="og:image" content="https://images.xiaozhuanlan.com/photo/2020/d737f2b72636a3f0611d9ee2d121e013.png">
 <meta property="og:image" content="https://images.xiaozhuanlan.com/photo/2020/d8835536fe012a79ade4f8c855c9904e.png">
 <meta property="og:image" content="https://images.xiaozhuanlan.com/photo/2020/d55466a8b3e1be6f48331b4520724b3f.png">
-<meta property="article:published_time" content="2020-07-03T01:10:50.000Z">
-<meta property="article:modified_time" content="2020-09-18T05:00:39.414Z">
+<meta property="article:published_time" content="2020-07-03T09:10:50.000Z">
+<meta property="article:modified_time" content="2025-11-28T15:04:14.761Z">
 <meta property="article:author" content="Sunset Wan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://images.xiaozhuanlan.com/photo/2020/29efcca67dbe23414a5ed5fa1000de30.png">
 
+
 <link rel="canonical" href="https://sunsetwan.github.io/2020/07/03/WWDC20%2010168%20-%20Explore%20logging%20in%20Swift/">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2020/07/03/WWDC20%2010168%20-%20Explore%20logging%20in%20Swift/","path":"2020/07/03/WWDC20 10168 - Explore logging in Swift/","title":"WWDC20 10168 - Explore logging in Swift"}</script>
 
-  <title>WWDC20 10168 - Explore logging in Swift | 日落大道</title>
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>WWDC20 10168 - Explore logging in Swift | 日落大道</title>
   
 
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
 
 
 
 
 
   <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
   </div>
 
   <div class="site-meta">
 
     <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">日落大道</h1>
-      <span class="logo-line-after"><i></i></span>
+      <i class="logo-line"></i>
+      <p class="site-title">日落大道</p>
+      <i class="logo-line"></i>
     </a>
   </div>
 
   <div class="site-nav-right">
-    <div class="toggle popup-trigger">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
     </div>
   </div>
 </div>
 
 
 
-
 <nav class="site-nav">
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
   </ul>
 </nav>
 
 
 
 
-</div>
-    </header>
+</header>
+        
+  
+  <aside class="sidebar">
 
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E6%8B%AC"><span class="nav-number">1.</span> <span class="nav-text">概括</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A5%E7%9C%8B%E6%96%B0%E7%89%88-log-API"><span class="nav-number">2.</span> <span class="nav-text">来看新版 log API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E7%89%88-log-API-%E6%94%AF%E6%8C%81%E4%BC%97%E5%A4%9A%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">新版 log API 支持众多数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%BB%88%E7%AB%AF%E4%B8%AD%E6%94%B6%E9%9B%86%E6%97%A5%E5%BF%97%E4%BF%A1%E6%81%AF"><span class="nav-number">4.</span> <span class="nav-text">在终端中收集日志信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-Console-App-%E4%B8%AD%E5%AE%9E%E6%97%B6%E6%A3%80%E8%A7%86%E6%97%A5%E5%BF%97%E4%BF%A1%E6%81%AF"><span class="nav-number">5.</span> <span class="nav-text">在 Console App 中实时检视日志信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E7%AD%89%E7%BA%A7"><span class="nav-number">6.</span> <span class="nav-text">日志等级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E6%B6%88%E6%81%AF%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">7.</span> <span class="nav-text">日志消息持久化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E5%8C%96%E6%97%A5%E5%BF%97%E4%BF%A1%E6%81%AF"><span class="nav-number">8.</span> <span class="nav-text">格式化日志信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8A%A4%E6%97%A5%E5%BF%97%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8"><span class="nav-number">9.</span> <span class="nav-text">保护日志信息安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API-%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="nav-number">10.</span> <span class="nav-text">API 可用性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">11.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
   </div>
 
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
+        </div>
+      </div>
+    </div>
 
     
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2020/07/03/WWDC20%2010168%20-%20Explore%20logging%20in%20Swift/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="Sunset Wan">
-      <meta itemprop="description" content="">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="日落大道">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="WWDC20 10168 - Explore logging in Swift | 日落大道">
+      <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           WWDC20 10168 - Explore logging in Swift
         </h1>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-07-03 09:10:50" itemprop="dateCreated datePublished" datetime="2020-07-03T09:10:50+08:00">2020-07-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-09-18 13:00:39" itemprop="dateModified" datetime="2020-09-18T13:00:39+08:00">2020-09-18</time>
-              </span>
+      <time title="创建时间：2020-07-03 09:10:50" itemprop="dateCreated datePublished" datetime="2020-07-03T09:10:50+00:00">2020-07-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-11-28 15:04:14" itemprop="dateModified" datetime="2025-11-28T15:04:14+00:00">2025-11-28</time>
+    </span>
 
-          
+  
+</div>
 
         </div>
       </header>
@@ -217,11 +246,8 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <p>有幸参与《WWDC 20 内参》的工作，欢迎 <a href="https://xiaozhuanlan.com/wwdc20" target="_blank" rel="noopener">订阅</a> 该专栏！<a id="more"></a></p>
-<p>本次 Session 的思维导图：<br><img src="https://images.xiaozhuanlan.com/photo/2020/29efcca67dbe23414a5ed5fa1000de30.png" alt=""></p>
+    <div class="post-body" itemprop="articleBody"><p>有幸参与《WWDC 20 内参》的工作，欢迎 <a target="_blank" rel="noopener" href="https://xiaozhuanlan.com/wwdc20">订阅</a> 该专栏！<span id="more"></span></p>
+<p>本次 Session 的思维导图：<br><img src="https://images.xiaozhuanlan.com/photo/2020/29efcca67dbe23414a5ed5fa1000de30.png"></p>
 <h3 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h3><p>这个 session 介绍了 Swift 统一 logging API 的最新版本。在这个视频中，你将学会：</p>
 <ol>
 <li>在记录应用中的事件和错误的同时，保持日志信息的隐私性。</li>
@@ -230,17 +256,17 @@
 </ol>
 <p>在实际的开发任务中，我们难免会遇到一些难以复现的 bug。使用 log API 能帮助我们理解及处理这类疑难杂症。我们可以在日志记录的众多线索中理解 bug 产生的原因。</p>
 <h3 id="来看新版-log-API"><a href="#来看新版-log-API" class="headerlink" title="来看新版 log API"></a>来看新版 log API</h3><p>我们可以利用 log API 在应用运行时记录下重要的事件。记录下的日志会被操作系统存档，以方便我们之后读取这些日志。由于新版 log API 十分高效，它们可以在应用中广泛地使用，且不会拖慢应用的运行速度。<br>仅需三步，就能在应用中使用 log API：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 第一步：导入 os 模块</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 第二步：创建 Logger 的实例</span><br><span class="line">&#x2F;&#x2F; subsystem 一般为 bundle identifier，以便从众多日志中辨别出：哪些是来自该应用的信息</span><br><span class="line">&#x2F;&#x2F; category 一般表示应用的某个模块，以便进一步辨别出：是来自该应用哪一模块的信息</span><br><span class="line">let logger &#x3D; Logger(subsystem: &quot;com.example.Fruta&quot;, category: &quot;giftcards&quot;)</span><br><span class="line"></span><br><span class="line">func beginTask(url: URL, handler: (Data) -&gt; Void) &#123;</span><br><span class="line">    launchTask(with: url) &#123;</span><br><span class="line">       handler($0)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 第三步：使用 log 函数</span><br><span class="line">    logger.log(&quot;Started a task \(taskId)&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// 第一步：导入 os 模块</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">// 第二步：创建 Logger 的实例</span><br><span class="line">// subsystem 一般为 bundle identifier，以便从众多日志中辨别出：哪些是来自该应用的信息</span><br><span class="line">// category 一般表示应用的某个模块，以便进一步辨别出：是来自该应用哪一模块的信息</span><br><span class="line">let logger = Logger(subsystem: &quot;com.example.Fruta&quot;, category: &quot;giftcards&quot;)</span><br><span class="line"></span><br><span class="line">func beginTask(url: URL, handler: (Data) -&gt; Void) &#123;</span><br><span class="line">    launchTask(with: url) &#123;</span><br><span class="line">       handler($0)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">// 第三步：使用 log 函数</span><br><span class="line">    logger.log(&quot;Started a task \(taskId)&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>调用 log 函数与调用 print 函数有点相似，但其实有着本质上的不同。因为转换成字符串会很慢，所以 log 信息不会完全转换为字符串。编译器和 logging library 合作对此进行了高度优化。在这种优化之下，只有当 log 信息真正显示的时候，才会付出将其转换为字符串的成本。</p>
 <h3 id="新版-log-API-支持众多数据类型"><a href="#新版-log-API-支持众多数据类型" class="headerlink" title="新版 log API 支持众多数据类型"></a>新版 log API 支持众多数据类型</h3><p>log 函数支持很多数据类型，比如数字类型 <code>Int</code> 和 <code>Double</code> 、Objective-C 对象及所有遵循 <code>CustomStringConvertible</code> 协议的类型。当在 log 消息中加入非数字类型的数据时，非数字类型的数据默认会被系统编辑，这是为了确保应用在实机运行时，不会泄漏个人信息。</p>
-<p>看到这里，你可能在心里发问：那当在模拟器上运行时是怎么样的呢？根据 Apple Developer Forums 上的 <a href="https://developer.apple.com/forums/thread/650761" target="_blank" rel="noopener">回答</a>：在 Xcode console 上显示的 log 信息始终不会被系统编辑，也就是说：如果应用从 Xcode 中启动，即使这条 log 信息是非公开的，在 console 中也会完全显示出来，以便开发者调试。</p>
-<p>举个例子，这里是在记录类型为字符串的 <code>accountNumber</code> 变量：<br><img src="https://images.xiaozhuanlan.com/photo/2020/b6a0d63473ca197beabfca7e846475c7.png" alt=""><br>但在输出的 log 信息中，accountNumber 被编辑为 <code>&lt;private&gt;</code>。<br>我们也可以手动控制 log 信息为公开的：<br><img src="https://images.xiaozhuanlan.com/photo/2020/4cc74822a20208d10fe2620bb772884a.png" alt=""></p>
-<h3 id="在终端中收集日志信息"><a href="#在终端中收集日志信息" class="headerlink" title="在终端中收集日志信息"></a>在终端中收集日志信息</h3><p>我们可以使用命令行来收集 log 信息。先把设备连接至电脑，再在终端中输入以下命令：<br><img src="https://images.xiaozhuanlan.com/photo/2020/07c82a637785bc33244ae38f8f580462.png" alt=""><br>使用 <code>log help collect</code>  可以获得该命令行的使用帮助。<br>在收集完之后，在当前路径下会产生一个以 .logarchive 结尾的文件。我们可以使用系统自带的 Console App 浏览该文件。    </p>
-<p>当在 Console App 中浏览这个文件时，常常会在搜索栏输入关键词来过滤无关的信息。这里分享一个小技巧：在搜索栏输入关键词，输入完毕后，点击右下角的保存按钮，可以将关键词保存起来。<br><img src="https://images.xiaozhuanlan.com/photo/2020/a160e515413c73d2d8b9398620e65cee.png" alt=""><br><img src="https://images.xiaozhuanlan.com/photo/2020/63a82bd65ce2500b5a051a0c0592b993.png" alt=""><br><img src="https://images.xiaozhuanlan.com/photo/2020/ec4dbbb4ccac676d69bb6fdbb75c8043.png" alt=""><br>下次搜索时，直接点击 log1 按钮，就自动填充搜索关键词，这样就可以免于重复输入搜索关键字。</p>
+<p>看到这里，你可能在心里发问：那当在模拟器上运行时是怎么样的呢？根据 Apple Developer Forums 上的 <a target="_blank" rel="noopener" href="https://developer.apple.com/forums/thread/650761">回答</a>：在 Xcode console 上显示的 log 信息始终不会被系统编辑，也就是说：如果应用从 Xcode 中启动，即使这条 log 信息是非公开的，在 console 中也会完全显示出来，以便开发者调试。</p>
+<p>举个例子，这里是在记录类型为字符串的 <code>accountNumber</code> 变量：<br><img src="https://images.xiaozhuanlan.com/photo/2020/b6a0d63473ca197beabfca7e846475c7.png"><br>但在输出的 log 信息中，accountNumber 被编辑为 <code>&lt;private&gt;</code>。<br>我们也可以手动控制 log 信息为公开的：<br><img src="https://images.xiaozhuanlan.com/photo/2020/4cc74822a20208d10fe2620bb772884a.png"></p>
+<h3 id="在终端中收集日志信息"><a href="#在终端中收集日志信息" class="headerlink" title="在终端中收集日志信息"></a>在终端中收集日志信息</h3><p>我们可以使用命令行来收集 log 信息。先把设备连接至电脑，再在终端中输入以下命令：<br><img src="https://images.xiaozhuanlan.com/photo/2020/07c82a637785bc33244ae38f8f580462.png"><br>使用 <code>log help collect</code>  可以获得该命令行的使用帮助。<br>在收集完之后，在当前路径下会产生一个以 .logarchive 结尾的文件。我们可以使用系统自带的 Console App 浏览该文件。    </p>
+<p>当在 Console App 中浏览这个文件时，常常会在搜索栏输入关键词来过滤无关的信息。这里分享一个小技巧：在搜索栏输入关键词，输入完毕后，点击右下角的保存按钮，可以将关键词保存起来。<br><img src="https://images.xiaozhuanlan.com/photo/2020/a160e515413c73d2d8b9398620e65cee.png"><br><img src="https://images.xiaozhuanlan.com/photo/2020/63a82bd65ce2500b5a051a0c0592b993.png"><br><img src="https://images.xiaozhuanlan.com/photo/2020/ec4dbbb4ccac676d69bb6fdbb75c8043.png"><br>下次搜索时，直接点击 log1 按钮，就自动填充搜索关键词，这样就可以免于重复输入搜索关键字。</p>
 <h3 id="在-Console-App-中实时检视日志信息"><a href="#在-Console-App-中实时检视日志信息" class="headerlink" title="在 Console App 中实时检视日志信息"></a>在 Console App 中实时检视日志信息</h3><p>使用 <code>log collect</code> 命令，我们可以在应用运行结束后，打开日志文件，阅读日志信息。在应用运行时，我们可以在 Xcode console 阅读日志信息。类似地，在应用运行时（无论是在真机上运行还是在模拟器上运行），我们也可以实时地在 Console App 里阅读日志信息！</p>
-<p>只要在 Console App 内选中正确的设备即可（注：这里的设备包括真机和模拟器）：<br><img src="https://images.xiaozhuanlan.com/photo/2020/c4361dd52595d8e6e6d9455dfbdc2377.png" alt=""></p>
+<p>只要在 Console App 内选中正确的设备即可（注：这里的设备包括真机和模拟器）：<br><img src="https://images.xiaozhuanlan.com/photo/2020/c4361dd52595d8e6e6d9455dfbdc2377.png"></p>
 <p>但在我自己动手尝试之后发现：即使在 Console App 的 Action 菜单里勾选 Include Debug Messages 选项，在 Xcode 中以模拟器的方式启动应用，Console App 里实时显示的日志信息竟然不包含 debug 等级的信息。然而，在 Xcode 中以真机的方式启动应用，Console App 里实时显示的日志信息却包含了 debug 等级的信息！</p>
-<p>这可能是个 bug。我已经在 Apple Developer Forums 提交了 <a href="https://developer.apple.com/forums/thread/652123?login=true" target="_blank" rel="noopener">反馈</a>。</p>
+<p>这可能是个 bug。我已经在 Apple Developer Forums 提交了 <a target="_blank" rel="noopener" href="https://developer.apple.com/forums/thread/652123?login=true">反馈</a>。</p>
 <h3 id="日志等级"><a href="#日志等级" class="headerlink" title="日志等级"></a>日志等级</h3><p>系统提供五种不同的日志记录等级：</p>
 <ol>
 <li>Debug level；在 debug 时使用</li>
@@ -249,18 +275,18 @@
 <li>Error；在程序执行出错时使用</li>
 <li>Fault；在程序出现 bug 时使用</li>
 </ol>
-<h3 id="日志消息持久化"><a href="#日志消息持久化" class="headerlink" title="日志消息持久化"></a>日志消息持久化</h3><p>当我们要在应用运行之后读取日志时，只有那些可以持久化的日志消息才会被读取到。日志消息是否持久保存取决于日志记录等级。<br><img src="https://images.xiaozhuanlan.com/photo/2020/dbeef496a2335f0b8d38e95d3eb180c6.png" alt=""></p>
-<p>日志记录等级各自的性能也有差异：<br><img src="https://images.xiaozhuanlan.com/photo/2020/027ab6a4b8c4d65c1fe59a3be2ab8f61.png" alt=""><br>[10:50 - 12:11]<br>处于 Debug 记录等级的日志信息不作持久化存储的处理。而且，当此等级的日志信息不被串流记录时，它们会直接被忽略掉。在日志信息被忽略掉的情况下，Swift 编译器还能确保在此函数内调用的函数根本不会执行。<br>所以处于 Debug 等级的 log 函数的运行速度是很快的，且在其中调用比较耗时的函数也是安全的。<br><img src="https://images.xiaozhuanlan.com/photo/2020/59567515af81e256684f9af075358521.png" alt=""><br>当真正需要收集 Debug 记录等级的日志时，才会付出对应的开销。更多的情况是，此等级的日志记录会被自动忽略，也就没有那些开销了。</p>
-<p>那什么情况下算是串流记录日志呢？<br><img src="https://images.xiaozhuanlan.com/photo/2020/0ee08db485e4b874c26685ad74dae6d7.png" alt=""></p>
+<h3 id="日志消息持久化"><a href="#日志消息持久化" class="headerlink" title="日志消息持久化"></a>日志消息持久化</h3><p>当我们要在应用运行之后读取日志时，只有那些可以持久化的日志消息才会被读取到。日志消息是否持久保存取决于日志记录等级。<br><img src="https://images.xiaozhuanlan.com/photo/2020/dbeef496a2335f0b8d38e95d3eb180c6.png"></p>
+<p>日志记录等级各自的性能也有差异：<br><img src="https://images.xiaozhuanlan.com/photo/2020/027ab6a4b8c4d65c1fe59a3be2ab8f61.png"><br>[10:50 - 12:11]<br>处于 Debug 记录等级的日志信息不作持久化存储的处理。而且，当此等级的日志信息不被串流记录时，它们会直接被忽略掉。在日志信息被忽略掉的情况下，Swift 编译器还能确保在此函数内调用的函数根本不会执行。<br>所以处于 Debug 等级的 log 函数的运行速度是很快的，且在其中调用比较耗时的函数也是安全的。<br><img src="https://images.xiaozhuanlan.com/photo/2020/59567515af81e256684f9af075358521.png"><br>当真正需要收集 Debug 记录等级的日志时，才会付出对应的开销。更多的情况是，此等级的日志记录会被自动忽略，也就没有那些开销了。</p>
+<p>那什么情况下算是串流记录日志呢？<br><img src="https://images.xiaozhuanlan.com/photo/2020/0ee08db485e4b874c26685ad74dae6d7.png"></p>
 <ol>
 <li>设备连接上 Mac，打开 Console App 时，Console App 会开始串流记录日志。</li>
 <li>在 Xcode 中启动应用时，Xcode debug console 会开始串流记录日志。</li>
 </ol>
 <p>如果在 Console App 的 Action 菜单里勾选 Include Debug Messages 选项，在 .logarchive 文件里也能阅读到 debug 等级的日志信息，也就是说：在这种条件下，debug 等级的日志信息也是可以持久化保存的。</p>
-<h3 id="格式化日志信息"><a href="#格式化日志信息" class="headerlink" title="格式化日志信息"></a>格式化日志信息</h3><p>[12: 15]<br>在 log API 里，我们往往会添加一些应用运行时产生的原始数据。而直接阅读这些原始数据是比较困难的，所以我们可以利用 log API 里的数据格式化功能来提高数据的可读性，且格式化功能对应用的运行时没有影响。<br><img src="https://images.xiaozhuanlan.com/photo/2020/0dc20f6fe73df5ede7da41a4d431b50b.png" alt=""><br>视频中展示的范例使用 log API 记录了 <code>taskID</code>、<code>giftCardID</code>、<code>serverID</code> 和 <code>seconds</code> 这些原始数据。下图是未对原始数据进行格式化的日志信息：<br><img src="https://images.xiaozhuanlan.com/photo/2020/9db29867c97e615668b16d4898564822.png" alt=""><br>可以看出，日志信息的可读性不佳：<code>giftCardID</code> 数据显示的宽度应当统一，这个宽度应为最长的 <code>giftCardID</code> 的长度；<code>seconds</code> 的精度应四舍五入至两位小数，以便比较。<br><img src="https://images.xiaozhuanlan.com/photo/2020/c04b16e62b1bc3d335003d9467820220.png" alt=""><br>对数据使用格式化选项之后，让我们再来看看：<br><img src="https://images.xiaozhuanlan.com/photo/2020/442461bcec75a0f3be2d52cf31179c8e.png" alt=""><br>格式化后的日志信息可读性大大提高，甚至可以直接拷贝数据到 Numbers 里，对数据作可视化分析：<br><img src="https://images.xiaozhuanlan.com/photo/2020/088cc35219071831472ded6167b4490a.png" alt=""><br>除了上述提到的几个数据格式化的选项以外，还有很多其他的选项：<br><img src="https://images.xiaozhuanlan.com/photo/2020/d737f2b72636a3f0611d9ee2d121e013.png" alt=""></p>
-<h3 id="保护日志信息安全"><a href="#保护日志信息安全" class="headerlink" title="保护日志信息安全"></a>保护日志信息安全</h3><p>当应用下载安装到用户手机上时，日志记录仍会进行。只要把有安装该应用的设备使用线缆连接到电脑上，任何人都可以查看日志信息，所以<strong>有关个人信息的日志绝对不能被标记为</strong> <code>.public</code>。<br>但是当我们需要比较两条非公开的信息是否一样时，这时候该怎么办呢？log API 还提供一种 equality-preserving hash 方法。在经过处理之后，不会显示真正的数据，但也能让我们判断这两条信息是否一样。<br><img src="https://images.xiaozhuanlan.com/photo/2020/d8835536fe012a79ade4f8c855c9904e.png" alt=""></p>
-<h3 id="API-可用性"><a href="#API-可用性" class="headerlink" title="API 可用性"></a>API 可用性</h3><p><img src="https://images.xiaozhuanlan.com/photo/2020/d55466a8b3e1be6f48331b4520724b3f.png" alt=""><br>最新版的 log 函数可以使用字符串插值，而旧版只能使用格式占位符：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">let userName &#x3D; &quot;Jack&quot;</span><br><span class="line">let userID &#x3D; &quot;15030225&quot;</span><br><span class="line">let balance &#x3D; 123</span><br><span class="line"></span><br><span class="line">override func viewDidLoad() &#123;</span><br><span class="line">   super.viewDidLoad()</span><br><span class="line"></span><br><span class="line">   &#x2F;&#x2F; 旧版的写法</span><br><span class="line">   os_log(&quot;balance: %&#123;private&#125;d&quot;, log: .demo, type: .info, balance)</span><br><span class="line">   os_log(&quot;user: %&#123;private&#125;@&quot;, log: .demo, type: .info, userName)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">extension OSLog &#123;</span><br><span class="line">    static let demo &#x3D; OSLog(subsystem: &quot;demo&quot;, category: &quot;sunset&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="格式化日志信息"><a href="#格式化日志信息" class="headerlink" title="格式化日志信息"></a>格式化日志信息</h3><p>[12: 15]<br>在 log API 里，我们往往会添加一些应用运行时产生的原始数据。而直接阅读这些原始数据是比较困难的，所以我们可以利用 log API 里的数据格式化功能来提高数据的可读性，且格式化功能对应用的运行时没有影响。<br><img src="https://images.xiaozhuanlan.com/photo/2020/0dc20f6fe73df5ede7da41a4d431b50b.png"><br>视频中展示的范例使用 log API 记录了 <code>taskID</code>、<code>giftCardID</code>、<code>serverID</code> 和 <code>seconds</code> 这些原始数据。下图是未对原始数据进行格式化的日志信息：<br><img src="https://images.xiaozhuanlan.com/photo/2020/9db29867c97e615668b16d4898564822.png"><br>可以看出，日志信息的可读性不佳：<code>giftCardID</code> 数据显示的宽度应当统一，这个宽度应为最长的 <code>giftCardID</code> 的长度；<code>seconds</code> 的精度应四舍五入至两位小数，以便比较。<br><img src="https://images.xiaozhuanlan.com/photo/2020/c04b16e62b1bc3d335003d9467820220.png"><br>对数据使用格式化选项之后，让我们再来看看：<br><img src="https://images.xiaozhuanlan.com/photo/2020/442461bcec75a0f3be2d52cf31179c8e.png"><br>格式化后的日志信息可读性大大提高，甚至可以直接拷贝数据到 Numbers 里，对数据作可视化分析：<br><img src="https://images.xiaozhuanlan.com/photo/2020/088cc35219071831472ded6167b4490a.png"><br>除了上述提到的几个数据格式化的选项以外，还有很多其他的选项：<br><img src="https://images.xiaozhuanlan.com/photo/2020/d737f2b72636a3f0611d9ee2d121e013.png"></p>
+<h3 id="保护日志信息安全"><a href="#保护日志信息安全" class="headerlink" title="保护日志信息安全"></a>保护日志信息安全</h3><p>当应用下载安装到用户手机上时，日志记录仍会进行。只要把有安装该应用的设备使用线缆连接到电脑上，任何人都可以查看日志信息，所以<strong>有关个人信息的日志绝对不能被标记为</strong> <code>.public</code>。<br>但是当我们需要比较两条非公开的信息是否一样时，这时候该怎么办呢？log API 还提供一种 equality-preserving hash 方法。在经过处理之后，不会显示真正的数据，但也能让我们判断这两条信息是否一样。<br><img src="https://images.xiaozhuanlan.com/photo/2020/d8835536fe012a79ade4f8c855c9904e.png"></p>
+<h3 id="API-可用性"><a href="#API-可用性" class="headerlink" title="API 可用性"></a>API 可用性</h3><p><img src="https://images.xiaozhuanlan.com/photo/2020/d55466a8b3e1be6f48331b4520724b3f.png"><br>最新版的 log 函数可以使用字符串插值，而旧版只能使用格式占位符：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">let userName = &quot;Jack&quot;</span><br><span class="line">let userID = &quot;15030225&quot;</span><br><span class="line">let balance = 123</span><br><span class="line"></span><br><span class="line">override func viewDidLoad() &#123;</span><br><span class="line">   super.viewDidLoad()</span><br><span class="line"></span><br><span class="line">   // 旧版的写法</span><br><span class="line">   os_log(&quot;balance: %&#123;private&#125;d&quot;, log: .demo, type: .info, balance)</span><br><span class="line">   os_log(&quot;user: %&#123;private&#125;@&quot;, log: .demo, type: .info, userName)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">extension OSLog &#123;</span><br><span class="line">    static let demo = OSLog(subsystem: &quot;demo&quot;, category: &quot;sunset&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><ul>
 <li>使用新版 log API 有助于帮助开发者理解难以复现的 bug。</li>
@@ -274,189 +300,66 @@
     
     
 
-      <footer class="post-footer">
+    <footer class="post-footer">
 
         
 
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="iOS 多线程学习笔记">
-      <i class="fa fa-chevron-left"></i> iOS 多线程学习笔记
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/11/27/how-to-design-rdt/" rel="next" title="如何设计一个可靠数据传输协议？">
-      如何设计一个可靠数据传输协议？ <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="iOS 多线程学习笔记">
+                  <i class="fa fa-angle-left"></i> iOS 多线程学习笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/27/how-to-design-rdt/" rel="next" title="如何设计一个可靠数据传输协议？">
+                  如何设计一个可靠数据传输协议？ <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
           </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概括"><span class="nav-number">1.</span> <span class="nav-text">概括</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#来看新版-log-API"><span class="nav-number">2.</span> <span class="nav-text">来看新版 log API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新版-log-API-支持众多数据类型"><span class="nav-number">3.</span> <span class="nav-text">新版 log API 支持众多数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在终端中收集日志信息"><span class="nav-number">4.</span> <span class="nav-text">在终端中收集日志信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在-Console-App-中实时检视日志信息"><span class="nav-number">5.</span> <span class="nav-text">在 Console App 中实时检视日志信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志等级"><span class="nav-number">6.</span> <span class="nav-text">日志等级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志消息持久化"><span class="nav-number">7.</span> <span class="nav-text">日志消息持久化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#格式化日志信息"><span class="nav-number">8.</span> <span class="nav-text">格式化日志信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#保护日志信息安全"><span class="nav-number">9.</span> <span class="nav-text">保护日志信息安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API-可用性"><span class="nav-number">10.</span> <span class="nav-text">API 可用性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结语"><span class="nav-number">11.</span> <span class="nav-text">结语</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Sunset Wan</p>
-  <div class="site-description" itemprop="description"></div>
+    </footer>
+  </article>
 </div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">12</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">7</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
+
+
+
+
+
+
 </div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
-      </span>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
   </div>
-
-
-
-      </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
 
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
+  </footer>
 
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
   
-  &copy; 
-  <span itemprop="copyrightYear">2024</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
   </div>
 
-        
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
 
 </body>
 </html>
