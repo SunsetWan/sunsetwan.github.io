@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="前阵子遇到一个很奇怪的 BUG：用 NavigationStack push 一个 View，CPU 使用率竟然冲上 100 %！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 WWDC 21 Demystify SwiftUI。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SwiftUI View 的 Identity 与 Lifetime">
+<meta property="og:url" content="https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/index.html">
+<meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="前阵子遇到一个很奇怪的 BUG：用 NavigationStack push 一个 View，CPU 使用率竟然冲上 100 %！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 WWDC 21 Demystify SwiftUI。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg">
+<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg">
+<meta property="article:published_time" content="2025-12-01T23:33:33.000Z">
+<meta property="article:modified_time" content="2025-12-01T15:35:37.146Z">
+<meta property="article:author" content="Sunset Wan">
+<meta property="article:tag" content="SwiftUI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg">
+
+
+<link rel="canonical" href="https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/","path":"2025/12/01/SwiftUI_Identity_lifetime/","title":"SwiftUI View 的 Identity 与 Lifetime"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SwiftUI View 的 Identity 与 Lifetime | 日落大道</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">日落大道</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Identity"><span class="nav-number">1.</span> <span class="nav-text">Identity</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E4%B8%80%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E7%BB%BF%E8%89%B2%E7%88%AA%E5%8D%B0%E6%B6%88%E5%A4%B1%E5%90%8E%E5%86%8D%E5%87%BA%E7%8E%B0%E7%BA%A2%E8%89%B2%E7%88%AA%E5%8D%B0%E5%91%A2%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">问题一：为什么是绿色爪印消失后再出现红色爪印呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E4%BA%8C%EF%BC%9A%E5%8D%95%E4%B8%AA%E7%88%AA%E5%8D%B0%E7%9B%B4%E6%8E%A5%E4%BB%8E%E7%BB%BF%E8%89%B2%E8%BF%87%E6%B8%A1%E5%88%B0%E7%BA%A2%E8%89%B2%E5%BA%94%E8%AF%A5%E4%BC%9A%E6%9B%B4%E4%B8%9D%E6%BB%91%EF%BC%8C%E6%88%91%E8%A6%81%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">问题二：单个爪印直接从绿色过渡到红色应该会更丝滑，我要怎么做？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifetime"><span class="nav-number">2.</span> <span class="nav-text">Lifetime</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dependency"><span class="nav-number">3.</span> <span class="nav-text">Dependency</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E9%A1%BE"><span class="nav-number">4.</span> <span class="nav-text">回顾</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sunset Wan</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SwiftUI View 的 Identity 与 Lifetime | 日落大道">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SwiftUI View 的 Identity 与 Lifetime
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-01 23:33:33 / 修改时间：15:35:37" itemprop="dateCreated datePublished" datetime="2025-12-01T23:33:33+00:00">2025-12-01</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>前阵子遇到一个很奇怪的 BUG：用 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/SwiftUI/NavigationStack">NavigationStack</a> push 一个 View，CPU 使用率竟然冲上 100 %！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">WWDC 21 Demystify SwiftUI</a>。 <span id="more"></span></p>
+<p>当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？</p>
+<ol>
+<li>Identity—是 SwiftUI 用来区分视图元素的“身份证”</li>
+<li>Lifetime—是 SwiftUI 用来管理视图与其相关状态的生命周期</li>
+<li>Dependency—是 SwiftUI 用来决定视图为何以及何时需要更新</li>
+</ol>
+<h2 id="Identity"><a href="#Identity" class="headerlink" title="Identity"></a>Identity</h2><p>SwiftUI 中 Identity 分为两种：Explicit Identity 和 Structural Identity。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="alt text"></p>
+<p>当遇到两个外表很相似的双胞胎，我们该如何区分？对，可以通过姓名来区分！这就是 Explicit Identity。</p>
+<p>我查了点资料，我们仅知道这对著名的双胞胎姐妹是格雷迪双胞胎姐妹，并不知道各自的姓名。那我问你：你觉得哪个更恐怖一点？我是觉得左边那位更恐怖一些。<br>通过她俩的相对位置来区分：一位是站在左边，另一位是站在右边。这就是 Structural Identity。</p>
+<p>接下来，我们来看一个更实际的例子：</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="02.jpg"></p>
+<p>左边的代码在 SwiftUI “眼里”当条件为真时显示 <code>AdoptionDirectory</code> 视图，条件为假时显示 <code>DogList</code> 视图。只要条件恒定，SwiftUI 能知道哪个是“真分支”哪个是“假分支”。</p>
+<p>View body 中的 if 语句在 SwiftUI 里会被编译成 _ConditionalContent&lt;TrueView, FalseView&gt; 这样的泛型类型，TrueView 和 FalseView 是两个分支的具体类型。这个转换由 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/swiftui/viewbuilder">ViewBuilder</a> 完成。<br>View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body 里的条件逻辑拼成一个统一的泛型视图类型。</p>
+<p>Structural Identity 是 Swift 通过视图元素在视图层级中的类型与位置来识别视图身份的方法。</p>
+<p>我们可以通过点击事件来更新 <code>dog.isGood</code> 状态，从而触发 <code>pawView</code> 的刷新。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ViewBuilder</span></span><br><span class="line"><span class="keyword">var</span> pawView: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> dog.isGood &#123;</span><br><span class="line">        <span class="type">PawView</span>(tint: .green)</span><br><span class="line">            .padding(.top, <span class="number">32</span>)</span><br><span class="line">        <span class="type">Spacer</span>()</span><br><span class="line">            .padding(.bottom, <span class="number">32</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="type">Spacer</span>()</span><br><span class="line">        <span class="type">PawView</span>(tint: .red)</span><br><span class="line">            .padding(.bottom, <span class="number">32</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="Simulator Screen Recording - iPhone 17 - 2025-11-30 at 12.53.09.gif"></p>
+<h3 id="问题一：为什么是绿色爪印消失后再出现红色爪印呢？"><a href="#问题一：为什么是绿色爪印消失后再出现红色爪印呢？" class="headerlink" title="问题一：为什么是绿色爪印消失后再出现红色爪印呢？"></a>问题一：为什么是绿色爪印消失后再出现红色爪印呢？</h3><p>因为 SwiftUI 是通过 Structural Identity 来区分绿色爪印和红色爪印，当 <code>dog.isGood</code> 变化时，SwiftUI 认为它需要销毁绿色爪印视图和创建红色爪印视图。</p>
+<p>不难得出：视图的 Identity 发生变化后，SwiftUI 会认为它需要销毁旧视图并创建新视图。</p>
+<h3 id="问题二：单个爪印直接从绿色过渡到红色应该会更丝滑，我要怎么做？"><a href="#问题二：单个爪印直接从绿色过渡到红色应该会更丝滑，我要怎么做？" class="headerlink" title="问题二：单个爪印直接从绿色过渡到红色应该会更丝滑，我要怎么做？"></a>问题二：单个爪印直接从绿色过渡到红色应该会更丝滑，我要怎么做？</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> pawView: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">PawView</span>(tint: dog.isGood <span class="operator">?</span> .green : .red)</span><br><span class="line">        .padding(.top, <span class="number">32</span>)</span><br><span class="line">        .padding(.bottom, <span class="number">32</span>)</span><br><span class="line">        .frame(maxHeight: .infinity, alignment: dog.isGood <span class="operator">?</span> .top : .bottom)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以把 <code>pawView</code> 里的 if 分支拿掉，单个 <code>PawView</code> 的 Structural Identity 就保持不变；<code>dog.isGood</code> 变化时，只是同一个视图的 tintColor 和位置在变，状态与动画都能连续。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="Simulator Screen Recording - iPhone 17 - 2025-11-30 at 13.24.36.gif"></p>
+<h2 id="Lifetime"><a href="#Lifetime" class="headerlink" title="Lifetime"></a>Lifetime</h2><p>我们给 <code>PawView</code> 加上 <code>PawViewState</code> 状态，来看看 Structural Identity 的变化对视图状态的影响</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PawViewState</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> id: <span class="type">UUID</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">id</span>: <span class="type">UUID</span> <span class="operator">=</span> <span class="type">UUID</span>()) &#123;</span><br><span class="line">        <span class="keyword">self</span>.id <span class="operator">=</span> id</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;PawViewState(<span class="subst">\(id)</span> init at <span class="subst">\(Date())</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">deinit</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;PawViewState(<span class="subst">\(id)</span> deinit at <span class="subst">\(Date())</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">PawView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> tint: <span class="type">Color</span></span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> state: <span class="type">PawViewState</span> <span class="operator">=</span> .<span class="keyword">init</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Circle</span>()</span><br><span class="line">            .fill(tint)</span><br><span class="line">            .frame(width: <span class="number">180</span>, height: <span class="number">180</span>)</span><br><span class="line">            .overlay(</span><br><span class="line">                <span class="type">Image</span>(systemName: <span class="string">&quot;pawprint.fill&quot;</span>)</span><br><span class="line">                    .resizable()</span><br><span class="line">                    .scaledToFit()</span><br><span class="line">                    .foregroundColor(.white)</span><br><span class="line">                    .padding(<span class="number">44</span>)</span><br><span class="line">            )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在我触发两次点击事件（Good dog → Bad dog, Bad dog → Good dog）后，Xcode console 输出如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">PawViewState</span>(39BFC159<span class="operator">-</span><span class="type">AE06</span><span class="operator">-</span>45A5<span class="operator">-</span><span class="number">9083</span><span class="operator">-</span><span class="type">B1C5BDF053C3</span> <span class="keyword">init</span> at <span class="number">2025</span><span class="operator">-</span><span class="number">11</span><span class="operator">-</span><span class="number">30</span> <span class="number">05</span>:<span class="number">42</span>:<span class="number">02</span> <span class="operator">+</span><span class="number">0000</span> <span class="comment">// Good dog 1 init</span></span><br><span class="line"><span class="type">PawViewState</span>(5FB6A6D4<span class="operator">-</span><span class="number">1E81</span><span class="operator">-</span>43A1<span class="operator">-</span>8AB1<span class="operator">-</span>04C2DEE8455A <span class="keyword">init</span> at <span class="number">2025</span><span class="operator">-</span><span class="number">11</span><span class="operator">-</span><span class="number">30</span> <span class="number">05</span>:<span class="number">42</span>:<span class="number">05</span> <span class="operator">+</span><span class="number">0000</span> <span class="comment">// Bad dog 1 init</span></span><br><span class="line"><span class="type">PawViewState</span>(39BFC159<span class="operator">-</span><span class="type">AE06</span><span class="operator">-</span>45A5<span class="operator">-</span><span class="number">9083</span><span class="operator">-</span><span class="type">B1C5BDF053C3</span> <span class="keyword">deinit</span> at <span class="number">2025</span><span class="operator">-</span><span class="number">11</span><span class="operator">-</span><span class="number">30</span> <span class="number">05</span>:<span class="number">42</span>:<span class="number">06</span> <span class="operator">+</span><span class="number">0000</span> <span class="comment">// Good dog 1 deinit</span></span><br><span class="line"><span class="type">PawViewState</span>(33E05E98<span class="operator">-</span><span class="number">2553</span><span class="operator">-</span>4C8D<span class="operator">-</span>81B0<span class="operator">-</span><span class="type">A56E2E353962</span> <span class="keyword">init</span> at <span class="number">2025</span><span class="operator">-</span><span class="number">11</span><span class="operator">-</span><span class="number">30</span> <span class="number">05</span>:<span class="number">42</span>:<span class="number">07</span> <span class="operator">+</span><span class="number">0000</span> <span class="comment">// Good dog 2 init</span></span><br><span class="line"><span class="type">PawViewState</span>(5FB6A6D4<span class="operator">-</span><span class="number">1E81</span><span class="operator">-</span>43A1<span class="operator">-</span>8AB1<span class="operator">-</span>04C2DEE8455A <span class="keyword">deinit</span> at <span class="number">2025</span><span class="operator">-</span><span class="number">11</span><span class="operator">-</span><span class="number">30</span> <span class="number">05</span>:<span class="number">42</span>:<span class="number">08</span> <span class="operator">+</span><span class="number">0000</span> <span class="comment">// Bad dog 1 deinit</span></span><br></pre></td></tr></table></figure>
+
+<p>从上面的例子中总结：</p>
+<ol>
+<li>视图的 Identity 发生变化后，SwiftUI 会认为它需要销毁旧视图并创建新视图。也就是说，视图的生命周期是否延续取决于 Identity 是否保持不变。</li>
+<li>SwiftUI 里状态的生命周期和视图的生命周期是绑定在一起的。也就是说，一个视图被创建时状态才会被创建，视图被销毁时状态就随之消失。</li>
+</ol>
+<p>因此，可得：</p>
+<p>SwiftUI 把视图的“本质”归结为它持有的状态，并把这份状态和视图的身份绑定在一起。<br>身份不变，状态就被保留下来；身份一变，SwiftUI 就当成全新的视图，状态也重建。这样能清晰地区分：哪些状态应该延续（身份稳定的视图），哪些状态应该重置（身份变化的视图）</p>
+<p>再看一个例子，来辅助理解上面的总结。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="image.png"></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Pet</span>: <span class="title class_ inherited__">Identifiable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> kind: <span class="type">Animal</span></span><br><span class="line">    <span class="keyword">var</span> id: <span class="type">UUID</span> &#123; <span class="comment">// 不稳定的 identity</span></span><br><span class="line">        <span class="type">UUID</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FavoritePetsView</span>: <span class="title class_ inherited__">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> pets: [<span class="type">Pet</span>]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">pets</span>: [<span class="type">Pet</span>]) &#123;</span><br><span class="line">        <span class="keyword">self</span>.pets <span class="operator">=</span> pets</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">NavigationStack</span> &#123;</span><br><span class="line">            <span class="type">List</span> &#123;</span><br><span class="line">                <span class="type">ForEach</span>(pets) &#123; pet <span class="keyword">in</span></span><br><span class="line">                    <span class="type">PetRow</span>(pet: pet)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            .listStyle(.plain)</span><br><span class="line">            .navigationTitle(<span class="string">&quot;Favorite Pets&quot;</span>)</span><br><span class="line">            .toolbar &#123;</span><br><span class="line">                <span class="type">ToolbarItem</span>(placement: .topBarTrailing) &#123;</span><br><span class="line">                    <span class="type">Button</span>(<span class="string">&quot;Add&quot;</span>) &#123;</span><br><span class="line">                        addTomCat()</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">addTomCat</span>() &#123;</span><br><span class="line">        <span class="keyword">let</span> newPet <span class="operator">=</span> <span class="type">Pet</span>(name: <span class="string">&quot;汤姆&quot;</span>, kind: .cat)</span><br><span class="line">        pets.insert(newPet, at: <span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当点击 add 按钮时，“汤姆”猫出现在 List 的首位。让我们用 SwiftUI Instruments 来查看当前视图的更新次数</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="03.jpg"></p>
+<p>因为 PetRow Identity 的不稳定性，导致 <code>PetRow</code> 的 body 被执行多次。如果放在一个大型项目中，可能会导致 App 出现卡顿。</p>
+<p>使用计算属性生成 UUID 的方式遵循 <code>Identifiable</code> 会导致视图 Identity 不稳定，所以作如下修改，以提供稳定的 Identity。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Pet</span>: <span class="title class_ inherited__">Identifiable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> kind: <span class="type">Animal</span></span><br><span class="line">    <span class="keyword">let</span> id <span class="operator">=</span> <span class="type">UUID</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以再次运行 SwiftUI Instruments 来查看当前视图的更新次数：</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="04.jpg"></p>
+<p>PetRow 的 body 被执行的次数锐减至 6 次！原本已有 5 个宠物，再加上新增的“汤姆”猫，总计 6 次，与预期相符。</p>
+<p>再看一个稍微复杂一点点的例子</p>
+<p>Treat Jar View 展示的是给宠物准备的零食。如果有零食过期，那就置灰。</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="08.png"></p>
+<p>我们借助于 <code>ExpirationModifier</code> 来实现置灰的效果。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">NavigationStack</span> &#123;</span><br><span class="line">        <span class="type">ScrollView</span> &#123;</span><br><span class="line">            <span class="type">LazyVGrid</span>(columns: columns, spacing: <span class="number">16</span>) &#123;</span><br><span class="line">                <span class="type">ForEach</span>(treats, id: \.serialNumber) &#123; treat <span class="keyword">in</span></span><br><span class="line">                    <span class="type">TreatCell</span>(treat: treat)</span><br><span class="line">                        .modifier(<span class="type">ExpirationModifier</span>(date: treat.expiryDate, referenceDate: referenceDate))</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            .padding(<span class="number">16</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        .background(<span class="type">Color</span>(.systemGroupedBackground))</span><br><span class="line">        .navigationTitle(<span class="string">&quot;Treat Jar&quot;</span>)</span><br><span class="line">        .toolbar &#123;</span><br><span class="line">            <span class="type">ToolbarItem</span>(placement: .topBarLeading) &#123;</span><br><span class="line">                <span class="type">Button</span>(referenceDateIsExpired <span class="operator">?</span> <span class="string">&quot;Restore&quot;</span> : <span class="string">&quot;Expire&quot;</span>) &#123;</span><br><span class="line">                    toggleExpirationSimulation()</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ExpirationModifier</span>: <span class="title class_ inherited__">ViewModifier</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> date: <span class="type">Date</span></span><br><span class="line">    <span class="keyword">var</span> referenceDate: <span class="type">Date</span> <span class="operator">=</span> .now</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">body</span>(<span class="params">content</span>: <span class="type">Content</span>) -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> date <span class="operator">&lt;</span> referenceDate &#123;</span><br><span class="line">            content.opacity(<span class="number">0.3</span>)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            content</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时执行点击左上角 Expire 按钮来模拟所有的零食过期。SwiftUI Instruments 给出的视图更新次数如下：</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="06.jpg"></p>
+<p>代表两种零食的 TreatCell 创建了两次，但实际上零食过期后，只需置灰即可，不需要重新创建 TreatCell。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ExpirationModifier</span>: <span class="title class_ inherited__">ViewModifier</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> date: <span class="type">Date</span></span><br><span class="line">    <span class="keyword">var</span> referenceDate: <span class="type">Date</span> <span class="operator">=</span> .now</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">body</span>(<span class="params">content</span>: <span class="type">Content</span>) -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> date <span class="operator">&lt;</span> referenceDate &#123; <span class="comment">// Structural Identity</span></span><br><span class="line">            content.opacity(<span class="number">0.3</span>)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            content</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用了 <code>ExpirationModifier</code> 之后， <code>ForEach</code> 中的 <code>Content View</code> 的 Identity 属于 Structural Identity</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ForEach 中的 Content View</span></span><br><span class="line"><span class="type">TreatCell</span>(treat: treat)</span><br><span class="line"> .modifier(<span class="type">ExpirationModifier</span>(date: treat.expiryDate, referenceDate: referenceDate))</span><br></pre></td></tr></table></figure>
+
+<p>根据之前的经验，我们可以通过这种方式来优化，即去除 if 分支：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ExpirationModifier</span>: <span class="title class_ inherited__">ViewModifier</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> date: <span class="type">Date</span></span><br><span class="line">    <span class="keyword">var</span> referenceDate: <span class="type">Date</span> <span class="operator">=</span> .now</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">body</span>(<span class="params">content</span>: <span class="type">Content</span>) -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        content.opacity(date <span class="operator">&lt;</span> referenceDate <span class="operator">?</span> <span class="number">0.3</span> : <span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行 SwiftUI Instruments，再次点击左上角 Expire 按钮，可以看到：</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="07.jpg"></p>
+<p>TreatCell.body 没有再被执行过了！所以在 View 中使用 if 分支时，可以停下来问自己：我是要多个视图还是某一视图的两种状态呢？引入不必要的分支，可能会导致性能下降，甚至视图的状态丢失。</p>
+<h2 id="Dependency"><a href="#Dependency" class="headerlink" title="Dependency"></a>Dependency</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="09.jpg"></p>
+<p>（本节不是本文讨论的重点，于是我放上 AI 对此的总结）</p>
+<ul>
+<li>依赖的含义：视图的输入（属性、@State&#x2F;@Binding&#x2F;@Environment&#x2F;ObservableObject 等）。依赖一旦<br>变更，对应视图就必须重新计算 body。</li>
+<li>依赖关系的结构：虽然视图层级像树，但同一个依赖可被多处使用，整体更像一张依赖图。某个依赖变<br>化时，SwiftUI 只让依赖它的视图重建，而不是全量刷新。</li>
+<li>身份在其中的作用：视图的身份（显式 id 或结构身份）决定依赖变化如何被路由到具体节点；身份稳<br>定，就能更好地保持状态和避免多余重建。</li>
+<li>选择稳定且唯一的标识：数据驱动的视图（ForEach 等）需要稳定、唯一的 id。随机 id 或数组下标会让身份漂移，造成闪烁、错误动画或状态丢失。</li>
+<li>精简条件分支：多余的 if&#x2F;switch 会制造额外的身份节点，导致重复重建。能用“惰性”修饰符（如条件<br>放进 opacity，1 时无影响）折叠条件时，更新会更集中高效。</li>
+<li>更新流程心智模型：依赖变化 → 标记相关视图 → 重新求 body 生成新值；值本身是短暂对比用的，持<br>久状态与视图身份绑定并随身份存续。</li>
+</ul>
+<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>还记得文章开头我提及的奇怪 BUG 吗？这是能复现的 demo，而且在 iOS 17.1.2 上能稳定复现。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typealias</span> <span class="type">DetailState</span> <span class="operator">=</span> <span class="type">DetailViewModel</span>.<span class="type">State</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">DetailViewModel</span>: <span class="title class_ inherited__">ObservableObject</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">State</span>: <span class="title class_ inherited__">Identifiable</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> title: <span class="type">String</span></span><br><span class="line">        <span class="keyword">let</span> subtitle: <span class="type">String</span></span><br><span class="line">        <span class="keyword">var</span> text: <span class="type">String</span> <span class="operator">=</span> <span class="string">&quot;123&quot;</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line">        <span class="keyword">var</span> id: <span class="type">UUID</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> newID <span class="operator">=</span> <span class="type">UUID</span>()</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;🆔🆔🆔 [DetailState] id accessed, generated: <span class="subst">\(newID)</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">return</span> newID</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Solution: Use stable explicit identity</span></span><br><span class="line"><span class="comment">//        let id = UUID()</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> state: <span class="type">State</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// MARK: - Textfield logic</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">state</span>: <span class="type">State</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.state <span class="operator">=</span> state</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心就在于通过 Navigator push Detail 页面时，DetailState 的 explicit identity 不稳定。每次求值 <code>body</code> 都会重新访问 <code>State.id</code>，计算属性每次生成新的 UUID，导致 <code>Identifiable</code> 身份变化。SwiftUI 认为当前 NavigationStack 顶端元素变了，于是销毁旧的 Detail 页面并创建新的 Detail 页面。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Button</span>(<span class="string">&quot;Show Detail&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> state: <span class="type">DetailState</span> <span class="operator">=</span> .<span class="keyword">init</span>(title: <span class="string">&quot;Detail Title&quot;</span>, subtitle: <span class="string">&quot;Detail subtitle&quot;</span>)</span><br><span class="line">    navigator.push(to: .detail(state))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行 Swift Instruments 来看看视图的变化次数：</p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="10.jpg"></p>
+<p>从上图可以看出：在短短几秒之内，DetailView 更新了将近 5000 次，SwiftUI 内部的 NavigationStack 更新了将近一万五千次，整个 app 出现了严重的卡顿！</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SwiftUI/" rel="tag"># SwiftUI</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/06/23/Swift-Protocol-Witness/" rel="prev" title="Protocol Witness in Swift">
+                  <i class="fa fa-angle-left"></i> Protocol Witness in Swift
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
