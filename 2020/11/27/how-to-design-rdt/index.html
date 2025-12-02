@@ -51,7 +51,7 @@
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064598516215.jpg">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/27/16064603771359.jpg">
 <meta property="article:published_time" content="2020-11-27T15:38:37.000Z">
-<meta property="article:modified_time" content="2025-12-01T15:35:37.147Z">
+<meta property="article:modified_time" content="2025-12-02T00:16:51.726Z">
 <meta property="article:author" content="Sunset Wan">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg">
@@ -238,7 +238,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-01 15:35:37" itemprop="dateModified" datetime="2025-12-01T15:35:37+00:00">2025-12-01</time>
+      <time title="修改时间：2025-12-02 00:16:51" itemprop="dateModified" datetime="2025-12-02T00:16:51+00:00">2025-12-02</time>
     </span>
 
   
@@ -257,7 +257,7 @@
 <h2 id="Reliable-Data-Transfer-1-0"><a href="#Reliable-Data-Transfer-1-0" class="headerlink" title="Reliable Data Transfer 1.0"></a>Reliable Data Transfer 1.0</h2><p>这里补充个关于有限状态机的小知识：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063107838650.jpg"></p>
 <p>在 1.0 版本里，假设要打造的可靠传输管道也是建立在一个可靠传输管道之上的。</p>
 <p>我们可以用有限状态机来表示 sender 和 receiver：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/25/16063091894453.jpg"></p>
-<p><code>rdt 1.0</code> sender 在收到发送数据的事件（<code>rdt_send(data)</code>）后，把数据分割为一个一个 <code>packet</code>，并开始发送数据。<br><code>rdt 1.0</code> receiver 在收到接收数据的事件（<code>rdt_rcv(packet)</code>）后，从 <code>packet</code> 中提取数据，并把数据发给上层。<br>在多种假设之下，<code>rdt 1.0</code> 的设计很简单，也很可靠。这里也隐含了 receiver的接收速度能与 sender 的发送速度同步。</p>
+<p><code>rdt 1.0</code> sender 在收到发送数据的事件（<code>rdt_send(data)</code>）后，把数据分割为一个一个 <code>packet</code>，并开始发送数据。<br><code>rdt 1.0</code> receiver 在收到接收数据的事件（<code>rdt_rcv(packet)</code>）后，从 <code>packet</code> 中提取数据，并把数据发给上层。<br>在多种假设之下，<code>rdt 1.0</code> 的设计很简单，也很可靠。这里也隐含了 receiver 的接收速度能与 sender 的发送速度同步。</p>
 <h2 id="Reliable-Data-Transfer-2-0"><a href="#Reliable-Data-Transfer-2-0" class="headerlink" title="Reliable Data Transfer 2.0"></a>Reliable Data Transfer 2.0</h2><p>不得不说，<code>rdt 1.0</code> 的实现条件极为苛刻，过于理想了。更加具有现实意义的是：传输过程中的数据可能会被“污染”，如位翻转。起初的假设由三个变为两个了。<br>再进一步讨论 <code>rdt 2.0</code> 的细节之前，让我们设想一个生活中常出现的场景：张三正在跟李四打电话。当李四说完一个事之后，张三清楚听到之后会回复一句“好的”。但当张三未能听清楚李四所说的事情时，张三会回复一句“能不能再说一遍？我没听清楚”。<br>“好的”可以视为 <strong>positive acknowledgments</strong>，“能不能再说一遍？我没听清楚”可以视为 <strong>negative acknowledgments</strong>。Receiver（张三）可以利用这两种信息使 sender（李四）明白：哪条信息已经传达到位和哪条信息需要重传。在计算机网络的范畴内，基于类似重传机制的可靠数据传输协议被称为<strong>自动重复请求协议</strong>（Automatic Repeat reQuest protocols）。<br>那么如何实现 ARQ 这个协议呢？</p>
 <ol>
 <li>receiver 要有检测数据是否出错（被污染）的能力，如添加校验和（checksum）字段。</li>
@@ -273,8 +273,8 @@
 </ol>
 <p>我们选择第二种方法，对于<strong>重复数据包</strong>这个新问题，有个简单的解决方法：在数据包首部添加<strong>序列号</strong>字段。这样，receiver 可以利用数据包的序列号来判断下一个到来的数据包是新的数据还是重传的旧数据了！<br><code>rdt 2.0</code> 作为停止等待协议的一个简单实现，序列号字段长为 1 位就够了。<br>目前仍是假设这个数据传输管道是不会传丢数据的，所以 ACK&#x2F;NAK 数据包是无需使用序列号来表示它们是对某个数据包的回应。</p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063659653383.jpg"><br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063659875543.jpg"></p>
-<h2 id="Reliable-Data-Transfer-2-2"><a href="#Reliable-Data-Transfer-2-2" class="headerlink" title="Reliable Data Transfer 2.2"></a>Reliable Data Transfer 2.2</h2><p><code>rdt 2.1</code> 在 sender 和 receiver 均使用了 ACK&#x2F;NAK。当失序数据到达 receiver 时，receiver 发送 ACK。当被“污染”的数据到达 receiver 时，receiver 发送 NAK。我们尝试换一种思路：当被”污染“的数据到达 receiver 时，receiver不发送 NAK，取而代之的是发送一个对最近正确收到的数据的 ACK。</p>
-<p>那当 sender 收到这个 ACK 时，它该怎么办判断这个 ACK 是代表 receiver 正确接受了它刚发送的数据（实则在路途中被“污染”）还是代表 receiver 正确接受了它上一个发送的数据呢？这种情况下，ACK 数据包也需要加入序列号了。</p>
+<h2 id="Reliable-Data-Transfer-2-2"><a href="#Reliable-Data-Transfer-2-2" class="headerlink" title="Reliable Data Transfer 2.2"></a>Reliable Data Transfer 2.2</h2><p><code>rdt 2.1</code> 在 sender 和 receiver 均使用了 ACK&#x2F;NAK。当失序数据到达 receiver 时，receiver 发送 ACK。当被“污染”的数据到达 receiver 时，receiver 发送 NAK。我们尝试换一种思路：当被“污染”的数据到达 receiver 时，receiver 不发送 NAK，取而代之的是发送一个对最近正确收到的数据的 ACK。</p>
+<p>那当 sender 收到这个 ACK 时，它该怎么判断这个 ACK 是代表 receiver 正确接受了它刚发送的数据（实则在路途中被“污染”）还是代表 receiver 正确接受了它上一个发送的数据呢？这种情况下，ACK 数据包也需要加入序列号了。</p>
 <p>当 sender 收到两个对同一个数据包确认的 ACK 时，即收到重复的 ACK，sender 就可以意识到：<strong>receiver 没能正确收到被确认两次的数据包的下一个数据包！</strong></p>
 <p>这样就迎来了 NAK-free 的 <code>rdt 2.2</code>!</p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063673825018.jpg"></p>
@@ -284,7 +284,7 @@
 <li>如何检测数据传丢了？</li>
 <li>当数据传丢了，它该做什么？</li>
 </ol>
-<p><code>rdt 2.2</code> 很好地替我们回应了第二个问题。<br>有不少的方法来解决第一个问题，但在这里，我们把检测数据丢失和数据恢复的重担放在 sender。<br>设想这样一个场景：sender 把数据发送出去，第一种情况：数据在发送途中丢失了。第二种情况：receiver 发回的 ACK 丢失了。在这其中任意一种情况下，sender 均不会收到关于刚刚发送出去的数据的任何反馈。但是，如果 sender 可以<strong>等足够久</strong>，以至于它可以很肯定：刚发出去的数据丢了，这样它就可以直接重新发送这个数据。<br>至于这个等待时间是多少，我们可以暂且理解为：一个 RTT（Round Trip Time）加上在物理介质上传输该数据的时间。<br>需要注意的是：如果一个数据包经历了一个特别大的延迟（网络特别拥堵），即使数据包和它的 ACK 都没有丢失，sender也会重新发送数据包。我们就又遇到在 <code>rdt 2.0</code> 中遇到的老问题——<strong>重复数据包</strong>。没关系，<code>rdt 2.2</code> 已经妥善处理好这个问题了。</p>
+<p><code>rdt 2.2</code> 很好地替我们回应了第二个问题。<br>有不少的方法来解决第一个问题，但在这里，我们把检测数据丢失和数据恢复的重担放在 sender。<br>设想这样一个场景：sender 把数据发送出去，第一种情况：数据在发送途中丢失了。第二种情况：receiver 发回的 ACK 丢失了。在这其中任意一种情况下，sender 均不会收到关于刚刚发送出去的数据的任何反馈。但是，如果 sender 可以<strong>等足够久</strong>，以至于它可以很肯定：刚发出去的数据丢了，这样它就可以直接重新发送这个数据。<br>至于这个等待时间是多少，我们可以暂且理解为：一个 RTT（Round Trip Time）加上在物理介质上传输该数据的时间。<br>需要注意的是：如果一个数据包经历了一个特别大的延迟（网络特别拥堵），即使数据包和它的 ACK 都没有丢失，sender 也会重新发送数据包。我们就又遇到在 <code>rdt 2.0</code> 中遇到的老问题——<strong>重复数据包</strong>。没关系，<code>rdt 2.2</code> 已经妥善处理好这个问题了。</p>
 <p>当遇到以下情况时：</p>
 <ol>
 <li>发出的数据在途中丢了</li>
@@ -312,10 +312,10 @@
 </ul>
 </li>
 </ul>
-<h2 id="GBN"><a href="#GBN" class="headerlink" title="GBN"></a>GBN</h2><p>在 GBN 协议中，sender 可以在不需要等待收到 ACK 的情况下，同时发送 N 个数据包，这意味 sender 最多能保持 N 个未收到 ACK 的数据包，N 也被称为滑动窗口的大小。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063778631352.jpg"><br>图中的 <code>base</code> 意为：序列号最小的未收到 ACK 的数据包的序列号，而<br><code>nextseqnum</code> 意为：下一个将被发送的数据包的序列号。<br>区间 [0, base - 1] 表示为：序列号落在此区间的数据包均被发送和成功收到 ACK。<br>区间 [base, nextseqnum - 1] 表示为：序列号落在此区间的数据包均被发送且还未收到对应的 ACK。<br>区间 [nextseqnum, base + N - 1] 表示为：序列号落在此区间的数据包均可立即被发送。<br>区间 [base + N, 正无穷] 表示：序列号落在此区间的数据包处于等待发送状态。当序列号为 base 的数据包收到 ACK 之后，整个滑动窗口 N 向后移动，这样序列号 base + N 的数据包才可以被发送。</p>
+<h2 id="GBN"><a href="#GBN" class="headerlink" title="GBN"></a>GBN</h2><p>在 GBN 协议中，sender 可以在不需要等待收到 ACK 的情况下，同时发送 N 个数据包，这意味着 sender 最多能保持 N 个未收到 ACK 的数据包，N 也被称为滑动窗口的大小。<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063778631352.jpg"><br>图中的 <code>base</code> 意为：序列号最小的未收到 ACK 的数据包的序列号，而<br><code>nextseqnum</code> 意为：下一个将被发送的数据包的序列号。<br>区间 [0, base - 1] 表示为：序列号落在此区间的数据包均被发送和成功收到 ACK。<br>区间 [base, nextseqnum - 1] 表示为：序列号落在此区间的数据包均被发送且还未收到对应的 ACK。<br>区间 [nextseqnum, base + N - 1] 表示为：序列号落在此区间的数据包均可立即被发送。<br>区间 [base + N, 正无穷] 表示：序列号落在此区间的数据包处于等待发送状态。当序列号为 base 的数据包收到 ACK 之后，整个滑动窗口 N 向后移动，这样序列号 base + N 的数据包才可以被发送。</p>
 <p>下图为 GBN sender 有限状态机表示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063896168564.jpg"><br>当 sender 的上层调用 <code>rdt_send()</code> 时，sender 会首先检查窗口是否已满，如果窗口已满，则拒绝发送数据。<br>当超时事件发生时，sender 启动计时器，且重新发送所有之前已发送过但未收到 ACK 的数据包。<br>当收到某个数据包的 ACK 时，还有已被发送且未收到 ACK 的数据包，sender 需要重启计时器；如果此时不存在已被发送且未收到 ACK 的数据包，sender 需停止计时。</p>
 <p>下图为 GBN receiver 有限状态机表示：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063905182408.jpg"><br>假设 receiver 已经接受了前 n - 1 个数据包，那么 receiver 下一个就想收到序列号为 n 的数据包。receiver 会抛弃所有下一个到来的序列号非 n 的数据包，并重新发送最近收到的数据包的 ACK（在这个例子中为：ACK n-1）。这就是<strong>累计确认</strong>（cumulative acknowledgments）。  </p>
-<p>GBN 中的 receiver 拒绝接受失序的数据包，这听起来虽然有点蠢，似乎不尊重sender 的幸苦劳动，但这样做还是有原因的。<br>假设 receiver 现在正恭迎序列号为 n 的数据包的到来，但序列号为 n + 1 的小老弟先来了，打了一个措手不及。因为收到的数据必须按顺序组装起来，所以此时的 receiver 选择把序列号为 n + 1 的数据包缓存起来。但是当序列号为 n 的数据包丢了之后，根据 sender 重传的规则，序列号为 n 和 n + 1 的数据包都会被重传。这样就能理解 receiver 不缓存失序数据包的原因了，反正都要一起重传过来的嘛，缓存干嘛！<br>这样，sender 需要记住自己滑动窗口的上下界和下一个要发送的数据包的位置就可以，而 receiver 这边就更简单了，只需记住自己所期待到来的那个数据包的序列号就行了。<br>当然，这种丢掉正确收到却失序的数据包的做法也是有缺点的，因为之后的重传过来的数据包可能会被传丢或被“污染”，这样就会导致更多的数据重传。</p>
+<p>GBN 中的 receiver 拒绝接受失序的数据包，这听起来虽然有点蠢，似乎不尊重 sender 的辛苦劳动，但这样做还是有原因的。<br>假设 receiver 现在正恭迎序列号为 n 的数据包的到来，但序列号为 n + 1 的小老弟先来了，打了一个措手不及。因为收到的数据必须按顺序组装起来，所以此时的 receiver 选择把序列号为 n + 1 的数据包缓存起来。但是当序列号为 n 的数据包丢了之后，根据 sender 重传的规则，序列号为 n 和 n + 1 的数据包都会被重传。这样就能理解 receiver 不缓存失序数据包的原因了，反正都要一起重传过来的嘛，缓存干嘛！<br>这样，sender 需要记住自己滑动窗口的上下界和下一个要发送的数据包的位置就可以，而 receiver 这边就更简单了，只需记住自己所期待到来的那个数据包的序列号就行了。<br>当然，这种丢掉正确收到却失序的数据包的做法也是有缺点的，因为之后的重传过来的数据包可能会被传丢或被“污染”，这样就会导致更多的数据重传。</p>
 <h2 id="选择重传（Selective-Repeat）"><a href="#选择重传（Selective-Repeat）" class="headerlink" title="选择重传（Selective Repeat）"></a>选择重传（Selective Repeat）</h2><p>流水线式的同时发送多个数据包的 GBN 协议已经比之前谈论的停止等待协议强不少。但是也有一些场景下，GBN 同样因为性能被人诟病。<br>特别是当前网络的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%B8%A6%E5%AE%BD%E6%97%B6%E5%BB%B6%E4%B9%98%E7%A7%AF">带宽延时乘积</a>很大且滑动窗口 N 也很大时，某个数据包传输出错会导致 GBN sender 重传一大堆的数据包，这大部分情况是没有必要的。随着数据传输出错率变高，滑动窗口中便会塞满大量重传的数据。<br>让我们来看一看选择重传协议。正如其名，选择重传会避免像 GBN 那样的没必要的大量重传，它只选择性地重新发送它认为没能正确送达的数据包！<br>与 GBN 不同的是，它的滑动窗口里会出现一些被 ACK 过的数据包，换句话说，不管这个被正确收到的数据包是不是失序的，SR 均会确认这些数据包。失序的数据包将会被缓存起来。</p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063947970142.jpg"></p>
 <p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2020/11/26/16063948151237.jpg"></p>

@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png">
 <meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-02.png">
 <meta property="article:published_time" content="2022-04-14T09:41:00.000Z">
-<meta property="article:modified_time" content="2025-12-01T15:35:37.146Z">
+<meta property="article:modified_time" content="2025-12-02T00:16:51.725Z">
 <meta property="article:author" content="Sunset Wan">
 <meta property="article:tag" content="Codable">
 <meta name="twitter:card" content="summary">
@@ -217,7 +217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-01 15:35:37" itemprop="dateModified" datetime="2025-12-01T15:35:37+00:00">2025-12-01</time>
+      <time title="修改时间：2025-12-02 00:16:51" itemprop="dateModified" datetime="2025-12-02T00:16:51+00:00">2025-12-02</time>
     </span>
 
   
@@ -273,8 +273,8 @@
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> zipString<span class="operator">?</span> <span class="operator">=</span> <span class="keyword">try?</span> addressInfo.decodeIfPresent(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .zip),</span><br><span class="line"><span class="keyword">let</span> zipString <span class="operator">=</span> zipString</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="type">Int</span>(zipString) <span class="operator">??</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">let</span> zipInt <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decodeIfPresent(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .zip) &#123;</span><br><span class="line">    <span class="keyword">self</span>.zip <span class="operator">=</span> zipInt</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>再者，如果 JSON 新加一个 <code>memberType</code> 字段来表示顾客的身份：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">MemberType</span>: <span class="title class_ inherited__">Int</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> vistor <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">case</span> vip <span class="operator">=</span> <span class="number">2</span></span><br><span class="line">    <span class="keyword">case</span> unknow <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>突然某一天，收到的 JSON 对象中 <code>memberType</code> 为 3，意味超级 vip 客户，这是业务迭代新增的需求，而在 <code>Customer</code> 未对此改动作相应的更新时，也在 decode 方法里对这种情况作兼容处理，比如直接设为 <code>.unknow</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">MemberType</span>: <span class="title class_ inherited__">Int</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> visitor <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">case</span> vip <span class="operator">=</span> <span class="number">2</span></span><br><span class="line">    <span class="keyword">case</span> unknown <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>突然某一天，收到的 JSON 对象中 <code>memberType</code> 为 3，意味超级 vip 客户，这是业务迭代新增的需求，而在 <code>Customer</code> 未对此改动作相应的更新时，也在 decode 方法里对这种情况作兼容处理，比如直接设为 <code>.unknown</code>。</p>
 <h2 id="JSONEncoder"><a href="#JSONEncoder" class="headerlink" title="JSONEncoder"></a>JSONEncoder</h2><ul>
 <li><strong>KeyEncodingStrategy</strong>：内置默认的 <code>convertToSnakeCase</code> 策略，如模型中的变量名为：<code>xmlContents</code>，经过 <code>convertToSnakeCase</code> 策略之后，对应的 JSON key 会变为 <code>xml_contents</code>。也提供自定义的接口，让开发者自行决定。</li>
 <li><strong>OutputFormatting</strong>：内置三种默认的输出格式化方式<ul>
