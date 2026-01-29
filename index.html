@@ -131,7 +131,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,84 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2026/01/26/tca-101-p1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sunset Wan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="日落大道">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | 日落大道">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2026/01/26/tca-101-p1/" class="post-title-link" itemprop="url">初识 The Composable Architecture（一）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-01-26 15:22:14" itemprop="dateCreated datePublished" datetime="2026-01-26T15:22:14+00:00">2026-01-26</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="Reducer"><a href="#Reducer" class="headerlink" title="Reducer"></a>Reducer</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> <span class="title class_">CounterAction</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> decrTapped</span><br><span class="line">  <span class="keyword">case</span> incrTapped</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">counterReducer</span>(</span><br><span class="line">  <span class="params">state</span>: <span class="type">AppState</span>, <span class="params">action</span>: <span class="type">CounterAction</span></span><br><span class="line">) -&gt; <span class="type">AppState</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">copy</span> <span class="operator">=</span> state</span><br><span class="line">  <span class="keyword">switch</span> action &#123;</span><br><span class="line">  <span class="keyword">case</span> .decrTapped:</span><br><span class="line">    <span class="keyword">copy</span>.count <span class="operator">-=</span> <span class="number">1</span></span><br><span class="line">  <span class="keyword">case</span> .incrTapped:</span><br><span class="line">    <span class="keyword">copy</span>.count <span class="operator">+=</span> <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">copy</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码是个标准的 reducer 结构：当收到 <code>incrTapped</code> 时，修改全局状态（计数加一），再返回新的全局状态。为什么称这样的结构为 reducer？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/01/26/tca-101-p1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -198,6 +276,13 @@
 
       <time title="创建时间：2026-01-25 10:48:23" itemprop="dateCreated datePublished" datetime="2026-01-25T10:48:23+00:00">2026-01-25</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-29 13:59:27" itemprop="dateModified" datetime="2026-01-29T13:59:27+00:00">2026-01-29</time>
+    </span>
 
   
 </div>
@@ -209,7 +294,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket <strong>客户端</strong>的 <strong>一小部分</strong> 功能，以达到了解 WebSocket 协议的目标！</p>
+          <p>工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket <strong>客户端</strong> 的 <strong>一小部分</strong> 功能，以达到了解 WebSocket 协议的目标！</p>
 <ol>
 <li>教科书：<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc6455.txt">RFC 6455</a></li>
 <li>老师：Codex</li>
@@ -279,6 +364,13 @@
 
       <time title="创建时间：2025-12-01 23:33:33" itemprop="dateCreated datePublished" datetime="2025-12-01T23:33:33+00:00">2025-12-01</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-01-29 13:59:27" itemprop="dateModified" datetime="2026-01-29T13:59:27+00:00">2026-01-29</time>
+    </span>
 
   
 </div>
@@ -290,7 +382,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>前阵子遇到一个很奇怪的 BUG：用 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/SwiftUI/NavigationStack">NavigationStack</a> push 一个 View，CPU 使用率竟然冲上 100 %！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">WWDC 21 Demystify SwiftUI</a>。
+          <p>前阵子遇到一个很奇怪的 BUG：用 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/SwiftUI/NavigationStack">NavigationStack</a> push 一个 View，CPU 使用率竟然冲上 100%！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">WWDC 21 Demystify SwiftUI</a>。
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2025/12/01/SwiftUI_Identity_lifetime/#more" rel="contents">
@@ -826,82 +918,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/12/15/uncover_mysteries_of_auto_layout/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2020/11/27/how-to-design-rdt/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/11/27/how-to-design-rdt/" class="post-title-link" itemprop="url">如何设计一个可靠数据传输协议？</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-27 15:38:37" itemprop="dateCreated datePublished" datetime="2020-11-27T15:38:37+00:00">2020-11-27</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本文是我个人对 《Computer Networking: A Top-down Approach》3.4 节的总结。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/27/how-to-design-rdt/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
