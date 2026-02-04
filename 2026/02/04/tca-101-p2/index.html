@@ -15,22 +15,26 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta property="og:type" content="website">
-<meta property="og:title" content="日落大道">
-<meta property="og:url" content="https://sunsetwan.github.io/index.html">
+    <meta name="description" content="Reducer 的副作用同步副作用我们在 FavoritePrimesAction 中新增一个 action：saveButtonTapped。 123456789101112131415161718public enum FavoritePrimesAction &#123;  case deleteFavoritePrimes(IndexSet)  case loadedFavoriteP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初识 The Composable Architecture（二）">
+<meta property="og:url" content="https://sunsetwan.github.io/2026/02/04/tca-101-p2/index.html">
 <meta property="og:site_name" content="日落大道">
+<meta property="og:description" content="Reducer 的副作用同步副作用我们在 FavoritePrimesAction 中新增一个 action：saveButtonTapped。 123456789101112131415161718public enum FavoritePrimesAction &#123;  case deleteFavoritePrimes(IndexSet)  case loadedFavoriteP">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-04T21:37:39.000Z">
+<meta property="article:modified_time" content="2026-02-04T21:37:39.000Z">
 <meta property="article:author" content="Sunset Wan">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://sunsetwan.github.io/">
+<link rel="canonical" href="https://sunsetwan.github.io/2026/02/04/tca-101-p2/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2026/02/04/tca-101-p2/","path":"2026/02/04/tca-101-p2/","title":"初识 The Composable Architecture（二）"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>日落大道</title>
+<title>初识 The Composable Architecture（二） | 日落大道</title>
   
 
 
@@ -80,7 +84,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">日落大道</h1>
+      <p class="site-title">日落大道</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -106,7 +110,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -119,6 +123,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reducer-%E7%9A%84%E5%89%AF%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">Reducer 的副作用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%89%AF%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">同步副作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%90%91%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="nav-number">1.2.</span> <span class="nav-text">单向数据流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E5%89%AF%E4%BD%9C%E7%94%A8"><span class="nav-number">1.3.</span> <span class="nav-text">异步副作用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Combine-%E4%BC%98%E5%8C%96"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用 Combine 优化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">2.</span> <span class="nav-text">结语</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -157,16 +162,17 @@
 
     </div>
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2026/02/04/tca-101-p2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -180,13 +186,13 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
+      <meta itemprop="name" content="初识 The Composable Architecture（二） | 日落大道">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2026/02/04/tca-101-p2/" class="post-title-link" itemprop="url">初识 The Composable Architecture（二）</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          初识 The Composable Architecture（二）
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -208,8 +214,7 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
-          <span id="more"></span>
+    <div class="post-body" itemprop="articleBody"><span id="more"></span>
 
 <h2 id="Reducer-的副作用"><a href="#Reducer-的副作用" class="headerlink" title="Reducer 的副作用"></a>Reducer 的副作用</h2><h3 id="同步副作用"><a href="#同步副作用" class="headerlink" title="同步副作用"></a>同步副作用</h3><p>我们在 <code>FavoritePrimesAction</code> 中新增一个 action：<code>saveButtonTapped</code>。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> <span class="title class_">FavoritePrimesAction</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> deleteFavoritePrimes(<span class="type">IndexSet</span>)</span><br><span class="line">  <span class="keyword">case</span> loadedFavoritePrimes([<span class="type">Int</span>])</span><br><span class="line">  <span class="keyword">case</span> saveButtonTapped <span class="comment">// 新增 action</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在原本的 reducer 中新增对这个 action 的处理</span></span><br><span class="line"><span class="operator">...</span></span><br><span class="line"><span class="keyword">case</span> .saveButtonTapped:</span><br><span class="line">  <span class="keyword">let</span> data <span class="operator">=</span> <span class="keyword">try!</span> <span class="type">JSONEncoder</span>().encode(state)</span><br><span class="line">  <span class="keyword">let</span> documentsPath <span class="operator">=</span> <span class="type">NSSearchPathForDirectoriesInDomains</span>(</span><br><span class="line">    .documentDirectory, .userDomainMask, <span class="literal">true</span></span><br><span class="line">  )[<span class="number">0</span>]</span><br><span class="line">  <span class="keyword">let</span> documentsUrl <span class="operator">=</span> <span class="type">URL</span>(fileURLWithPath: documentsPath)</span><br><span class="line">  <span class="keyword">try!</span> data.write(</span><br><span class="line">    to: documentsUrl.appendingPathComponent(<span class="string">&quot;favorite-primes.json&quot;</span>)</span><br><span class="line">  )</span><br><span class="line"><span class="operator">...</span></span><br></pre></td></tr></table></figure>
@@ -288,7 +293,6 @@
 
 <h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>下次再聊 TCA 中的 Dependency Injection 与 Testing。</p>
 
-      
     </div>
 
     
@@ -296,257 +300,18 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
 
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2026/01/26/tca-101-p1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2026/01/26/tca-101-p1/" class="post-title-link" itemprop="url">初识 The Composable Architecture（一）</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2026-01-26 15:22:14" itemprop="dateCreated datePublished" datetime="2026-01-26T15:22:14+00:00">2026-01-26</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="Reducer"><a href="#Reducer" class="headerlink" title="Reducer"></a>Reducer</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> <span class="title class_">CounterAction</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> decrTapped</span><br><span class="line">  <span class="keyword">case</span> incrTapped</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">counterReducer</span>(</span><br><span class="line">  <span class="params">state</span>: <span class="type">AppState</span>, <span class="params">action</span>: <span class="type">CounterAction</span></span><br><span class="line">) -&gt; <span class="type">AppState</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">copy</span> <span class="operator">=</span> state</span><br><span class="line">  <span class="keyword">switch</span> action &#123;</span><br><span class="line">  <span class="keyword">case</span> .decrTapped:</span><br><span class="line">    <span class="keyword">copy</span>.count <span class="operator">-=</span> <span class="number">1</span></span><br><span class="line">  <span class="keyword">case</span> .incrTapped:</span><br><span class="line">    <span class="keyword">copy</span>.count <span class="operator">+=</span> <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">copy</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面的代码是个标准的 reducer 结构：当收到 <code>incrTapped</code> 时，修改全局状态（计数加一），再返回新的全局状态。为什么称这样的结构为 reducer？</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/01/26/tca-101-p1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2026/01/25/WebSocket-note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2026/01/25/WebSocket-note/" class="post-title-link" itemprop="url">WebSocket 协议学习笔记</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2026-01-25 10:48:23" itemprop="dateCreated datePublished" datetime="2026-01-25T10:48:23+00:00">2026-01-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-01-29 13:59:27" itemprop="dateModified" datetime="2026-01-29T13:59:27+00:00">2026-01-29</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket <strong>客户端</strong> 的 <strong>一小部分</strong> 功能，以达到了解 WebSocket 协议的目标！</p>
-<ol>
-<li>教科书：<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc6455.txt">RFC 6455</a></li>
-<li>老师：Codex</li>
-<li>代码仓库地址：<a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a></li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/01/25/WebSocket-note/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/01/26/tca-101-p1/" rel="prev" title="初识 The Composable Architecture（一）">
+                  <i class="fa fa-angle-left"></i> 初识 The Composable Architecture（一）
+                </a>
             </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2025/12/01/SwiftUI_Identity_lifetime/" class="post-title-link" itemprop="url">SwiftUI View 的 Identity 与 Lifetime</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-12-01 23:33:33" itemprop="dateCreated datePublished" datetime="2025-12-01T23:33:33+00:00">2025-12-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-01-29 13:59:27" itemprop="dateModified" datetime="2026-01-29T13:59:27+00:00">2026-01-29</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>前阵子遇到一个很奇怪的 BUG：用 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/SwiftUI/NavigationStack">NavigationStack</a> push 一个 View，CPU 使用率竟然冲上 100%！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">WWDC 21 Demystify SwiftUI</a>。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/12/01/SwiftUI_Identity_lifetime/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
+            <div class="post-nav-item">
             </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          </div>
     </footer>
   </article>
 </div>
@@ -554,465 +319,7 @@
 
 
 
-    
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/06/23/Swift-Protocol-Witness/" class="post-title-link" itemprop="url">Protocol Witness in Swift</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-06-23 21:23:49" itemprop="dateCreated datePublished" datetime="2024-06-23T21:23:49+00:00">2024-06-23</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/06/23/Swift-Protocol-Witness/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" class="post-title-link" itemprop="url">Alamofire 源码阅读（一）</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-06-15 00:01:13" itemprop="dateCreated datePublished" datetime="2024-06-15T00:01:13+00:00">2024-06-15</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2022/04/14/Codable/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/04/14/Codable/" class="post-title-link" itemprop="url">Codable 学习笔记</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-04-14 09:41:00" itemprop="dateCreated datePublished" datetime="2022-04-14T09:41:00+00:00">2022-04-14</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/04/14/Codable/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/" class="post-title-link" itemprop="url">打造一个简单的 iOS App CI 系统</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-30 09:41:00" itemprop="dateCreated datePublished" datetime="2022-03-30T09:41:00+00:00">2022-03-30</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>除了 Xcode Cloud，你还有别的选择。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/" class="post-title-link" itemprop="url">Kingfisher 源码阅读（一）</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-28 09:41:00" itemprop="dateCreated datePublished" datetime="2022-03-28T09:41:00+00:00">2022-03-28</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>最近想了解如何设计一个简单的缓存系统，于是找了 Kingfisher 7.1.2 版本的源代码读一读，有些收获，记录于此。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/" class="post-title-link" itemprop="url">WWDC21 10267 一窥 Xcode Cloud</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-09 09:41:00" itemprop="dateCreated datePublished" datetime="2021-08-09T09:41:00+00:00">2021-08-09</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>有幸参与《WWDC 21 内参》的工作，欢迎 <a target="_blank" rel="noopener" href="https://xiaozhuanlan.com/wwdc21">订阅</a> 该专栏！
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/09/WWDC%2021%2010267%20%E4%B8%80%E7%AA%A5%20Xcode%20Cloud/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
 
 </div>
   </main>
