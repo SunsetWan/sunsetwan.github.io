@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -153,8 +156,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-07-16T01:15:00+08:00">
+        更新于 2026-07-16
       </time>
     
     
@@ -327,7 +330,7 @@
 <p>内存缓存背后支撑的数据结构是 Foundation 框架中的 <code class="language-plaintext highlighter-rouge">NSCache</code>。<br />
 <code class="language-plaintext highlighter-rouge">NSCache</code> 有两个限制：<code class="language-plaintext highlighter-rouge">countLimit</code> 和 <code class="language-plaintext highlighter-rouge">totalCostLimit</code>。前者是表示能存储多少个对象，后者是表示缓存的容量有多大。但这两个限制是软限制——如果超过限制，<code class="language-plaintext highlighter-rouge">NSCache</code> 中保存的对象不一定会被及时地从其中移出。根据 <a href="https://developer.apple.com/documentation/foundation/nscache?language=objc">官方文档</a>，超过限制之后，对象的移出时机取决与 <code class="language-plaintext highlighter-rouge">NSCache</code> 背后的实现。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="kf_01" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="NSCache 的泛型声明要求 KeyType 和 ObjectType 都是 AnyObject 引用类型" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">NSCache</code> 是个泛型类，所以我们得定义好 <code class="language-plaintext highlighter-rouge">KeyType</code> 和 <code class="language-plaintext highlighter-rouge">ObjectType</code>。<br />
 根据声明的类型约束，<code class="language-plaintext highlighter-rouge">KeyType</code> 的类型得是一个类。一般地，类似 key 的数据结构会采用 <code class="language-plaintext highlighter-rouge">String</code>。而这里 <code class="language-plaintext highlighter-rouge">KeyType</code> 得是引用类型而不是值类型，所以我们会选择 <code class="language-plaintext highlighter-rouge">NSString</code>。但在 API 设计时，对外暴露的那一层 API，还是可以使用 <code class="language-plaintext highlighter-rouge">String</code>。到调用 <code class="language-plaintext highlighter-rouge">NSCache</code> 的 <code class="language-plaintext highlighter-rouge">setObject(_:forKey:cost:)</code> 方法时，再把 <code class="language-plaintext highlighter-rouge">String</code> 转为 <code class="language-plaintext highlighter-rouge">NSString</code>。之所以这样做，是因为值类型更符合当前场景的需求。<br />
@@ -603,7 +606,7 @@ Kingfisher 有设计 3 种缓存续期策略：</p>
 <h2 id="其他">其他</h2>
 <p>在阅读 Kingfisher 缓存系统相关代码时，我还发现了其他值得学习的代码，一并记录。</p>
 <h3 id="网络请求重试机制">网络请求重试机制</h3>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="kf_02.001" /><br />
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="Kingfisher 重试机制：RetryStrategy 根据数据源、错误和重试次数决定继续重试或停止" /><br />
 Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">RetryStrategy</code> 协议，由遵循该协议的对象来作出决定（<code class="language-plaintext highlighter-rouge">RetryDecision</code>）。<code class="language-plaintext highlighter-rouge">RetryDecision</code> 有两种：继续重试和停止重试。</p>
 
 <p>遵循 <code class="language-plaintext highlighter-rouge">RetryStrategy</code> 协议的对象内部设计了三种重试模式：</p>
@@ -916,7 +919,7 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>有了这些，便可以画出一个有限状态机的状态转移图：<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_03.png" alt="CacheCallbackCoordinator 状态机" /><br />
+<p>有了这些，便可以画出一个有限状态机的状态转移图：<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_03.png" alt="CacheCallbackCoordinator 状态机" /><br />
 从图中可以看出：在从 <code class="language-plaintext highlighter-rouge">idle</code> 状态到 <code class="language-plaintext highlighter-rouge">done</code> 状态的任意一条路线上，<code class="language-plaintext highlighter-rouge">trigger</code> 方法的执行次数<strong>有且只有一次</strong>！这样设计的代码清晰，也容易测试，是很值得学习的案例了！</p>
 
 <h2 id="结语">结语</h2>
@@ -1013,11 +1016,20 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -1030,12 +1042,16 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -1044,8 +1060,8 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -1054,16 +1070,18 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1071,7 +1089,9 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -1080,8 +1100,6 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -1089,17 +1107,24 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>

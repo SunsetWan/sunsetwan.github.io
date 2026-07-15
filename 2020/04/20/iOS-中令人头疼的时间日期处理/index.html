@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -153,8 +156,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-07-16T01:13:28+08:00">
+        更新于 2026-07-16
       </time>
     
     
@@ -510,7 +513,7 @@ print(timeString)
 <p>我有一个朋友，在美国一机场上班。他在今年 3 月 8 日的凌晨 03:30 有排班。他跟往常一样，打算提前一小时醒来做作准备。他把一个简单闹钟 App 的提醒时间设定为 3 月 8 号 02:30。</p>
 
 <p>先从上帝视角看这条时间线：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebedtest1.jpg" alt="" /></p>
+<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebedtest1.jpg" alt="夏令时跳过 02:00 后，02:30 闹钟与 03:30 上班时间的时间线" /></p>
 
 <p>这一天其实是不存在<strong>凌晨两点半</strong>这个时间点的。这就是 matchingPolicy 大显身手的时候了。四种不同的 matchingPolicy 会导致闹钟 App 在四个不同的时间点响铃🔔：</p>
 <h4 id="matchingpolicy-nexttime">matchingPolicy: nextTime</h4>
@@ -608,7 +611,7 @@ dateLog(next, hint: "Matching Result")
 // Formatted: 2020/03/08 01:30:00
 dateLog(next, hint: "Matching Result")
 </code></pre></div></div>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebed2.jpg" alt="" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebed2.jpg" alt="四种 Calendar matchingPolicy 对不存在的 02:30 闹钟时间的匹配结果" /></p>
 
 <p>可能，我这位朋友真正想要的是并不是<strong>凌晨两点半</strong>，而是<strong>开始工作前的一小时</strong>。</p>
 
@@ -704,11 +707,20 @@ dateLog(next, hint: "Matching Result")
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -721,12 +733,16 @@ dateLog(next, hint: "Matching Result")
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -735,8 +751,8 @@ dateLog(next, hint: "Matching Result")
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -745,16 +761,18 @@ dateLog(next, hint: "Matching Result")
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -762,7 +780,9 @@ dateLog(next, hint: "Matching Result")
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -771,8 +791,6 @@ dateLog(next, hint: "Matching Result")
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -780,17 +798,24 @@ dateLog(next, hint: "Matching Result")
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>

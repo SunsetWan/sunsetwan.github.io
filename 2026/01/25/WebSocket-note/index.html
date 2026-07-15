@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -153,8 +156,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-07-16T01:19:02+08:00">
+        更新于 2026-07-16
       </time>
     
     
@@ -431,7 +434,7 @@
 
 <p>在握手成功后，双端严格以数据帧格式通信，格式如下图：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="image-20260123201016373" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="WebSocket 数据帧中 FIN、RSV、opcode、MASK、长度和载荷字段的位布局" /></p>
 
 <h4 id="头部结构2-个字节">头部结构（2 个字节）</h4>
 
@@ -549,7 +552,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <h3 id="建立连接时的握手阶段-1">建立连接时的握手阶段</h3>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Xnip2026-01-24_14-58-02" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Wireshark 抓包显示客户端 GET 升级请求和服务端 101 Switching Protocols 响应" /></p>
 
 <p>点击 Connect，客户端主动发送 HTTP 升级请求，并收到服务端的同意协议升级响应。</p>
 
@@ -557,7 +560,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>建立连接成功后，发送 “hello” 字符串</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Xnip2026-01-24_15-24-15" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Wireshark 显示客户端发送带 MASK 的 hello 文本帧" /></p>
 
 <p>我们可以看到数据帧为：0x81 0x85 0x88 0x56 0xa3 0xf5 0xe0 0x33 0xcf 0x99 0xe7</p>
 
@@ -580,17 +583,17 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <h4 id="服务端发来的数据帧">服务端发来的数据帧</h4>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Xnip2026-01-24_22-27-48" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Wireshark 显示服务端返回不带 MASK 的 hello 文本帧" /></p>
 
 <p>因为是回声服务器，所以服务端也是发来 “hello”，没有做 masking，能直接看到 payload 是 “hello”。</p>
 
 <h4 id="客户端主动与服务端断开连接">客户端主动与服务端断开连接</h4>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Xnip2026-01-24_22-58-26" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Wireshark 显示客户端发送带 MASK、状态码 1000 的关闭帧" /></p>
 
 <p>上图中：客户端发出关闭控制帧，FIN 位为 1，opcode 为 8。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Xnip2026-01-24_22-58-53" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Wireshark 显示服务端返回不带 MASK 和载荷的关闭帧" /></p>
 
 <p>上图中：客户端收到服务端响应的关闭控制帧。</p>
 
@@ -654,7 +657,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>看来看去还是 Starscream 的星星数比较多多，同时也是 Socket.IO iOS 客户端的依赖之一，所有首先来看看它的架构图：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="Starscream 从 API、Engine 到 Compression、Security、Transport 和 Framer 的分层架构图" /></p>
 
 <h4 id="设计特点">设计特点</h4>
 
@@ -886,11 +889,20 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -903,12 +915,16 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -917,8 +933,8 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -927,16 +943,18 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -944,7 +962,9 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -953,8 +973,6 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -962,17 +980,24 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>

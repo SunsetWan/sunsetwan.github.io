@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -295,7 +298,7 @@
   <p>有幸参与《WWDC 20 内参》的工作，欢迎 <a href="https://xiaozhuanlan.com/wwdc20">订阅</a> 该专栏！<!-- more --></p>
 
 <p>本次 Session 的思维导图：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/01.svg" alt="Explore logging in Swift 主题思维导图" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/01.svg" alt="Explore logging in Swift 主题思维导图" /></p>
 
 <blockquote>
   <p>配图说明：原图床已失效。思维导图依据本文内容重建，其余画面取自 <a href="https://developer.apple.com/videos/play/wwdc2020/10168/">Apple 官方 Session 视频</a>。</p>
@@ -339,28 +342,28 @@ func beginTask(url: URL, handler: (Data) -&gt; Void) {
 <p>看到这里，你可能在心里发问：那当在模拟器上运行时是怎么样的呢？根据 Apple Developer Forums 上的 <a href="https://developer.apple.com/forums/thread/650761">回答</a>：在 Xcode console 上显示的 log 信息始终不会被系统编辑，也就是说：如果应用从 Xcode 中启动，即使这条 log 信息是非公开的，在 console 中也会完全显示出来，以便开发者调试。</p>
 
 <p>举个例子，这里是在记录类型为字符串的 <code class="language-plaintext highlighter-rouge">accountNumber</code> 变量：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/02.png" alt="非数字日志默认脱敏为 private" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/02.png" alt="非数字日志默认脱敏为 private" /><br />
 但在输出的 log 信息中，accountNumber 被编辑为 <code class="language-plaintext highlighter-rouge">&lt;private&gt;</code>。<br />
 我们也可以手动控制 log 信息为公开的：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/03.png" alt="将非敏感日志数据标记为 public" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/03.png" alt="将非敏感日志数据标记为 public" /></p>
 
 <h3 id="在终端中收集日志信息">在终端中收集日志信息</h3>
 <p>我们可以使用命令行来收集 log 信息。先把设备连接至电脑，再在终端中输入以下命令：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/04.png" alt="使用 log collect 命令收集设备日志" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/04.png" alt="使用 log collect 命令收集设备日志" /><br />
 使用 <code class="language-plaintext highlighter-rouge">log help collect</code>  可以获得该命令行的使用帮助。<br />
 在收集完之后，在当前路径下会产生一个以 .logarchive 结尾的文件。我们可以使用系统自带的 Console App 浏览该文件。</p>
 
 <p>当在 Console App 中浏览这个文件时，常常会在搜索栏输入关键词来过滤无关的信息。这里分享一个小技巧：在搜索栏输入关键词，输入完毕后，点击右下角的保存按钮，可以将关键词保存起来。<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/05.png" alt="Console App 中的设备日志列表" /><br />
-<img src="/assets/images/posts/wwdc20-explore-logging/06.png" alt="Console App 按子系统过滤日志" /><br />
-<img src="/assets/images/posts/wwdc20-explore-logging/07.png" alt="Console App 保存日志搜索条件" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/05.png" alt="Console App 中的设备日志列表" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/06.png" alt="Console App 按子系统过滤日志" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/07.png" alt="Console App 保存日志搜索条件" /><br />
 下次搜索时，直接点击 log1 按钮，就自动填充搜索关键词，这样就可以免于重复输入搜索关键字。</p>
 
 <h3 id="在-console-app-中实时检视日志信息">在 Console App 中实时检视日志信息</h3>
 <p>使用 <code class="language-plaintext highlighter-rouge">log collect</code> 命令，我们可以在应用运行结束后，打开日志文件，阅读日志信息。在应用运行时，我们可以在 Xcode console 阅读日志信息。类似地，在应用运行时（无论是在真机上运行还是在模拟器上运行），我们也可以实时地在 Console App 里阅读日志信息！</p>
 
 <p>只要在 Console App 内选中正确的设备即可（注：这里的设备包括真机和模拟器）：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/08.png" alt="通过 Console App 实时串流设备日志" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/08.png" alt="通过 Console App 实时串流设备日志" /></p>
 
 <p>但在我自己动手尝试之后发现：即使在 Console App 的 Action 菜单里勾选 Include Debug Messages 选项，在 Xcode 中以模拟器的方式启动应用，Console App 里实时显示的日志信息竟然不包含 debug 等级的信息。然而，在 Xcode 中以真机的方式启动应用，Console App 里实时显示的日志信息却包含了 debug 等级的信息！</p>
 
@@ -378,18 +381,18 @@ func beginTask(url: URL, handler: (Data) -&gt; Void) {
 
 <h3 id="日志消息持久化">日志消息持久化</h3>
 <p>当我们要在应用运行之后读取日志时，只有那些可以持久化的日志消息才会被读取到。日志消息是否持久保存取决于日志记录等级。<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/09.png" alt="不同日志等级的持久化策略" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/09.png" alt="不同日志等级的持久化策略" /></p>
 
 <p>日志记录等级各自的性能也有差异：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/10.png" alt="不同日志等级的性能差异" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/10.png" alt="不同日志等级的性能差异" /><br />
 [10:50 - 12:11]<br />
 处于 Debug 记录等级的日志信息不作持久化存储的处理。而且，当此等级的日志信息不被串流记录时，它们会直接被忽略掉。在日志信息被忽略掉的情况下，Swift 编译器还能确保在此函数内调用的函数根本不会执行。<br />
 所以处于 Debug 等级的 log 函数的运行速度是很快的，且在其中调用比较耗时的函数也是安全的。<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/11.png" alt="Debug 日志不会执行被优化掉的慢函数" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/11.png" alt="Debug 日志不会执行被优化掉的慢函数" /><br />
 当真正需要收集 Debug 记录等级的日志时，才会付出对应的开销。更多的情况是，此等级的日志记录会被自动忽略，也就没有那些开销了。</p>
 
 <p>那什么情况下算是串流记录日志呢？<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/12.png" alt="Console App 与 Xcode 的日志串流方式" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/12.png" alt="Console App 与 Xcode 的日志串流方式" /></p>
 <ol>
   <li>设备连接上 Mac，打开 Console App 时，Console App 会开始串流记录日志。</li>
   <li>在 Xcode 中启动应用时，Xcode debug console 会开始串流记录日志。</li>
@@ -400,25 +403,25 @@ func beginTask(url: URL, handler: (Data) -&gt; Void) {
 <h3 id="格式化日志信息">格式化日志信息</h3>
 <p>[12: 15]<br />
 在 log API 里，我们往往会添加一些应用运行时产生的原始数据。而直接阅读这些原始数据是比较困难的，所以我们可以利用 log API 里的数据格式化功能来提高数据的可读性，且格式化功能对应用的运行时没有影响。<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/13.png" alt="记录服务器通信统计数据的 Logger 代码" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/13.png" alt="记录服务器通信统计数据的 Logger 代码" /><br />
 视频中展示的范例使用 log API 记录了 <code class="language-plaintext highlighter-rouge">taskID</code>、<code class="language-plaintext highlighter-rouge">giftCardID</code>、<code class="language-plaintext highlighter-rouge">serverID</code> 和 <code class="language-plaintext highlighter-rouge">seconds</code> 这些原始数据。下图是未对原始数据进行格式化的日志信息：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/14.png" alt="未格式化的统计日志输出" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/14.png" alt="未格式化的统计日志输出" /><br />
 可以看出，日志信息的可读性不佳：<code class="language-plaintext highlighter-rouge">giftCardID</code> 数据显示的宽度应当统一，这个宽度应为最长的 <code class="language-plaintext highlighter-rouge">giftCardID</code> 的长度；<code class="language-plaintext highlighter-rouge">seconds</code> 的精度应四舍五入至两位小数，以便比较。<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/15.png" alt="为 giftCardID 和 seconds 添加对齐与精度格式" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/15.png" alt="为 giftCardID 和 seconds 添加对齐与精度格式" /><br />
 对数据使用格式化选项之后，让我们再来看看：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/16.png" alt="格式化后的统计日志输出" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/16.png" alt="格式化后的统计日志输出" /><br />
 格式化后的日志信息可读性大大提高，甚至可以直接拷贝数据到 Numbers 里，对数据作可视化分析：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/17.png" alt="将日志数据复制到 Numbers 分析" /><br />
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/17.png" alt="将日志数据复制到 Numbers 分析" /><br />
 除了上述提到的几个数据格式化的选项以外，还有很多其他的选项：<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/18.png" alt="Xcode 提供的日志格式化选项" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/18.png" alt="Xcode 提供的日志格式化选项" /></p>
 
 <h3 id="保护日志信息安全">保护日志信息安全</h3>
 <p>当应用下载安装到用户手机上时，日志记录仍会进行。只要把有安装该应用的设备使用线缆连接到电脑上，任何人都可以查看日志信息，所以<strong>有关个人信息的日志绝对不能被标记为</strong> <code class="language-plaintext highlighter-rouge">.public</code>。<br />
 但是当我们需要比较两条非公开的信息是否一样时，这时候该怎么办呢？log API 还提供一种 equality-preserving hash 方法。在经过处理之后，不会显示真正的数据，但也能让我们判断这两条信息是否一样。<br />
-<img src="/assets/images/posts/wwdc20-explore-logging/19.png" alt="使用 equality-preserving hash 保护私密数据" /></p>
+<img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/19.png" alt="使用 equality-preserving hash 保护私密数据" /></p>
 
 <h3 id="api-可用性">API 可用性</h3>
-<p><img src="/assets/images/posts/wwdc20-explore-logging/20.png" alt="Logger API 的系统版本可用性" /><br />
+<p><img loading="lazy" decoding="async" src="/assets/images/posts/wwdc20-explore-logging/20.png" alt="Logger API 的系统版本可用性" /><br />
 最新版的 log 函数可以使用字符串插值，而旧版只能使用格式占位符：</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let userName = "Jack"
 let userID = "15030225"
@@ -531,11 +534,20 @@ extension OSLog {
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -548,12 +560,16 @@ extension OSLog {
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -562,8 +578,8 @@ extension OSLog {
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -572,16 +588,18 @@ extension OSLog {
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -589,7 +607,9 @@ extension OSLog {
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -598,8 +618,6 @@ extension OSLog {
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -607,17 +625,24 @@ extension OSLog {
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>

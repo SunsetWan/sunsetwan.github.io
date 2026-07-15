@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -153,8 +156,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-07-16T01:13:58+08:00">
+        更新于 2026-07-16
       </time>
     
     
@@ -281,7 +284,7 @@
 
 <p>如果 requestQueue 自己是个单独的串行队列呢？iOS 会专门给 requestQueue 分配另一个线程 T2，这样 App 就可能使用了不必要的线程资源。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="Alamofire 的 requestQueue 和 serializationQueue 都以 rootQueue 为目标队列，共用其执行线程" /></p>
 
 <p>当存在过多线程时，不仅会增加内存压力，更重要的是，这些线程在有限的 CPU 核心上运行，导致频繁的线程上下文切换。有时候，与实际执行需要的指令相比，这些上下文切换所消耗的资源和时间反而占据了主要部分。这种情况下，由于线程被阻塞的同时，又不断有新的任务以 async 的方式提交到并行队列，导致过多的新线程被创建，我们将其称为<strong>线程爆炸</strong>。</p>
 
@@ -289,11 +292,11 @@
 
 <h2 id="af-创建-request-的流程">AF 创建 Request 的流程</h2>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="Alamofire 从 Session 发起请求并创建 DataRequest 的调用流程" /></p>
 
 <h2 id="af-处理-response-的流程">AF 处理 Response 的流程</h2>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="Alamofire 接收 URLSession 回调并序列化 Response 的处理流程" /></p>
 
 <h2 id="af-中是如何解决数据竞争的">AF 中是如何解决数据竞争的？</h2>
 
@@ -423,7 +426,7 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 
 <p>但需要注意的是，这个代理方法被调用的条件有些苛刻，得同时满足以下 7 个条件才行！</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="URLSession 调用 willCacheResponse 代理方法所需满足的七个条件" /></p>
 
 </div>
 
@@ -512,11 +515,20 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -529,12 +541,16 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -543,8 +559,8 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -553,16 +569,18 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -570,7 +588,9 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -579,8 +599,6 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -588,17 +606,24 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>

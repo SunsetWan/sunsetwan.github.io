@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -153,8 +156,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-07-16T01:15:00+08:00">
+        更新于 2026-07-16
       </time>
     
     
@@ -422,7 +425,7 @@ bundle <span class="nb">exec </span>fastlane match adhoc
 <span class="p">)</span>
 </code></pre></div></div>
 <p>iOS App scheme、match type 和 gym export method 三者之间可能对应的关系如下图所示：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png" alt="01" /></p>
+<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png" alt="test、pre-prod 与 prod 三种 scheme 对应的 match type 和 gym export method" /></p>
 <h3 id="7-上传至-app-store">7. 上传至 App store</h3>
 <p>fastlane 老式的做法是用 Apple ID 的账号密码去登陆 App store connect，这样不光得设置一大堆环境变量，如下：</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">FASTLANE_USER</span> <span class="o">=</span> <span class="s2">"sunsetwan@gmail.com"</span>
@@ -545,9 +548,9 @@ bundle <span class="nb">exec </span>fastlane match adhoc
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_02.jpg" alt="02" /><br />
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_02.jpg" alt="Xcode 中包含 test_methodOne 和 test_methodTwo 的 MyClassTests 测试类，左侧可运行整组测试" /><br />
 点击运行按钮，可以看到如下测试日志：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_03.jpg" alt="03" /><br />
+<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_03.jpg" alt="两个测试均各自创建、调用并销毁一个 MyClass 实例的测试日志" /><br />
 以 <code class="language-plaintext highlighter-rouge">test_methodOne</code> 方法为例，整个测试流程方法调用顺序为：</p>
 <ol>
   <li>MyClass.init()</li>
@@ -572,7 +575,7 @@ bundle <span class="nb">exec </span>fastlane match adhoc
 <span class="p">}</span>
 </code></pre></div></div>
 <p>再次点击运行按钮，得到如下测试日志：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_04.jpg" alt="04" /><br />
+<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_04.jpg" alt="把 MyClass 设为测试类属性后，测试运行前连续初始化两个实例且没有销毁日志" /><br />
 咦！怎么 <code class="language-plaintext highlighter-rouge">MyClass.init()</code> 调用了两次？<code class="language-plaintext highlighter-rouge">MyClass.deinit()</code> 方法没被调用！<br />
 在测试代码开始运行之前，两个 <code class="language-plaintext highlighter-rouge">MyClass</code> 的实例被创建了，且从未被销毁！这样会有两个潜在的问题：</p>
 <ol>
@@ -639,7 +642,7 @@ bundle <span class="nb">exec </span>fastlane match adhoc
 <span class="p">}</span>
 </code></pre></div></div>
 <p>再次点击运行按钮，得到如下测试日志：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_05.jpg" alt="05" /><br />
+<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_05.jpg" alt="使用 setUp 与 tearDown 后，每个测试都正确初始化并销毁 MyClass 实例的日志" /><br />
 Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 
 <p>fastlane 的 <a href="https://docs.fastlane.tools/getting-started/ios/running-tests/">run_tests</a> 可用来在 ruby 脚本中执行测试代码。</p>
@@ -740,11 +743,20 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -757,12 +769,16 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -771,8 +787,8 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -781,16 +797,18 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -798,7 +816,9 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -807,8 +827,6 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -816,17 +834,24 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>

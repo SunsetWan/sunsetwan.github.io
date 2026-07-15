@@ -101,7 +101,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><main class="page-content" aria-label="Content">
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -140,7 +143,7 @@
     data-no-results="没有找到与“{query}”匹配的文章"
     data-load-error="暂时无法加载搜索索引。"
   >
-  <ul id="search-results" class="search-results" hidden></ul>
+  <ul id="search-results" class="search-results" aria-live="polite" aria-relevant="additions text" hidden></ul>
 </div>
 
 <script>

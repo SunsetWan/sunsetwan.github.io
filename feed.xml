@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://sunsetwan.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://sunsetwan.github.io/" rel="alternate" type="text/html" hreflang="zh-CN" /><updated>2026-07-16T00:01:15+08:00</updated><id>https://sunsetwan.github.io/feed.xml</id><title type="html">日落大道</title><subtitle>Sunset Wan 的 Swift、iOS 与软件设计技术博客。</subtitle><author><name>Sunset Wan</name></author><entry><title type="html">初识 The Composable Architecture（二）</title><link href="https://sunsetwan.github.io/2026/02/04/tca-101-p2/" rel="alternate" type="text/html" title="初识 The Composable Architecture（二）" /><published>2026-02-04T21:37:39+08:00</published><updated>2026-02-04T21:37:39+08:00</updated><id>https://sunsetwan.github.io/2026/02/04/tca-101-p2</id><content type="html" xml:base="https://sunsetwan.github.io/2026/02/04/tca-101-p2/"><![CDATA[<p>本文延续上一节对 TCA 的建模思路，聚焦「副作用」该如何在 reducer 中显式表达与测试。我们会把原本隐式的 I/O 操作抽象为 <code class="language-plaintext highlighter-rouge">Effect</code>，让 reducer 返回副作用，并进一步调整 <code class="language-plaintext highlighter-rouge">combine</code>/<code class="language-plaintext highlighter-rouge">pullback</code> 以支持一组 effect 的组合。通过 Favorite Primes 的保存/读取示例，展示从「纯函数」到「可追踪副作用」的演化过程。</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://sunsetwan.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://sunsetwan.github.io/" rel="alternate" type="text/html" hreflang="zh-CN" /><updated>2026-07-16T01:30:50+08:00</updated><id>https://sunsetwan.github.io/feed.xml</id><title type="html">日落大道</title><subtitle>Sunset Wan 的 Swift、iOS 与软件设计技术博客。</subtitle><author><name>Sunset Wan</name></author><entry><title type="html">初识 The Composable Architecture（二）</title><link href="https://sunsetwan.github.io/2026/02/04/tca-101-p2/" rel="alternate" type="text/html" title="初识 The Composable Architecture（二）" /><published>2026-02-04T21:37:39+08:00</published><updated>2026-02-04T21:37:39+08:00</updated><id>https://sunsetwan.github.io/2026/02/04/tca-101-p2</id><content type="html" xml:base="https://sunsetwan.github.io/2026/02/04/tca-101-p2/"><![CDATA[<p>本文延续上一节对 TCA 的建模思路，聚焦「副作用」该如何在 reducer 中显式表达与测试。我们会把原本隐式的 I/O 操作抽象为 <code class="language-plaintext highlighter-rouge">Effect</code>，让 reducer 返回副作用，并进一步调整 <code class="language-plaintext highlighter-rouge">combine</code>/<code class="language-plaintext highlighter-rouge">pullback</code> 以支持一组 effect 的组合。通过 Favorite Primes 的保存/读取示例，展示从「纯函数」到「可追踪副作用」的演化过程。</p>
 
 <!-- more -->
 
@@ -1356,7 +1356,7 @@
 
 <p>在握手成功后，双端严格以数据帧格式通信，格式如下图：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="image-20260123201016373" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="WebSocket 数据帧中 FIN、RSV、opcode、MASK、长度和载荷字段的位布局" /></p>
 
 <h4 id="头部结构2-个字节">头部结构（2 个字节）</h4>
 
@@ -1474,7 +1474,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <h3 id="建立连接时的握手阶段-1">建立连接时的握手阶段</h3>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Xnip2026-01-24_14-58-02" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Wireshark 抓包显示客户端 GET 升级请求和服务端 101 Switching Protocols 响应" /></p>
 
 <p>点击 Connect，客户端主动发送 HTTP 升级请求，并收到服务端的同意协议升级响应。</p>
 
@@ -1482,7 +1482,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>建立连接成功后，发送 “hello” 字符串</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Xnip2026-01-24_15-24-15" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Wireshark 显示客户端发送带 MASK 的 hello 文本帧" /></p>
 
 <p>我们可以看到数据帧为：0x81 0x85 0x88 0x56 0xa3 0xf5 0xe0 0x33 0xcf 0x99 0xe7</p>
 
@@ -1505,17 +1505,17 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <h4 id="服务端发来的数据帧">服务端发来的数据帧</h4>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Xnip2026-01-24_22-27-48" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Wireshark 显示服务端返回不带 MASK 的 hello 文本帧" /></p>
 
 <p>因为是回声服务器，所以服务端也是发来 “hello”，没有做 masking，能直接看到 payload 是 “hello”。</p>
 
 <h4 id="客户端主动与服务端断开连接">客户端主动与服务端断开连接</h4>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Xnip2026-01-24_22-58-26" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Wireshark 显示客户端发送带 MASK、状态码 1000 的关闭帧" /></p>
 
 <p>上图中：客户端发出关闭控制帧，FIN 位为 1，opcode 为 8。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Xnip2026-01-24_22-58-53" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Wireshark 显示服务端返回不带 MASK 和载荷的关闭帧" /></p>
 
 <p>上图中：客户端收到服务端响应的关闭控制帧。</p>
 
@@ -1579,7 +1579,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>看来看去还是 Starscream 的星星数比较多多，同时也是 Socket.IO iOS 客户端的依赖之一，所有首先来看看它的架构图：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="Starscream 从 API、Engine 到 Compression、Security、Transport 和 Framer 的分层架构图" /></p>
 
 <h4 id="设计特点">设计特点</h4>
 
@@ -1736,7 +1736,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>SwiftUI 中 Identity 分为两种：Explicit Identity 和 Structural Identity。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="alt text" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="外表相似的双胞胎并肩站在走廊中" /></p>
 
 <p>当遇到两个外表很相似的双胞胎，我们该如何区分？对，可以通过姓名来区分！这就是 Explicit Identity。</p>
 
@@ -1745,7 +1745,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>接下来，我们来看一个更实际的例子：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="02.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="SwiftUI 条件分支映射为 ConditionalContent 的 True 和 False 两种结构身份" /></p>
 
 <p>左边的代码在 SwiftUI 「眼里」当条件为真时显示 <code class="language-plaintext highlighter-rouge">AdoptionDirectory</code> 视图，条件为假时显示 <code class="language-plaintext highlighter-rouge">DogList</code> 视图。只要条件恒定，SwiftUI 能知道哪个是「真分支」哪个是「假分支」。</p>
 
@@ -1773,7 +1773,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
     <span class="p">}</span>
 </code></pre></div></div>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="Simulator Screen Recording - iPhone 17 - 2025-11-30 at 12.53.09.gif" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="条件分支切换时，绿色爪印消失后红色爪印重新出现的动画" /></p>
 
 <h4 id="问题一为什么是绿色爪印消失后再出现红色爪印呢">问题一：为什么是绿色爪印消失后再出现红色爪印呢？</h4>
 
@@ -1793,7 +1793,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>我们可以把 <code class="language-plaintext highlighter-rouge">pawView</code> 里的 if 分支拿掉，单个 <code class="language-plaintext highlighter-rouge">PawView</code> 的 Structural Identity 就保持不变；<code class="language-plaintext highlighter-rouge">dog.isGood</code> 变化时，只是同一个视图的 tintColor 和位置在变，状态与动画都能连续。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="Simulator Screen Recording - iPhone 17 - 2025-11-30 at 13.24.36.gif" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="保持同一 PawView 身份后，爪印颜色和位置连续过渡的动画" /></p>
 
 <h2 id="lifetime">Lifetime</h2>
 
@@ -1856,7 +1856,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>再看这个 <a href="https://github.com/SunsetWan/WWDC-21-Demystify-SwiftUI-code-example/blob/main/SharingDemo-TreatJar/TreatJar/TreatJar/FavoritePetsView.swift#L37">例子</a>，来辅助理解上面的总结。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="image.png" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="Favorite Pets 列表显示五只宠物及右上角 Add 按钮" /></p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">Pet</span><span class="p">:</span> <span class="kt">Identifiable</span> <span class="p">{</span>
     <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
@@ -1901,7 +1901,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>当点击 Add 按钮时，「汤姆猫」出现在 List 的首位。让我们用 SwiftUI Instruments 来查看当前视图的更新次数。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="03.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="SwiftUI Instruments 显示身份不稳定时 PetRow body 执行 29 次" /></p>
 
 <p>因为 PetRow Identity 的不稳定性，导致 <code class="language-plaintext highlighter-rouge">PetRow</code> 的 body 被执行多次。如果放在一个大型项目中，可能会导致 App 出现卡顿。</p>
 
@@ -1916,7 +1916,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>可以再次运行 SwiftUI Instruments 来查看当前视图的更新次数：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="04.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="使用稳定 id 后 SwiftUI Instruments 显示 PetRow body 仅创建 6 次" /></p>
 
 <p>PetRow 的 body 被执行的次数锐减至 6 次！原本已有 5 个宠物，再加上新增的「汤姆猫」，总计 6 次，与预期相符。</p>
 
@@ -1924,7 +1924,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>再看这个稍微复杂一点的 <a href="https://github.com/SunsetWan/WWDC-21-Demystify-SwiftUI-code-example/blob/main/SharingDemo-TreatJar/TreatJar/TreatJar/TreatJarView.swift#L45">例子</a>。Treat Jar View 展示的是给宠物准备的零食。如果有零食过期，那就置灰。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="08.png" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="Treat Jar 页面中已过期零食变灰，未过期零食保持高亮" /></p>
 
 <p>我们借助于 <code class="language-plaintext highlighter-rouge">ExpirationModifier</code> 来实现置灰的效果。</p>
 
@@ -1968,7 +1968,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>此时执行点击左上角 Expire 按钮来模拟所有的零食过期。SwiftUI Instruments 给出的视图更新次数如下：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="06.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="条件分支切换过期状态后，SwiftUI Instruments 显示 TreatCell body 创建 2 次" /></p>
 
 <p>代表两种零食的 TreatCell 创建了两次，但实际上零食过期后，只需置灰即可，不需要重新创建 TreatCell。</p>
 
@@ -2007,13 +2007,13 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>运行 SwiftUI Instruments，再次点击左上角 Expire 按钮，可以看到：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="07.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="移除条件分支后，Instruments 只记录 ExpirationModifier body 的 7 次更新" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">TreatCell.body</code> 没有再被执行过了！所以在 View 中使用 if 分支时，可以停下来问自己：我是要多个视图还是某一视图的两种状态呢？引入不必要的分支，可能会导致性能下降，甚至视图的状态丢失。</p>
 
 <h2 id="dependency">Dependency</h2>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="09.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="DogView 代码中依赖、body 和 action 的对应区域" /></p>
 
 <p>（本节不是本文讨论的重点，于是我放上 AI 对此的总结）</p>
 
@@ -2068,7 +2068,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>运行 SwiftUI Instruments 来看看视图的变化次数：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="10.jpg" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="SwiftUI Instruments 显示 DetailView 更新约 4900 次并出现严重卡顿" /></p>
 
 <p>从上图可以看出：在短短几秒之内，DetailView 更新了将近 5000 次，SwiftUI 内部的 NavigationStack 更新了将近一万五千次，整个 App 出现了严重的卡顿！</p>]]></content><author><name>Sunset Wan</name></author><category term="SwiftUI" /><summary type="html"><![CDATA[前阵子遇到一个很奇怪的 BUG：用 NavigationStack push 一个 View，CPU 使用率竟然冲上 100%！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 WWDC 21 Demystify SwiftUI。]]></summary></entry><entry><title type="html">Protocol Witness in Swift</title><link href="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/" rel="alternate" type="text/html" title="Protocol Witness in Swift" /><published>2024-06-23T21:23:49+08:00</published><updated>2024-06-23T21:23:49+08:00</updated><id>https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness</id><content type="html" xml:base="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/"><![CDATA[<p>在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。<!-- more --></p>
 
@@ -2339,7 +2339,7 @@ let 小蜘蛛 = 蜘蛛()
 <h2 id="wwdc-24-中也提到了-protocol-witness">WWDC 24 中也提到了 Protocol Witness</h2>
 
 <p>于 <a href="https://developer.apple.com/videos/play/wwdc2024/10217/">Explore Swift performance</a> 视频 [31: 04] 处：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/wwdc24_swift_performance.jpg" alt="" /></p>
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/wwdc24_swift_performance.jpg" alt="DataModel 协议要求与 DataModelWitnessTable 中函数指针的对照" /></p>
 
 <p>左边为 <code class="language-plaintext highlighter-rouge">DataModel</code> 协议，右边为 <code class="language-plaintext highlighter-rouge">DataModel</code> 协议的 Witness。</p>
 
@@ -2355,7 +2355,7 @@ let 小蜘蛛 = 蜘蛛()
 
 <p>如果 requestQueue 自己是个单独的串行队列呢？iOS 会专门给 requestQueue 分配另一个线程 T2，这样 App 就可能使用了不必要的线程资源。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="Alamofire 的 requestQueue 和 serializationQueue 都以 rootQueue 为目标队列，共用其执行线程" /></p>
 
 <p>当存在过多线程时，不仅会增加内存压力，更重要的是，这些线程在有限的 CPU 核心上运行，导致频繁的线程上下文切换。有时候，与实际执行需要的指令相比，这些上下文切换所消耗的资源和时间反而占据了主要部分。这种情况下，由于线程被阻塞的同时，又不断有新的任务以 async 的方式提交到并行队列，导致过多的新线程被创建，我们将其称为<strong>线程爆炸</strong>。</p>
 
@@ -2363,11 +2363,11 @@ let 小蜘蛛 = 蜘蛛()
 
 <h2 id="af-创建-request-的流程">AF 创建 Request 的流程</h2>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="Alamofire 从 Session 发起请求并创建 DataRequest 的调用流程" /></p>
 
 <h2 id="af-处理-response-的流程">AF 处理 Response 的流程</h2>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="Alamofire 接收 URLSession 回调并序列化 Response 的处理流程" /></p>
 
 <h2 id="af-中是如何解决数据竞争的">AF 中是如何解决数据竞争的？</h2>
 
@@ -2497,7 +2497,7 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 
 <p>但需要注意的是，这个代理方法被调用的条件有些苛刻，得同时满足以下 7 个条件才行！</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="" /></p>]]></content><author><name>Sunset Wan</name></author><category term="Alamofire" /><summary type="html"><![CDATA[阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。]]></summary></entry><entry><title type="html">Codable 学习笔记</title><link href="https://sunsetwan.github.io/2022/04/14/Codable/" rel="alternate" type="text/html" title="Codable 学习笔记" /><published>2022-04-14T09:41:00+08:00</published><updated>2022-04-14T09:41:00+08:00</updated><id>https://sunsetwan.github.io/2022/04/14/Codable</id><content type="html" xml:base="https://sunsetwan.github.io/2022/04/14/Codable/"><![CDATA[<p>本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。<!-- more --></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="URLSession 调用 willCacheResponse 代理方法所需满足的七个条件" /></p>]]></content><author><name>Sunset Wan</name></author><category term="Alamofire" /><summary type="html"><![CDATA[阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。]]></summary></entry><entry><title type="html">Codable 学习笔记</title><link href="https://sunsetwan.github.io/2022/04/14/Codable/" rel="alternate" type="text/html" title="Codable 学习笔记" /><published>2022-04-14T09:41:00+08:00</published><updated>2022-04-14T09:41:00+08:00</updated><id>https://sunsetwan.github.io/2022/04/14/Codable</id><content type="html" xml:base="https://sunsetwan.github.io/2022/04/14/Codable/"><![CDATA[<p>本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。<!-- more --></p>
 
 <p>Swift 4.0 就引入了 <code class="language-plaintext highlighter-rouge">Codable</code> 协议。话不多说，进入正题：<br />
 示例 JSON：</p>
@@ -2637,7 +2637,7 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
     <span class="p">}</span>
 </code></pre></div></div>
 <p>在自己实现 <code class="language-plaintext highlighter-rouge">decode</code> 方法时，还需要对几类容器（Container）有了解：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png" alt="codable-01" /></p>
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png" alt="JSON 示例中 Keyed、Nested、Unkeyed 和 Single Value 四类容器的位置" /></p>
 <ul>
   <li><strong>Keyed Container</strong>：最常见的容器之一，可用来解析键值对数据，对应的 key 定义在 <code class="language-plaintext highlighter-rouge">CodingKeys</code> 枚举中。</li>
   <li><strong>Unkeyed Container</strong>：用来解析不是以字符串为 key 的结构，例如常见的数组结构。</li>
@@ -2922,7 +2922,7 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 <p><a href="https://developer.apple.com/documentation/foundation/jsondecoder">JSONDecoder</a> 的结构与 <a href="https://developer.apple.com/documentation/foundation/jsonencoder">JSONEncoder</a> 很相似，不再一一赘述。</p>
 
 <h3 id="swiftyjson-源码分析未完待续">SwiftyJSON 源码分析（未完待续）</h3>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-02.png" alt="" /></p>]]></content><author><name>Sunset Wan</name></author><category term="Codable" /><summary type="html"><![CDATA[本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。]]></summary></entry><entry><title type="html">打造一个简单的 iOS App CI 系统</title><link href="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/" rel="alternate" type="text/html" title="打造一个简单的 iOS App CI 系统" /><published>2022-03-30T09:41:00+08:00</published><updated>2022-03-30T09:41:00+08:00</updated><id>https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F</id><content type="html" xml:base="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/"><![CDATA[<p>除了 Xcode Cloud，你还有别的选择。<!-- more --><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-02.png" alt="SwiftyJSON 的 JSON 结构体组成及其输入和协议关系" /></p>]]></content><author><name>Sunset Wan</name></author><category term="Codable" /><summary type="html"><![CDATA[本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。]]></summary></entry><entry><title type="html">打造一个简单的 iOS App CI 系统</title><link href="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/" rel="alternate" type="text/html" title="打造一个简单的 iOS App CI 系统" /><published>2022-03-30T09:41:00+08:00</published><updated>2022-03-30T09:41:00+08:00</updated><id>https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F</id><content type="html" xml:base="https://sunsetwan.github.io/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/"><![CDATA[<p>除了 Xcode Cloud，你还有别的选择。<!-- more --><br />
 本文介绍如何在 macOS 上使用 <a href="https://fastlane.tools/">fastlane</a> 来帮助你打造一个简单的 iOS App CI 系统。</p>
 
 <h2 id="在安装-fastlane-之前">在安装 fastlane 之前</h2>
@@ -3005,7 +3005,7 @@ bundle <span class="nb">exec </span>fastlane match adhoc
 <span class="p">)</span>
 </code></pre></div></div>
 <p>iOS App scheme、match type 和 gym export method 三者之间可能对应的关系如下图所示：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png" alt="01" /></p>
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_01.png" alt="test、pre-prod 与 prod 三种 scheme 对应的 match type 和 gym export method" /></p>
 <h3 id="7-上传至-app-store">7. 上传至 App store</h3>
 <p>fastlane 老式的做法是用 Apple ID 的账号密码去登陆 App store connect，这样不光得设置一大堆环境变量，如下：</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">FASTLANE_USER</span> <span class="o">=</span> <span class="s2">"sunsetwan@gmail.com"</span>
@@ -3128,9 +3128,9 @@ bundle <span class="nb">exec </span>fastlane match adhoc
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_02.jpg" alt="02" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_02.jpg" alt="Xcode 中包含 test_methodOne 和 test_methodTwo 的 MyClassTests 测试类，左侧可运行整组测试" /><br />
 点击运行按钮，可以看到如下测试日志：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_03.jpg" alt="03" /><br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_03.jpg" alt="两个测试均各自创建、调用并销毁一个 MyClass 实例的测试日志" /><br />
 以 <code class="language-plaintext highlighter-rouge">test_methodOne</code> 方法为例，整个测试流程方法调用顺序为：</p>
 <ol>
   <li>MyClass.init()</li>
@@ -3155,7 +3155,7 @@ bundle <span class="nb">exec </span>fastlane match adhoc
 <span class="p">}</span>
 </code></pre></div></div>
 <p>再次点击运行按钮，得到如下测试日志：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_04.jpg" alt="04" /><br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_04.jpg" alt="把 MyClass 设为测试类属性后，测试运行前连续初始化两个实例且没有销毁日志" /><br />
 咦！怎么 <code class="language-plaintext highlighter-rouge">MyClass.init()</code> 调用了两次？<code class="language-plaintext highlighter-rouge">MyClass.deinit()</code> 方法没被调用！<br />
 在测试代码开始运行之前，两个 <code class="language-plaintext highlighter-rouge">MyClass</code> 的实例被创建了，且从未被销毁！这样会有两个潜在的问题：</p>
 <ol>
@@ -3222,7 +3222,7 @@ bundle <span class="nb">exec </span>fastlane match adhoc
 <span class="p">}</span>
 </code></pre></div></div>
 <p>再次点击运行按钮，得到如下测试日志：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_05.jpg" alt="05" /><br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/iOS_simple_CI/ios_ci_05.jpg" alt="使用 setUp 与 tearDown 后，每个测试都正确初始化并销毁 MyClass 实例的日志" /><br />
 Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 
 <p>fastlane 的 <a href="https://docs.fastlane.tools/getting-started/ios/running-tests/">run_tests</a> 可用来在 ruby 脚本中执行测试代码。</p>
@@ -3242,7 +3242,7 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 <p>内存缓存背后支撑的数据结构是 Foundation 框架中的 <code class="language-plaintext highlighter-rouge">NSCache</code>。<br />
 <code class="language-plaintext highlighter-rouge">NSCache</code> 有两个限制：<code class="language-plaintext highlighter-rouge">countLimit</code> 和 <code class="language-plaintext highlighter-rouge">totalCostLimit</code>。前者是表示能存储多少个对象，后者是表示缓存的容量有多大。但这两个限制是软限制——如果超过限制，<code class="language-plaintext highlighter-rouge">NSCache</code> 中保存的对象不一定会被及时地从其中移出。根据 <a href="https://developer.apple.com/documentation/foundation/nscache?language=objc">官方文档</a>，超过限制之后，对象的移出时机取决与 <code class="language-plaintext highlighter-rouge">NSCache</code> 背后的实现。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="kf_01" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="NSCache 的泛型声明要求 KeyType 和 ObjectType 都是 AnyObject 引用类型" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">NSCache</code> 是个泛型类，所以我们得定义好 <code class="language-plaintext highlighter-rouge">KeyType</code> 和 <code class="language-plaintext highlighter-rouge">ObjectType</code>。<br />
 根据声明的类型约束，<code class="language-plaintext highlighter-rouge">KeyType</code> 的类型得是一个类。一般地，类似 key 的数据结构会采用 <code class="language-plaintext highlighter-rouge">String</code>。而这里 <code class="language-plaintext highlighter-rouge">KeyType</code> 得是引用类型而不是值类型，所以我们会选择 <code class="language-plaintext highlighter-rouge">NSString</code>。但在 API 设计时，对外暴露的那一层 API，还是可以使用 <code class="language-plaintext highlighter-rouge">String</code>。到调用 <code class="language-plaintext highlighter-rouge">NSCache</code> 的 <code class="language-plaintext highlighter-rouge">setObject(_:forKey:cost:)</code> 方法时，再把 <code class="language-plaintext highlighter-rouge">String</code> 转为 <code class="language-plaintext highlighter-rouge">NSString</code>。之所以这样做，是因为值类型更符合当前场景的需求。<br />
@@ -3518,7 +3518,7 @@ Kingfisher 有设计 3 种缓存续期策略：</p>
 <h2 id="其他">其他</h2>
 <p>在阅读 Kingfisher 缓存系统相关代码时，我还发现了其他值得学习的代码，一并记录。</p>
 <h3 id="网络请求重试机制">网络请求重试机制</h3>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="kf_02.001" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="Kingfisher 重试机制：RetryStrategy 根据数据源、错误和重试次数决定继续重试或停止" /><br />
 Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">RetryStrategy</code> 协议，由遵循该协议的对象来作出决定（<code class="language-plaintext highlighter-rouge">RetryDecision</code>）。<code class="language-plaintext highlighter-rouge">RetryDecision</code> 有两种：继续重试和停止重试。</p>
 
 <p>遵循 <code class="language-plaintext highlighter-rouge">RetryStrategy</code> 协议的对象内部设计了三种重试模式：</p>
@@ -3848,7 +3848,7 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 </blockquote>
 
 <p>一个典型的持续集成工作流程如下图所示：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%201.jpg" alt="" /></p>
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%201.jpg" alt="典型持续集成流程：推送 Git 变更后执行构建、测试与自定义任务，再生成产物和通知" /></p>
 <ol>
   <li>将发生变动的代码推送至远端代码仓库。</li>
   <li>项目开始构建、运行测试代码和其他自定义步骤。</li>
@@ -3856,7 +3856,7 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 </ol>
 
 <p>再让我们看一下 iOS 应用常见的开发流程：<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%202.jpg" alt="" /></p>
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%202.jpg" alt="iOS 应用开发循环：开发团队构建测试并分发，用户手动测试反馈后继续优化" /></p>
 <ol>
   <li>修复 Bug 和完成新的需求。</li>
   <li>根据团队内部 Code Review 的反馈，对代码作相应的修改。</li>
@@ -3867,7 +3867,7 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 <p>高效地运作上图所示流程是构建高质量应用的关键。</p>
 
 <p>嘭! Xcode Cloud 此时闪亮登场！<br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%203.jpg" alt="" /><br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%203.jpg" alt="Xcode Cloud 将 Xcode 开发、TestFlight 测试与 App Store 分发连接成闭环" /><br />
 在上述持续集成的流程之上，Xcode Cloud 把应用开发、应用测试和应用分发三点连接起来，提供给开发者一条完整的开发流水线：</p>
 <ol>
   <li>应用开发</li>
@@ -3879,18 +3879,18 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 
 <h3 id="立马上手-xcode-cloud">立马上手 Xcode Cloud</h3>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%204%20%E6%96%B0.jpg" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%204%20%E6%96%B0.jpg" alt="Xcode 中 Fruta 的 Xcode Cloud 总览，左侧列出工作流与构建状态，右侧汇总各次构建" /></p>
 
 <p>Fruta 是 Apple 用来演示 Xcode Cloud 的 App。在 Xcode 13 本地打开的 Xcode Cloud 控制台页面大致如上图所示，左边侧边栏展示了已完成/正在执行中的工作流，右边则是对多个工作流的总览，从中我们可以粗略了解整个团队开发的进度。</p>
 
 <h4 id="什么是-xcode-cloud-workflow">什么是 Xcode Cloud Workflow？</h4>
 <p>我们可以把 Xcode Cloud 工作流理解成某种配置。Xcode Cloud 会读取该配置的内容，从而明白自己在何时执行何种任务。某个工作流执行的过程称为一次构建。Xcode Cloud 依托于 Apple 自管理的云端基础设施。该基础设施提供代码签名，同时也能帮助开发者访问多种不同版本的操作系统和 Xcode，例如最新版的 macOS Monterey 和 Xcode 13。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%205.jpg" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%205.jpg" alt="Fruta Build 595 总览：iOS 和 macOS 归档成功，iOS 测试失败，TestFlight 后置操作完成" /></p>
 
 <p>在左侧边栏中点选某个工作流，展现在我们面前的是该工作流单次运行的总览。从这里，我们能看到测试代码运行的结果与相应的日志，甚至可以双击报错处，直接定位到导致出错的某一行代码。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%206.jpg" alt="" /></p>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%206.jpg" alt="App Store Connect 网页中的 Fruta Xcode Cloud 构建列表" /></p>
 
 <p>这些内容可不只是在 Xcode 本地才能看到，也可以在 App Store Connect 网页中获取到，包括开始构建、管理工作流、检阅构建产物、与团队成员共享构建报告和管理通知等。比如，在构建完成后，可以在网页中设置结果通知到 Slack 等交流协作工具，以帮助团队成员在第一时间知道结果。</p>
 
@@ -3906,13 +3906,13 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 </ul>
 
 <h2 id="为你的工程配置-xcode-cloud">为你的工程配置 Xcode Cloud</h2>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%207.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%207.jpg" alt="Xcode 的 Product 菜单中选择 Xcode Cloud，再点击 Create Workflow" /><br />
  在 Xcode 13 中（满足一些前提条件之后）仅需几步操作即可为你的工程配置 Xcode Cloud。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%208.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%208.jpg" alt="Xcode Cloud 产品选择页中选中支持 iOS 和 macOS 的 Fruta App" /><br />
 接着，选中接入 Xcode Cloud 的应用（这里以 Fruta 为例），·</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%209.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%209.jpg" alt="Default 工作流预览：main 分支变更触发，使用最新 Xcode，归档 iOS 与 macOS" /><br />
 然后，开始预览一个工作流。工作流最基本的四个要素为：</p>
 <ul>
   <li>启动的条件</li>
@@ -3923,7 +3923,7 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 
 <p>想要深入了解工作流的编辑过程，请参考 <a href="https://developer.apple.com/videos/play/wwdc2021/10268/">WWDC21 10268 探索 Xcode Cloud 工作流</a>。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2010.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2010.jpg" alt="Xcode Cloud 请求访问 GitHub 上的 FrutaApp 主仓库与 scripts 仓库" /><br />
 然后需要给 Xcode Cloud 授权以获取 Fruta 源代码。授权范围不光光是代码主仓库，也包括名下的子模块以及私有的 Swift Package。</p>
 
 <p>Fruta App 使用到两个托管于 GitHub 上的私有仓库，所以点击「Grant Access」会跳转到 App Store Connect 网页界面。值得一提的是：这个流程取决于工程代码是如何托管的。Xcode Cloud 要求使用 Git 来管理工程代码，且仅支持以下几种源代码管理提供商：</p>
@@ -3937,30 +3937,30 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 
 <p>整个授权过程将 Apple ID 与源代码管理提供商的账号相关联，并使用源代码管理提供商原生的授权方式与 Xcode Cloud 的安全加密，以确保源代码和用户信息处于保护之下。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2012.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2012.jpg" alt="FrutaApp 主仓库与 scripts 仓库均已授权 Xcode Cloud 访问" /><br />
 在 App Store Connect 上完成授权后就可以回到 Xcode 本地继续之前的流程。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2018%20%EF%BC%88%E6%9C%AA%E4%B8%8A%E4%BC%A0%E8%87%B3%E5%9B%BE%E5%BA%8A%EF%BC%89.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2018%20%EF%BC%88%E6%9C%AA%E4%B8%8A%E4%BC%A0%E8%87%B3%E5%9B%BE%E5%BA%8A%EF%BC%89.jpg" alt="确认将 Fruta App 与 App Store Connect 中的 Xcode Cloud 构建关联" /><br />
 点击 <code class="language-plaintext highlighter-rouge">Complete</code> 按钮，Xcode Cloud 将会帮助开发者把应用信息注册至 App Store Connect。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2014.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2014.jpg" alt="Fruta 已配置 Xcode Cloud，选择 main 分支并点击 Start Build 开始首次构建" /><br />
 终于到了最后一步！点击 <code class="language-plaintext highlighter-rouge">Start Build</code> 按钮，就可以开始第一次构建。</p>
 
 <h2 id="检阅-xcode-cloud-构建报告">检阅 Xcode Cloud 构建报告</h2>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2015%20%E6%96%B0.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2015%20%E6%96%B0.jpg" alt="Build 1 总览：iOS 归档完成，macOS 归档因两个问题失败" /><br />
 以 Fruta 这次构建为例：从该构建报告中，我们可以清晰明了地知道构建耗时以及构建环境的配置。点击右上角的 <code class="language-plaintext highlighter-rouge">Rebuild</code> 按钮也能帮助我们重新开始构建。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2016.jpg" alt="" /><br />
-<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2017.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2016.jpg" alt="Build 1 的 iOS 归档日志与各构建步骤耗时" /><br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%88%AA%E5%9B%BE%2017.jpg" alt="Build 1 的 iOS 归档产物列表，包含日志、安装包和 xcarchive" /><br />
 在 <code class="language-plaintext highlighter-rouge">Actions</code> 一列中，点击单个 action，可以看到该次 Action 的日志和相应的产物。这样的设计使得整个团队都能很方便地获取到当前 CI 的信息。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2019.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2019.jpg" alt="macOS 归档失败：UIKit 在 macOS 不可用且找不到 UIKit 模块" /><br />
 喔嚯，在 Build 1 中的「 在 macOS 上归档（Archive）」这一任务失败了！是因为无法在 macOS 上使用 UIKit 框架。我们可以把鼠标移至报错处，点击 ➡️ 小箭头，会直接跳转到对应出错的代码文件。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2020.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2020.jpg" alt="在 MeasurementView 中用条件编译避免 macOS 构建导入 UIKit" /><br />
 根据之前的报错提示，我们可以快速定位问题。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2021.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%96%B0%E6%88%AA%E5%9B%BE%2021.jpg" alt="修复 macOS 导入错误后自动触发 Build 2，Build 1 仍显示失败" /><br />
 在 Git 上推送最新的代码之后，Xcode Cloud 自动触发了新的构建——Build 2。</p>
 
 <h2 id="xcode-cloud-中的团队协作">Xcode Cloud 中的团队协作</h2>
@@ -3968,14 +3968,14 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 
 <p>Build 1 和 Build 2 均是名为 <code class="language-plaintext highlighter-rouge">Default</code> 的工作流的两次不同的构建。但 Default 这个名字取得不够具体，让我们在它上面点击鼠标右键并在弹出的菜单中选择 <code class="language-plaintext highlighter-rouge">Edit Workflow...</code>，来看看是如何简单地编辑一个 Xcode Cloud 工作流吧！</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2022.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2022.jpg" alt="在工作流 General 设置中将名称从 Default 改为 Releases" /><br />
 将工作流的名称从 <code class="language-plaintext highlighter-rouge">Default</code> 修改为 <code class="language-plaintext highlighter-rouge">Releases</code> 更加符合该工作流的意图。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2023.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2023.jpg" alt="Releases 工作流触发条件：监听 main 和 release/v1 分支并自动取消旧构建" /><br />
 点选左侧边栏的 <code class="language-plaintext highlighter-rouge">Start Condition</code> 就可以开始编辑该工作流的触发条件。<br />
 类似地，我们在 <code class="language-plaintext highlighter-rouge">Custom Branches</code> 一栏中点击 + 号，添加 <code class="language-plaintext highlighter-rouge">release/v1</code> 分支。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2024.jpg" alt="" /><br />
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/WWDC%2021/%E6%AD%A3%E5%BC%8F/%E6%96%B0%E6%88%AA%E5%9B%BE%2024.jpg" alt="Releases 工作流添加必过的 iOS 测试任务，覆盖 iPhone 12 与推荐 iPad" /><br />
 <code class="language-plaintext highlighter-rouge">Releases</code> 工作流怎么能少了测试任务呢！点击 <code class="language-plaintext highlighter-rouge">Actions</code> 右边的小加号，并在弹出的菜单中选择 <code class="language-plaintext highlighter-rouge">Test</code> 即可添加对应的测试任务。</p>
 
 <p>点选左侧边栏的 <code class="language-plaintext highlighter-rouge">Environment</code> 就可以开始编辑该工作流的环境配置。其中有一个可勾选的 <code class="language-plaintext highlighter-rouge">Clean</code> 选项。一旦勾选，Xcode Cloud 会在每次开始构建时清空 <code class="language-plaintext highlighter-rouge">DerivedData</code> 缓存文件夹。更多详细内容，请参考 <a href="https://developer.apple.com/videos/play/wwdc2021/10268/">WWDC21 10268 探索 Xcode Cloud 工作流</a> [06:02] 处。</p>

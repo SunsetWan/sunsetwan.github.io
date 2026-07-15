@@ -103,7 +103,10 @@
   
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body><div class="progress-bar" aria-hidden="true"></div>
+<body>
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -128,7 +131,7 @@
   });
 })();
 </script>
-<main class="page-content" aria-label="Content">
+<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
 
@@ -153,8 +156,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-07-16T01:19:02+08:00">
+        更新于 2026-07-16
       </time>
     
     
@@ -273,7 +276,7 @@
 
 <p>SwiftUI 中 Identity 分为两种：Explicit Identity 和 Structural Identity。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="alt text" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="外表相似的双胞胎并肩站在走廊中" /></p>
 
 <p>当遇到两个外表很相似的双胞胎，我们该如何区分？对，可以通过姓名来区分！这就是 Explicit Identity。</p>
 
@@ -282,7 +285,7 @@
 
 <p>接下来，我们来看一个更实际的例子：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="02.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="SwiftUI 条件分支映射为 ConditionalContent 的 True 和 False 两种结构身份" /></p>
 
 <p>左边的代码在 SwiftUI 「眼里」当条件为真时显示 <code class="language-plaintext highlighter-rouge">AdoptionDirectory</code> 视图，条件为假时显示 <code class="language-plaintext highlighter-rouge">DogList</code> 视图。只要条件恒定，SwiftUI 能知道哪个是「真分支」哪个是「假分支」。</p>
 
@@ -310,7 +313,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
     <span class="p">}</span>
 </code></pre></div></div>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="Simulator Screen Recording - iPhone 17 - 2025-11-30 at 12.53.09.gif" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="条件分支切换时，绿色爪印消失后红色爪印重新出现的动画" /></p>
 
 <h4 id="问题一为什么是绿色爪印消失后再出现红色爪印呢">问题一：为什么是绿色爪印消失后再出现红色爪印呢？</h4>
 
@@ -330,7 +333,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>我们可以把 <code class="language-plaintext highlighter-rouge">pawView</code> 里的 if 分支拿掉，单个 <code class="language-plaintext highlighter-rouge">PawView</code> 的 Structural Identity 就保持不变；<code class="language-plaintext highlighter-rouge">dog.isGood</code> 变化时，只是同一个视图的 tintColor 和位置在变，状态与动画都能连续。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="Simulator Screen Recording - iPhone 17 - 2025-11-30 at 13.24.36.gif" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="保持同一 PawView 身份后，爪印颜色和位置连续过渡的动画" /></p>
 
 <h2 id="lifetime">Lifetime</h2>
 
@@ -393,7 +396,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>再看这个 <a href="https://github.com/SunsetWan/WWDC-21-Demystify-SwiftUI-code-example/blob/main/SharingDemo-TreatJar/TreatJar/TreatJar/FavoritePetsView.swift#L37">例子</a>，来辅助理解上面的总结。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="image.png" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="Favorite Pets 列表显示五只宠物及右上角 Add 按钮" /></p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">Pet</span><span class="p">:</span> <span class="kt">Identifiable</span> <span class="p">{</span>
     <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
@@ -438,7 +441,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>当点击 Add 按钮时，「汤姆猫」出现在 List 的首位。让我们用 SwiftUI Instruments 来查看当前视图的更新次数。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="03.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="SwiftUI Instruments 显示身份不稳定时 PetRow body 执行 29 次" /></p>
 
 <p>因为 PetRow Identity 的不稳定性，导致 <code class="language-plaintext highlighter-rouge">PetRow</code> 的 body 被执行多次。如果放在一个大型项目中，可能会导致 App 出现卡顿。</p>
 
@@ -453,7 +456,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>可以再次运行 SwiftUI Instruments 来查看当前视图的更新次数：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="04.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="使用稳定 id 后 SwiftUI Instruments 显示 PetRow body 仅创建 6 次" /></p>
 
 <p>PetRow 的 body 被执行的次数锐减至 6 次！原本已有 5 个宠物，再加上新增的「汤姆猫」，总计 6 次，与预期相符。</p>
 
@@ -461,7 +464,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>再看这个稍微复杂一点的 <a href="https://github.com/SunsetWan/WWDC-21-Demystify-SwiftUI-code-example/blob/main/SharingDemo-TreatJar/TreatJar/TreatJar/TreatJarView.swift#L45">例子</a>。Treat Jar View 展示的是给宠物准备的零食。如果有零食过期，那就置灰。</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="08.png" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="Treat Jar 页面中已过期零食变灰，未过期零食保持高亮" /></p>
 
 <p>我们借助于 <code class="language-plaintext highlighter-rouge">ExpirationModifier</code> 来实现置灰的效果。</p>
 
@@ -505,7 +508,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>此时执行点击左上角 Expire 按钮来模拟所有的零食过期。SwiftUI Instruments 给出的视图更新次数如下：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="06.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="条件分支切换过期状态后，SwiftUI Instruments 显示 TreatCell body 创建 2 次" /></p>
 
 <p>代表两种零食的 TreatCell 创建了两次，但实际上零食过期后，只需置灰即可，不需要重新创建 TreatCell。</p>
 
@@ -544,13 +547,13 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>运行 SwiftUI Instruments，再次点击左上角 Expire 按钮，可以看到：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="07.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="移除条件分支后，Instruments 只记录 ExpirationModifier body 的 7 次更新" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">TreatCell.body</code> 没有再被执行过了！所以在 View 中使用 if 分支时，可以停下来问自己：我是要多个视图还是某一视图的两种状态呢？引入不必要的分支，可能会导致性能下降，甚至视图的状态丢失。</p>
 
 <h2 id="dependency">Dependency</h2>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="09.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="DogView 代码中依赖、body 和 action 的对应区域" /></p>
 
 <p>（本节不是本文讨论的重点，于是我放上 AI 对此的总结）</p>
 
@@ -605,7 +608,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>运行 SwiftUI Instruments 来看看视图的变化次数：</p>
 
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="10.jpg" /></p>
+<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="SwiftUI Instruments 显示 DetailView 更新约 4900 次并出现严重卡顿" /></p>
 
 <p>从上图可以看出：在短短几秒之内，DetailView 更新了将近 5000 次，SwiftUI 内部的 NavigationStack 更新了将近一万五千次，整个 App 出现了严重的卡顿！</p>
 
@@ -696,11 +699,20 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <script>
 (function() {
-  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
+  document.querySelectorAll('pre').forEach(function(pre) {
+    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+  });
+
+  blocks.forEach(function(block) {
+    var code = block.querySelector('code');
+    if (!code) return;
+
     block.style.position = 'relative';
+    block.classList.add('has-code-copy');
 
     // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).find(function(c) {
+    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
       return c.indexOf('language-') === 0 && c !== 'language-plaintext';
     });
     if (langClass) {
@@ -713,12 +725,16 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
     var btn = document.createElement('button');
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', "复制代码");
+    btn.setAttribute('aria-live', 'polite');
     btn.textContent = "复制";
     btn.addEventListener('click', function() {
-      var code = block.querySelector('code');
       navigator.clipboard.writeText(code.innerText).then(function() {
         btn.textContent = "已复制";
-        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+        btn.setAttribute('aria-label', "已复制");
+        setTimeout(function() {
+          btn.textContent = "复制";
+          btn.setAttribute('aria-label', "复制代码");
+        }, 2000);
       });
     });
     block.appendChild(btn);
@@ -727,8 +743,8 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 </script>
 
 
-<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部" aria-hidden="true" tabindex="-1">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="18 15 12 9 6 15"></polyline>
   </svg>
 </button>
@@ -737,16 +753,18 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
     position: fixed;
     bottom: 2em;
     right: 2em;
-    width: 40px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text);
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -754,7 +772,9 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
   }
   .back-to-top.visible {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
   .back-to-top:hover {
     color: var(--links);
@@ -763,8 +783,6 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
     .back-to-top {
       bottom: 1em;
       right: 1em;
-      width: 36px;
-      height: 36px;
     }
   }
 </style>
@@ -772,17 +790,24 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 (function() {
   var btn = document.querySelector('.back-to-top');
   if (!btn) return;
+  var visible = false;
+
+  function setVisible(nextVisible) {
+    if (visible === nextVisible) return;
+    visible = nextVisible;
+    btn.classList.toggle('visible', visible);
+    btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    btn.tabIndex = visible ? 0 : -1;
+  }
+
   btn.addEventListener('click', function() {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
   });
   window.addEventListener('scroll', function() {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
+    setVisible(window.scrollY > 400);
   });
+  setVisible(window.scrollY > 400);
 })();
 </script>
 </body>
