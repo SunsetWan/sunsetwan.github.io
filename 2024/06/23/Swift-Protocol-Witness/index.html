@@ -1,359 +1,734 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+<html lang="zh-CN" class="html" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <title>
+    
+      Protocol Witness in Swift
+    
+  </title>
 
-<link rel="stylesheet" href="/css/main.css">
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Protocol Witness in Swift" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。" />
+<meta name="twitter:description" property="og:description" content="在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。" />
+<link rel="canonical" href="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/" />
+<meta property="og:url" content="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-06-23T21:23:49+08:00" />
+<meta property="article:modified_time" content="2024-06-23T21:23:49+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Protocol Witness in Swift" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2024-06-23T21:23:49+08:00","datePublished":"2024-06-23T21:23:49+08:00","description":"在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。","headline":"Protocol Witness in Swift","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/"},"url":"https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/"}</script>
+<!-- End Jekyll SEO tag -->
 
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
-
-    <meta name="description" content="在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Protocol Witness in Swift">
-<meta property="og:url" content="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/index.html">
-<meta property="og:site_name" content="日落大道">
-<meta property="og:description" content="在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/wwdc24_swift_performance.jpg">
-<meta property="article:published_time" content="2024-06-23T21:23:49.000Z">
-<meta property="article:modified_time" content="2024-06-23T21:23:49.000Z">
-<meta property="article:author" content="Sunset Wan">
-<meta property="article:tag" content="Protocol">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/wwdc24_swift_performance.jpg">
-
-
-<link rel="canonical" href="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/">
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/","path":"2024/06/23/Swift-Protocol-Witness/","title":"Protocol Witness in Swift"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Protocol Witness in Swift | 日落大道</title>
-  
-
-
-
-
-
-
-
-
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
-<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
 
   
 
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
 
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
 
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
 
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
 
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
 
   
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
+  <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
+<body><div class="progress-bar" aria-hidden="true"></div>
+<style>
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--links);
+    z-index: 100;
+    transition: width 50ms linear;
+  }
+</style>
+<script>
+(function() {
+  var bar = document.querySelector('.progress-bar');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      bar.style.width = (scrollTop / docHeight * 100) + '%';
+    }
+  });
+})();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="w">
+        
 
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
 
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
+<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</a>
+
+<h1 class="post-title">Protocol Witness in Swift</h1>
+
+
+
+<div class="post-meta">
+  <div class="post-meta-line">
+    
+    
+      <time class="post-meta-date" datetime="2024-06-23T21:23:49+08:00">
+        发布于 2024-06-23
+      </time>
+    
+    
+      <span class="post-meta-sep">·</span>
+      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
+        更新于 2026-07-15
+      </time>
+    
+    
+  </div>
+
+  
+    <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/Protocol/" class="tag">Protocol</a>
+
+      
     </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">日落大道</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
+  
 </div>
 
 
 
-<nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+
+
+
+
+
+<details class="toc">
+  <summary>目录</summary>
+  <ul>
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#问题-1">问题 1</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#问题-2">问题 2</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#问题-3">问题 3</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#protocol-witnesses-协议目击者">Protocol Witnesses （协议目击者）</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#解决问题-1">解决问题 1</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#解决问题-2">解决问题 2</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#解决问题-3">解决问题 3</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#收获">收获</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#wwdc-24-中也提到了-protocol-witness">WWDC 24 中也提到了 Protocol Witness</a></li>
+        
+      
+    
   </ul>
+</details>
+
+<div class="post-content">
+  <p>在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。<!-- more --></p>
+
+<h2 id="问题-1">问题 1</h2>
+
+<pre><code class="language-Swift">protocol A {}
+
+protocol B {}
+
+extension B: A {} // 🛑 Extension of protocol 'B' cannot have an inheritance clause
+</code></pre>
+
+<p>我们无法在协议 B 的扩展中继承协议 A。</p>
+
+<pre><code class="language-Swift">protocol A {}
+
+protocol B: A {} // 🟢
+</code></pre>
+
+<p>只有在协议 B 声明时，才能建立继承关系。当协议 B 非我们自己声明时，那就无计可施了。</p>
+
+<h2 id="问题-2">问题 2</h2>
+
+<p>遵循协议的类型只能以一种方式来实现协议的要求。</p>
+
+<pre><code class="language-Swift">indirect enum Tree&lt;A&gt; {
+    case empty
+    case node(left: Tree&lt;A&gt;, value: A, right: Tree&lt;A&gt;)
+}
+
+// ⚠️ Types are only allowed to conform to a protocol in one single way.
+extension Tree: Sequence {
+    // in-order?
+    // pre-order?
+    // post-order?
+}
+</code></pre>
+
+<p>我们利用 Swift 中的 enum 来定义树的结构，并期望 <code class="language-plaintext highlighter-rouge">Tree</code> 遵循 <code class="language-plaintext highlighter-rouge">Sequence</code> 协议。那么遍历 <code class="language-plaintext highlighter-rouge">Tree</code> 时，用哪种方式去遍历是固定的，是根据 <code class="language-plaintext highlighter-rouge">IteratorProtocol</code> 协议的实现来定的。</p>
+
+<h2 id="问题-3">问题 3</h2>
+
+<p>有些类型无法遵循协议，如 <code class="language-plaintext highlighter-rouge">Tuple</code>。</p>
+
+<pre><code class="language-Swift">let tuple1 = (1, 1)
+let tuple2 = (2, 2)
+
+@discardableResult
+func isEqual&lt;T: Equatable&gt;(lhs: T, rhs: T) -&gt; Bool {
+    lhs == rhs
+}
+
+isEqual(lhs: tuple1, rhs: tuple2) // 🛑 Type '(Int, Int)' cannot conform to 'Equatable'
+</code></pre>
+
+<h2 id="protocol-witnesses-协议目击者">Protocol Witnesses （协议目击者）</h2>
+<blockquote>
+
+  <p>Protocol witnesses are generated by the Swift compiler, when a protocol is used in a generic context, the compiler generates a separate implementation for each concrete type that conforms to the protocols. These implementations called protocol witnesses, are optimized for the specific type.</p>
+</blockquote>
+
+<p>简而言之，Protocol Witnesses 是 Swift 编译器生成的一种数据结构，这种数据结构里包含了遵循某个协议的实现细节。也就是说，如果 Swift 中没有设计协议，我们也能利用这种数据结构实现协议的特性。</p>
+
+<pre><code class="language-Swift">protocol Combinable {
+    func combine(_ other: Self) -&gt; Self
+}
+
+extension Int: Combinable {
+    func combine(_ other: Int) -&gt; Int {
+        self + other
+    }
+}
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">Combinable</code> 是个很简单的协议，我们让 <code class="language-plaintext highlighter-rouge">Int</code> 遵循 <code class="language-plaintext highlighter-rouge">Combinable</code> 协议，并用整型数的加法来满足协议要求。</p>
+
+<p>如果 <code class="language-plaintext highlighter-rouge">Double</code> 和 <code class="language-plaintext highlighter-rouge">Float</code> 类型也想变成 <code class="language-plaintext highlighter-rouge">Combinable</code> 呢？</p>
+
+<p>😐 嗯，继续添加对应的实现呗！</p>
+
+<pre><code class="language-Swift">extension Double: Combinable {
+    func combine(_ other: Double) -&gt; Double {
+        self + other
+    }
+}
+
+extension Float: Combinable {
+    func combine(_ other: Float) -&gt; Float {
+        self + other
+    }
+}
+</code></pre>
+
+<p>似乎闻到了坏代码的味道！😷</p>
+
+<p>我们转头一想，<code class="language-plaintext highlighter-rouge">Int</code>，<code class="language-plaintext highlighter-rouge">Double</code>，<code class="language-plaintext highlighter-rouge">Float</code> 都是遵循 <code class="language-plaintext highlighter-rouge">Numeric</code> 协议的，那么直接让 <code class="language-plaintext highlighter-rouge">Numeric</code> 协议继承自 <code class="language-plaintext highlighter-rouge">Combinable</code>，似乎问题就解决了！</p>
+
+<pre><code class="language-Swift">// 🛑 Extension of protocol 'Numeric' cannot have an inheritance clause
+extension Numeric: Combinable {
+
+}
+</code></pre>
+
+<p>😇 还是不行！🙅</p>
+
+<h3 id="解决问题-1">解决问题 1</h3>
+
+<p>让我们写出 <code class="language-plaintext highlighter-rouge">Combinable</code> 协议对应的 Witness 来解决这个问题。<code class="language-plaintext highlighter-rouge">Combining&lt;A&gt;</code> 是<code class="language-plaintext highlighter-rouge">Combinable</code> 协议的 Witness。</p>
+
+<pre><code class="language-Swift">struct Combining&lt;A&gt; {
+    let combine: (A, A) -&gt; A
+}
+</code></pre>
+
+<p>再写出加法的实现：</p>
+
+<pre><code class="language-Swift">extension Combining where A: Numeric {
+    static var sum: Combining {
+        Combining { $0 + $1 }
+    }
+}
+</code></pre>
+
+<p>最后，</p>
+
+<pre><code class="language-Swift">Combining&lt;Int&gt;.sum.combine(1, 2) // Output: Int 3
+
+Combining&lt;Double&gt;.sum.combine(1.0, 2.0) // Output: Double 3.0
+</code></pre>
+
+<h3 id="解决问题-2">解决问题 2</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Int</code> 变成 <code class="language-plaintext highlighter-rouge">Combinable</code>，不应该只有加法这一种实现方式，也可以是两个 <code class="language-plaintext highlighter-rouge">Int</code> 做乘法。</p>
+
+<pre><code class="language-Swift">extension Combining where A: Numeric {
+    static var sum: Combining {
+        Combining { $0 + $1 }
+    }
+
+    static var prod: Combining {
+        Combining { $0 * $1 }
+    }
+}
+</code></pre>
+
+<p>让我们看一个复杂点的例子：</p>
+
+<pre><code class="language-Swift">extension Array where Element: Combinable {
+    func reduce(_ initial: Element) -&gt; Element {
+        self.reduce(initial) {
+            $0.combine($1)
+        }
+    }
+}
+
+// 转为使用 Combining&lt;A&gt;
+extension Array {
+    func reduce(_ initial: Element, _ combining: Combining&lt;Element&gt;) -&gt; Element {
+        return reduce(initial, combining.combine)
+    }
+}
+
+[1, 3, 5].reduce(0, .sum) // Output: 9
+[CGFloat(2), 3, 5].reduce(1, .prod) // Output: 30
+</code></pre>
+
+<p>我们只需传入不同实现的 Witness 即可实现同一协议方法的不同实现。</p>
+
+<h3 id="解决问题-3">解决问题 3</h3>
+
+<pre><code class="language-Swift">let tuple1 = (1, 1)
+let tuple2 = (2, 2)
+
+@discardableResult
+func isEqual&lt;T: Equatable&gt;(lhs: T, rhs: T) -&gt; Bool {
+    lhs == rhs
+}
+
+isEqual(lhs: tuple1, rhs: tuple2) // 🛑 Type '(Int, Int)' cannot conform to 'Equatable'
+</code></pre>
+
+<p>以 <code class="language-plaintext highlighter-rouge">Array</code> 为例，如果 Element 是 <code class="language-plaintext highlighter-rouge">Equatable</code> 的，那么整个 <code class="language-plaintext highlighter-rouge">Array</code> 也是 <code class="language-plaintext highlighter-rouge">Equatable</code> 的。那么同理 <code class="language-plaintext highlighter-rouge">(1, 1)</code> 这个 tuple 也应该是 <code class="language-plaintext highlighter-rouge">Equatable</code> 或者 <code class="language-plaintext highlighter-rouge">Combinable</code> 的，因为整型数 1 是 <code class="language-plaintext highlighter-rouge">Equatable</code> 的，也是 <code class="language-plaintext highlighter-rouge">Combinable</code> 的！</p>
+
+<p>如果目标是证明： <code class="language-plaintext highlighter-rouge">(A, B)</code> 是 <code class="language-plaintext highlighter-rouge">Combinable</code> 的，那么我们需要拿出 <code class="language-plaintext highlighter-rouge">Combining&lt;(A, B)&gt;</code> 这个 witness 才能证明！但我们现在只有 <code class="language-plaintext highlighter-rouge">Combining&lt;A&gt;</code> 和 <code class="language-plaintext highlighter-rouge">Combining&lt;B&gt;</code>，能以此为基础推导出 <code class="language-plaintext highlighter-rouge">Combining&lt;(A, B)&gt;</code> 吗？</p>
+
+<p>答案是可以：</p>
+
+<pre><code class="language-Swift">func zip&lt;A, B&gt;(_ a: Combining&lt;A&gt;, _ b: Combining&lt;B&gt;) -&gt; Combining&lt;(A, B)&gt; {
+    Combining { lhs, rhs in
+        (a.combine(lhs.0, rhs.0), b.combine(lhs.1, rhs.1))
+    }
+}
+
+[
+    (1, 1.1),
+    (2, 2),
+    (3, 3),
+].reduce((1, 0), zip(.prod, .sum)) // Output: (6, 6.1)
+</code></pre>
+
+<h2 id="收获">收获</h2>
+
+<p>前面的内容讲了不少 Protocol Witness 的内容，但既然 Swift 编译器已经把这些细节隐藏起来了，那我们知道这些有什么用呢？请看下面一个例子：</p>
+
+<pre><code class="language-Swift">protocol 动物 {
+    func 走路()
+}
+
+extension 动物 {
+    func 走路() {
+        print("我用 4 条腿走路")
+    }
+
+    func 奔跑() {
+        print("我用 4 条腿奔跑")
+    }
+
+    func 跑跑跳跳() {
+        走路()
+        奔跑()
+    }
+}
+
+struct 蜘蛛: 动物 {
+    func 走路() {
+        print("我用 8 条腿走路")
+    }
+
+    func 奔跑() {
+        print("我用 8 条腿奔跑")
+    }
+}
+
+let 小蜘蛛 = 蜘蛛()
+小蜘蛛.跑跑跳跳()
+// Output:
+// 我用 8 条腿走路
+// 我用 4 条腿奔跑
+</code></pre>
+
+<p>我们可以用 Protocol Witness 的知识来说明这个输出的原因。在 Swift 协议中，只有被要求的函数才会进行动态派发，即只有在 Protocol Witness 中的方法才会进行动态派发。</p>
+
+<p>所以，我们可以想象小蜘蛛的 <code class="language-plaintext highlighter-rouge">走路</code> 和 <code class="language-plaintext highlighter-rouge">奔跑</code> 方法中都有一个隐藏的参数（<code class="language-plaintext highlighter-rouge">动物</code> 的 witness）。</p>
+
+<p>在小蜘蛛的 <code class="language-plaintext highlighter-rouge">走路</code> 方法执行时，发现 witness 中有 <code class="language-plaintext highlighter-rouge">走路</code> 方法的实现，即执行动态派发的方法 <code class="language-plaintext highlighter-rouge">走路</code>（输出：”我用 8 条腿走路”）。</p>
+
+<p>在小蜘蛛的 <code class="language-plaintext highlighter-rouge">奔跑</code> 方法执行时，发现 witness 中并没有 <code class="language-plaintext highlighter-rouge">奔跑</code> 方法的实现，即执行协议扩展中静态派发的方法 <code class="language-plaintext highlighter-rouge">奔跑</code>（输出：”我用 4 条腿奔跑”）</p>
+
+<p>很明显，蜘蛛不光用 8 条腿走路，它们还可能是用 8 条腿奔跑的。</p>
+
+<p>那么我们只需把 <code class="language-plaintext highlighter-rouge">奔跑</code> 方法加入 <code class="language-plaintext highlighter-rouge">动物</code> 协议的 witness 中，即把 <code class="language-plaintext highlighter-rouge">奔跑</code> 方法加入 <code class="language-plaintext highlighter-rouge">动物</code> 协议中，使其成为协议约束的一部分！这样就可以让这只小蜘蛛也用上 8 条腿奔跑了！</p>
+
+<pre><code class="language-Swift">protocol 动物 {
+    func 走路()
+    func 奔跑()
+}
+
+...
+...
+
+let 小蜘蛛 = 蜘蛛()
+小蜘蛛.跑跑跳跳()
+// Output:
+// 我用 8 条腿走路
+// 我用 8 条腿奔跑
+</code></pre>
+
+<h2 id="wwdc-24-中也提到了-protocol-witness">WWDC 24 中也提到了 Protocol Witness</h2>
+
+<p>于 <a href="https://developer.apple.com/videos/play/wwdc2024/10217/">Explore Swift performance</a> 视频 [31: 04] 处：<br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/wwdc24_swift_performance.jpg" alt="" /></p>
+
+<p>左边为 <code class="language-plaintext highlighter-rouge">DataModel</code> 协议，右边为 <code class="language-plaintext highlighter-rouge">DataModel</code> 协议的 Witness。</p>
+
+<p>在每个协议要求的方法中，均有一个额外的隐藏参数——指向 witness 的指针。</p>
+
+</div>
+
+
+<nav class="post-nav" aria-label="文章导航">
+  
+    <a class="post-nav-prev" href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><span class="post-nav-label">&larr; 上一篇</span>Alamofire 源码阅读（一）</a>
+  
+  
+    <a class="post-nav-next" href="/2025/12/01/SwiftUI_Identity_lifetime/"><span class="post-nav-label">下一篇 &rarr;</span>SwiftUI View 的 Identity 与 Lifetime</a>
+  
 </nav>
 
 
-
-
-</header>
         
-  
-  <aside class="sidebar">
+          
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98-1"><span class="nav-number">1.</span> <span class="nav-text">问题 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98-2"><span class="nav-number">2.</span> <span class="nav-text">问题 2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98-3"><span class="nav-number">3.</span> <span class="nav-text">问题 3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Protocol-Witnesses-%EF%BC%88%E5%8D%8F%E8%AE%AE%E7%9B%AE%E5%87%BB%E8%80%85%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">Protocol Witnesses （协议目击者）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98-1"><span class="nav-number">4.1.</span> <span class="nav-text">解决问题 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98-2"><span class="nav-number">4.2.</span> <span class="nav-text">解决问题 2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98-3"><span class="nav-number">4.3.</span> <span class="nav-text">解决问题 3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B6%E8%8E%B7"><span class="nav-number">5.</span> <span class="nav-text">收获</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WWDC-24-%E4%B8%AD%E4%B9%9F%E6%8F%90%E5%88%B0%E4%BA%86-Protocol-Witness"><span class="nav-number">6.</span> <span class="nav-text">WWDC 24 中也提到了 Protocol Witness</span></a></li></ol></div>
-        </div>
-        <!--/noindex-->
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </main><script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var defined_alerts = {
+      NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
+      TIP:       { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>', label: 'Tip' },
+      IMPORTANT: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Important' },
+      WARNING:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Warning' },
+      CAUTION:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Caution' }
+    };
 
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Sunset Wan</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">15</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">10</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author animated">
-      <span class="links-of-author-item">
-        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-  </div>
+    var blockquotes = document.querySelectorAll("blockquote");
+    for (var i = 0; i < blockquotes.length; i++) {
+      var bq = blockquotes[i];
+      var firstP = bq.querySelector("p:first-child");
+      if (!firstP) continue;
 
-        </div>
-      </div>
-    </div>
+      var text = firstP.innerHTML;
+      var match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br\s*\/?>)?/);
+      if (!match) continue;
 
-    
-  </aside>
+      var type = match[1];
+      var alert = defined_alerts[type];
 
+      // Remove the marker from the paragraph text
+      firstP.innerHTML = text.replace(match[0], "").trim();
 
-    </div>
+      // If the paragraph is now empty, remove it
+      if (!firstP.innerHTML) {
+        firstP.remove();
+      }
 
-    <div class="main-inner post posts-expand">
+      // Build the alert title
+      var title = document.createElement("p");
+      title.className = "markdown-alert-title";
+      title.innerHTML = alert.icon + " " + alert.label;
+      bq.insertBefore(title, bq.firstChild);
 
-
-  
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2024/06/23/Swift-Protocol-Witness/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Protocol Witness in Swift | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Protocol Witness in Swift
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-06-23 21:23:49" itemprop="dateCreated datePublished" datetime="2024-06-23T21:23:49+00:00">2024-06-23</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。<span id="more"></span></p>
-<h2 id="问题-1"><a href="#问题-1" class="headerlink" title="问题 1"></a>问题 1</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">A</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protocol</span> <span class="title class_">B</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">B</span>: <span class="title class_ inherited__">A</span> &#123;&#125; <span class="comment">// 🛑 Extension of protocol &#x27;B&#x27; cannot have an inheritance clause</span></span><br></pre></td></tr></table></figure>
-
-<p>我们无法在协议 B 的扩展中继承协议 A。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">A</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protocol</span> <span class="title class_">B</span>: <span class="title class_ inherited__">A</span> &#123;&#125; <span class="comment">// 🟢</span></span><br></pre></td></tr></table></figure>
-
-<p>只有在协议 B 声明时，才能建立继承关系。当协议 B 非我们自己声明时，那就无计可施了。</p>
-<h2 id="问题-2"><a href="#问题-2" class="headerlink" title="问题 2"></a>问题 2</h2><p>遵循协议的类型只能以一种方式来实现协议的要求。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">indirect</span> <span class="keyword">enum</span> <span class="title class_">Tree</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">case</span> empty</span><br><span class="line">    <span class="keyword">case</span> node(left: <span class="type">Tree</span>&lt;<span class="type">A</span>&gt;, value: <span class="type">A</span>, right: <span class="type">Tree</span>&lt;<span class="type">A</span>&gt;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ⚠️ Types are only allowed to conform to a protocol in one single way.</span></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">Tree</span>: <span class="title class_ inherited__">Sequence</span> &#123;</span><br><span class="line">    <span class="comment">// in-order?</span></span><br><span class="line">    <span class="comment">// pre-order?</span></span><br><span class="line">    <span class="comment">// post-order?</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们利用 Swift 中的 enum 来定义树的结构，并期望 <code>Tree</code> 遵循 <code>Sequence</code> 协议。那么遍历 <code>Tree</code> 时，用哪种方式去遍历是固定的，是根据 <code>IteratorProtocol</code> 协议的实现来定的。</p>
-<h2 id="问题-3"><a href="#问题-3" class="headerlink" title="问题 3"></a>问题 3</h2><p>有些类型无法遵循协议，如 <code>Tuple</code>。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> tuple1 <span class="operator">=</span> (<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"><span class="keyword">let</span> tuple2 <span class="operator">=</span> (<span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">@discardableResult</span></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">isEqual</span>&lt;<span class="type">T</span>: <span class="type">Equatable</span>&gt;(<span class="params">lhs</span>: <span class="type">T</span>, <span class="params">rhs</span>: <span class="type">T</span>) -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    lhs <span class="operator">==</span> rhs</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">isEqual(lhs: tuple1, rhs: tuple2) <span class="comment">// 🛑 Type &#x27;(Int, Int)&#x27; cannot conform to &#x27;Equatable&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="Protocol-Witnesses-（协议目击者）"><a href="#Protocol-Witnesses-（协议目击者）" class="headerlink" title="Protocol Witnesses （协议目击者）"></a>Protocol Witnesses （协议目击者）</h2><blockquote>
-<p>Protocol witnesses are generated by the Swift compiler, when a protocol is used in a generic context, the compiler generates a separate implementation for each concrete type that conforms to the protocols. These implementations called protocol witnesses, are optimized for the specific type.</p>
-</blockquote>
-<p>简而言之，Protocol Witnesses 是 Swift 编译器生成的一种数据结构，这种数据结构里包含了遵循某个协议的实现细节。也就是说，如果 Swift 中没有设计协议，我们也能利用这种数据结构实现协议的特性。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">Combinable</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">combine</span>(<span class="keyword">_</span> <span class="params">other</span>: <span class="keyword">Self</span>) -&gt; <span class="keyword">Self</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">Int</span>: <span class="title class_ inherited__">Combinable</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">combine</span>(<span class="keyword">_</span> <span class="params">other</span>: <span class="type">Int</span>) -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">self</span> <span class="operator">+</span> other</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>Combinable</code> 是个很简单的协议，我们让 <code>Int</code> 遵循 <code>Combinable</code> 协议，并用整型数的加法来满足协议要求。</p>
-<p>如果 <code>Double</code> 和 <code>Float</code> 类型也想变成 <code>Combinable</code> 呢？</p>
-<p>😐 嗯，继续添加对应的实现呗！</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">Double</span>: <span class="title class_ inherited__">Combinable</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">combine</span>(<span class="keyword">_</span> <span class="params">other</span>: <span class="type">Double</span>) -&gt; <span class="type">Double</span> &#123;</span><br><span class="line">        <span class="keyword">self</span> <span class="operator">+</span> other</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">Float</span>: <span class="title class_ inherited__">Combinable</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">combine</span>(<span class="keyword">_</span> <span class="params">other</span>: <span class="type">Float</span>) -&gt; <span class="type">Float</span> &#123;</span><br><span class="line">        <span class="keyword">self</span> <span class="operator">+</span> other</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>似乎闻到了坏代码的味道！😷</p>
-<p>我们转头一想，<code>Int</code>，<code>Double</code>，<code>Float</code> 都是遵循 <code>Numeric</code> 协议的，那么直接让 <code>Numeric</code> 协议继承自 <code>Combinable</code>，似乎问题就解决了！</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 🛑 Extension of protocol &#x27;Numeric&#x27; cannot have an inheritance clause</span></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">Numeric</span>: <span class="title class_ inherited__">Combinable</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>😇 还是不行！🙅</p>
-<h3 id="解决问题-1"><a href="#解决问题-1" class="headerlink" title="解决问题 1"></a>解决问题 1</h3><p>让我们写出 <code>Combinable</code> 协议对应的 Witness 来解决这个问题。<code>Combining&lt;A&gt;</code> 是<code>Combinable</code> 协议的 Witness。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Combining</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> combine: (<span class="type">A</span>, <span class="type">A</span>) -&gt; <span class="type">A</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>再写出加法的实现：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">Combining</span> <span class="keyword">where</span> <span class="type">A</span>: <span class="type">Numeric</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> sum: <span class="type">Combining</span> &#123;</span><br><span class="line">        <span class="type">Combining</span> &#123; <span class="variable">$0</span> <span class="operator">+</span> <span class="variable">$1</span> &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>最后，</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Combining</span>&lt;<span class="type">Int</span>&gt;.sum.combine(<span class="number">1</span>, <span class="number">2</span>) <span class="comment">// Output: Int 3</span></span><br><span class="line"></span><br><span class="line"><span class="type">Combining</span>&lt;<span class="type">Double</span>&gt;.sum.combine(<span class="number">1.0</span>, <span class="number">2.0</span>) <span class="comment">// Output: Double 3.0</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="解决问题-2"><a href="#解决问题-2" class="headerlink" title="解决问题 2"></a>解决问题 2</h3><p><code>Int</code> 变成 <code>Combinable</code>，不应该只有加法这一种实现方式，也可以是两个 <code>Int</code> 做乘法。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">Combining</span> <span class="keyword">where</span> <span class="type">A</span>: <span class="type">Numeric</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> sum: <span class="type">Combining</span> &#123;</span><br><span class="line">        <span class="type">Combining</span> &#123; <span class="variable">$0</span> <span class="operator">+</span> <span class="variable">$1</span> &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> prod: <span class="type">Combining</span> &#123;</span><br><span class="line">        <span class="type">Combining</span> &#123; <span class="variable">$0</span> <span class="operator">*</span> <span class="variable">$1</span> &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>让我们看一个复杂点的例子：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">Array</span> <span class="keyword">where</span> <span class="type">Element</span>: <span class="type">Combinable</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">reduce</span>(<span class="keyword">_</span> <span class="params">initial</span>: <span class="type">Element</span>) -&gt; <span class="type">Element</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.reduce(initial) &#123;</span><br><span class="line">            <span class="variable">$0</span>.combine(<span class="variable">$1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 转为使用 Combining&lt;A&gt;</span></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">Array</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">reduce</span>(<span class="keyword">_</span> <span class="params">initial</span>: <span class="type">Element</span>, <span class="keyword">_</span> <span class="params">combining</span>: <span class="type">Combining</span>&lt;<span class="type">Element</span>&gt;) -&gt; <span class="type">Element</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> reduce(initial, combining.combine)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>].reduce(<span class="number">0</span>, .sum) <span class="comment">// Output: 9</span></span><br><span class="line">[<span class="type">CGFloat</span>(<span class="number">2</span>), <span class="number">3</span>, <span class="number">5</span>].reduce(<span class="number">1</span>, .prod) <span class="comment">// Output: 30</span></span><br></pre></td></tr></table></figure>
-
-<p>我们只需传入不同实现的 Witness 即可实现同一协议方法的不同实现。</p>
-<h3 id="解决问题-3"><a href="#解决问题-3" class="headerlink" title="解决问题 3"></a>解决问题 3</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> tuple1 <span class="operator">=</span> (<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"><span class="keyword">let</span> tuple2 <span class="operator">=</span> (<span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">@discardableResult</span></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">isEqual</span>&lt;<span class="type">T</span>: <span class="type">Equatable</span>&gt;(<span class="params">lhs</span>: <span class="type">T</span>, <span class="params">rhs</span>: <span class="type">T</span>) -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    lhs <span class="operator">==</span> rhs</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">isEqual(lhs: tuple1, rhs: tuple2) <span class="comment">// 🛑 Type &#x27;(Int, Int)&#x27; cannot conform to &#x27;Equatable&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>以 <code>Array</code> 为例，如果 Element 是 <code>Equatable</code> 的，那么整个 <code>Array</code> 也是 <code>Equatable</code> 的。那么同理 <code>(1, 1)</code> 这个 tuple 也应该是 <code>Equatable</code> 或者 <code>Combinable</code> 的，因为整型数 1 是 <code>Equatable</code> 的，也是 <code>Combinable</code> 的！</p>
-<p>如果目标是证明： <code>(A, B)</code> 是 <code>Combinable</code> 的，那么我们需要拿出 <code>Combining&lt;(A, B)&gt;</code> 这个 witness 才能证明！但我们现在只有 <code>Combining&lt;A&gt;</code> 和 <code>Combining&lt;B&gt;</code>，能以此为基础推导出 <code>Combining&lt;(A, B)&gt;</code> 吗？</p>
-<p>答案是可以：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">zip</span>&lt;<span class="type">A</span>, <span class="type">B</span>&gt;(<span class="keyword">_</span> <span class="params">a</span>: <span class="type">Combining</span>&lt;<span class="type">A</span>&gt;, <span class="keyword">_</span> <span class="params">b</span>: <span class="type">Combining</span>&lt;<span class="type">B</span>&gt;) -&gt; <span class="type">Combining</span>&lt;(<span class="type">A</span>, <span class="type">B</span>)&gt; &#123;</span><br><span class="line">    <span class="type">Combining</span> &#123; lhs, rhs <span class="keyword">in</span></span><br><span class="line">        (a.combine(lhs.<span class="number">0</span>, rhs.<span class="number">0</span>), b.combine(lhs.<span class="number">1</span>, rhs.<span class="number">1</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[</span><br><span class="line">    (<span class="number">1</span>, <span class="number">1.1</span>),</span><br><span class="line">    (<span class="number">2</span>, <span class="number">2</span>),</span><br><span class="line">    (<span class="number">3</span>, <span class="number">3</span>),</span><br><span class="line">].reduce((<span class="number">1</span>, <span class="number">0</span>), <span class="built_in">zip</span>(.prod, .sum)) <span class="comment">// Output: (6, 6.1)</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h2><p>前面的内容讲了不少 Protocol Witness 的内容，但既然 Swift 编译器已经把这些细节隐藏起来了，那我们知道这些有什么用呢？请看下面一个例子：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">动物</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">走路</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">动物</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">走路</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;我用 4 条腿走路&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">奔跑</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;我用 4 条腿奔跑&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">跑跑跳跳</span>() &#123;</span><br><span class="line">        走路()</span><br><span class="line">        奔跑()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">蜘蛛</span>: 动物 &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">走路</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;我用 8 条腿走路&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">奔跑</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;我用 8 条腿奔跑&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> 小蜘蛛 <span class="operator">=</span> 蜘蛛()</span><br><span class="line">小蜘蛛.跑跑跳跳()</span><br><span class="line"><span class="comment">// Output:</span></span><br><span class="line"><span class="comment">// 我用 8 条腿走路</span></span><br><span class="line"><span class="comment">// 我用 4 条腿奔跑</span></span><br></pre></td></tr></table></figure>
-
-<p>我们可以用 Protocol Witness 的知识来说明这个输出的原因。在 Swift 协议中，只有被要求的函数才会进行动态派发，即只有在 Protocol Witness 中的方法才会进行动态派发。</p>
-<p>所以，我们可以想象小蜘蛛的 <code>走路</code> 和 <code>奔跑</code> 方法中都有一个隐藏的参数（<code>动物</code> 的 witness）。</p>
-<p>在小蜘蛛的 <code>走路</code> 方法执行时，发现 witness 中有 <code>走路</code> 方法的实现，即执行动态派发的方法 <code>走路</code>（输出：”我用 8 条腿走路”）。</p>
-<p>在小蜘蛛的 <code>奔跑</code> 方法执行时，发现 witness 中并没有 <code>奔跑</code> 方法的实现，即执行协议扩展中静态派发的方法 <code>奔跑</code>（输出：”我用 4 条腿奔跑”）</p>
-<p>很明显，蜘蛛不光用 8 条腿走路，它们还可能是用 8 条腿奔跑的。</p>
-<p>那么我们只需把 <code>奔跑</code> 方法加入 <code>动物</code> 协议的 witness 中，即把 <code>奔跑</code> 方法加入 <code>动物</code> 协议中，使其成为协议约束的一部分！这样就可以让这只小蜘蛛也用上 8 条腿奔跑了！</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">动物</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">走路</span>()</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">奔跑</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="operator">...</span></span><br><span class="line"><span class="operator">...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> 小蜘蛛 <span class="operator">=</span> 蜘蛛()</span><br><span class="line">小蜘蛛.跑跑跳跳()</span><br><span class="line"><span class="comment">// Output:</span></span><br><span class="line"><span class="comment">// 我用 8 条腿走路</span></span><br><span class="line"><span class="comment">// 我用 8 条腿奔跑</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="WWDC-24-中也提到了-Protocol-Witness"><a href="#WWDC-24-中也提到了-Protocol-Witness" class="headerlink" title="WWDC 24 中也提到了 Protocol Witness"></a>WWDC 24 中也提到了 Protocol Witness</h2><p>于 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2024/10217/">Explore Swift performance</a> 视频 [31: 04] 处：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/wwdc24_swift_performance.jpg"></p>
-<p>左边为 <code>DataModel</code> 协议，右边为 <code>DataModel</code> 协议的 Witness。</p>
-<p>在每个协议要求的方法中，均有一个额外的隐藏参数——指向 witness 的指针。</p>
-
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Protocol/" rel="tag"># Protocol</a>
-          </div>
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" rel="prev" title="Alamofire 源码阅读（一）">
-                  <i class="fa fa-angle-left"></i> Alamofire 源码阅读（一）
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2025/12/01/SwiftUI_Identity_lifetime/" rel="next" title="SwiftUI View 的 Identity 与 Lifetime">
-                  SwiftUI View 的 Identity 与 Lifetime <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
+      bq.classList.add("markdown-alert", "markdown-alert-" + type.toLowerCase());
+    }
+  });
+</script>
 
 
+<script>
+(function() {
+  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+    block.style.position = 'relative';
+
+    // Language label derived from rouge's language-* class
+    var langClass = Array.from(block.classList).find(function(c) {
+      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
+    });
+    if (langClass) {
+      var label = document.createElement('span');
+      label.className = 'code-lang';
+      label.textContent = langClass.replace('language-', '');
+      block.appendChild(label);
+    }
+
+    var btn = document.createElement('button');
+    btn.className = 'code-copy';
+    btn.setAttribute('aria-label', "复制代码");
+    btn.textContent = "复制";
+    btn.addEventListener('click', function() {
+      var code = block.querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(function() {
+        btn.textContent = "已复制";
+        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+      });
+    });
+    block.appendChild(btn);
+  });
+})();
+</script>
 
 
-
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-user"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
-  </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
-
-    </div>
-  </footer>
-
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+<style>
+  .back-to-top {
+    position: fixed;
+    bottom: 2em;
+    right: 2em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .back-to-top:hover {
+    color: var(--links);
+  }
+  @media screen and (max-width: 600px) {
+    .back-to-top {
+      bottom: 1em;
+      right: 1em;
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>
+<script>
+(function() {
+  var btn = document.querySelector('.back-to-top');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
+  });
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  });
+})();
+</script>
 </body>
 </html>

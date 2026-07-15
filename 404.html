@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="html" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    
+      页面未找到
+    
+  </title>
+
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="页面未找到" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="Sunset Wan 的 Swift、iOS 与软件设计技术博客。" />
+<meta name="twitter:description" property="og:description" content="Sunset Wan 的 Swift、iOS 与软件设计技术博客。" />
+<link rel="canonical" href="https://sunsetwan.github.io/404.html" />
+<meta property="og:url" content="https://sunsetwan.github.io/404.html" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="页面未找到" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Sunset Wan"},"description":"Sunset Wan 的 Swift、iOS 与软件设计技术博客。","headline":"页面未找到","url":"https://sunsetwan.github.io/404.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
+
+  
+
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
+
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
+
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
+
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
+
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
+
+  
+  <link rel="stylesheet" href="/assets/css/main.css" />
+</head>
+<body><main class="page-content" aria-label="Content">
+      <div class="w">
+        
+  
+
+
+<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</a>
+
+
+
+
+  <h1 class="page-title">页面未找到</h1>
+
+
+<div class="page-body">
+  <p>这里没有你要找的页面。</p>
+<p><a href="/">返回首页</a></p>
+
+</div>
+
+        
+          
+
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </main></body>
+</html>

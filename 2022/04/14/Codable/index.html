@@ -1,353 +1,876 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+<html lang="zh-CN" class="html" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <title>
+    
+      Codable 学习笔记
+    
+  </title>
 
-<link rel="stylesheet" href="/css/main.css">
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Codable 学习笔记" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。" />
+<meta name="twitter:description" property="og:description" content="本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。" />
+<link rel="canonical" href="https://sunsetwan.github.io/2022/04/14/Codable/" />
+<meta property="og:url" content="https://sunsetwan.github.io/2022/04/14/Codable/" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-04-14T09:41:00+08:00" />
+<meta property="article:modified_time" content="2022-04-14T09:41:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Codable 学习笔记" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2022-04-14T09:41:00+08:00","datePublished":"2022-04-14T09:41:00+08:00","description":"本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。","headline":"Codable 学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2022/04/14/Codable/"},"url":"https://sunsetwan.github.io/2022/04/14/Codable/"}</script>
+<!-- End Jekyll SEO tag -->
 
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
-
-    <meta name="description" content="本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Codable 学习笔记">
-<meta property="og:url" content="https://sunsetwan.github.io/2022/04/14/Codable/index.html">
-<meta property="og:site_name" content="日落大道">
-<meta property="og:description" content="本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-02.png">
-<meta property="article:published_time" content="2022-04-14T09:41:00.000Z">
-<meta property="article:modified_time" content="2022-04-14T09:41:00.000Z">
-<meta property="article:author" content="Sunset Wan">
-<meta property="article:tag" content="Codable">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png">
-
-
-<link rel="canonical" href="https://sunsetwan.github.io/2022/04/14/Codable/">
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2022/04/14/Codable/","path":"2022/04/14/Codable/","title":"Codable 学习笔记"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Codable 学习笔记 | 日落大道</title>
-  
-
-
-
-
-
-
-
-
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
-<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
 
   
 
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
 
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
 
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
 
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
 
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
 
   
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
+  <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
+<body><div class="progress-bar" aria-hidden="true"></div>
+<style>
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--links);
+    z-index: 100;
+    transition: width 50ms linear;
+  }
+</style>
+<script>
+(function() {
+  var bar = document.querySelector('.progress-bar');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      bar.style.width = (scrollTop / docHeight * 100) + '%';
+    }
+  });
+})();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="w">
+        
 
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
 
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
+<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</a>
+
+<h1 class="post-title">Codable 学习笔记</h1>
+
+
+
+<div class="post-meta">
+  <div class="post-meta-line">
+    
+    
+      <time class="post-meta-date" datetime="2022-04-14T09:41:00+08:00">
+        发布于 2022-04-14
+      </time>
+    
+    
+      <span class="post-meta-sep">·</span>
+      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
+        更新于 2026-07-15
+      </time>
+    
+    
+  </div>
+
+  
+    <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/Codable/" class="tag">Codable</a>
+
+      
     </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">日落大道</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
+  
 </div>
 
 
 
-<nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+
+
+
+
+
+<details class="toc">
+  <summary>目录</summary>
+  <ul>
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#如何-decode">如何 Decode？</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#维持原有层级结构">维持原有层级结构</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#自定义-json-对应模型的层级结构">自定义 JSON 对应模型的层级结构</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#如何-encode">如何 Encode?</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#修改-json-对象的层级结构">修改 JSON 对象的层级结构</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#达成-codable">达成 Codable</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#jsonencoder">JSONEncoder</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#swiftyjson-源码分析未完待续">SwiftyJSON 源码分析（未完待续）</a></li>
+        
+      
+    
   </ul>
+</details>
+
+<div class="post-content">
+  <p>本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。<!-- more --></p>
+
+<p>Swift 4.0 就引入了 <code class="language-plaintext highlighter-rouge">Codable</code> 协议。话不多说，进入正题：<br />
+示例 JSON：</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"accessKey"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"S|_|p3rs3cr37"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"AddressInfo"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"atmCode"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"1132"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"city"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"Albuquerque"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"street"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"3828 Piermont Drive"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"zip"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">87112</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"ContactInfo"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"addedOn"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"04-14-2022 13:58"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"cellularPhone"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"+972 542-288-482"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"email"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"freak4pc@gmail.com"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"homePhone"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"+1 212-741-4695"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"website"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"http://github.com/freak4pc"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"family"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"Tom"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"Elia"</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"Shai Mishali"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<h2 id="如何-decode">如何 Decode？</h2>
+<p>即如何解析这段 JSON？</p>
+<h3 id="维持原有层级结构">维持原有层级结构</h3>
+<p>这个 JSON 对应的 Swift 模型为：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">Foundation</span>
+
+<span class="kd">struct</span> <span class="kt">Customer1</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">accessKey</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">addressInfo</span><span class="p">:</span> <span class="kt">AddressInfo</span>
+    <span class="k">let</span> <span class="nv">contactInfo</span><span class="p">:</span> <span class="kt">ContactInfo</span>
+    <span class="k">let</span> <span class="nv">family</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span>
+    <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
+
+    <span class="kd">enum</span> <span class="kt">CodingKeys</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">accessKey</span>
+        <span class="k">case</span> <span class="n">addressInfo</span>
+        <span class="k">case</span> <span class="n">contactInfo</span>
+        <span class="k">case</span> <span class="n">family</span><span class="p">,</span> <span class="n">name</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// MARK: - AddressInfo</span>
+<span class="kd">struct</span> <span class="kt">AddressInfo</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">atmCode</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="nv">street</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">zip</span><span class="p">:</span> <span class="kt">Int</span>
+<span class="p">}</span>
+
+<span class="c1">// MARK: - ContactInfo</span>
+<span class="kd">struct</span> <span class="kt">ContactInfo</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">addedOn</span><span class="p">,</span> <span class="n">cellularPhone</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="nv">homePhone</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">website</span><span class="p">:</span> <span class="kt">String</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">Customer1</code> 结构体模型的层级结构与 JSON 对象的层级结构保持一致。这样就可以利用 <code class="language-plaintext highlighter-rouge">JSONDecoder</code> 把示例 JSON 成功地解析为 <code class="language-plaintext highlighter-rouge">Customer1</code> 结构体模型。</p>
+
+<h3 id="自定义-json-对应模型的层级结构">自定义 JSON 对应模型的层级结构</h3>
+<p>以上述 <code class="language-plaintext highlighter-rouge">Customer1</code> 模型为例，如果想访问该顾客所在的城市：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">jack</span> <span class="o">=</span> <span class="kt">Customer1</span><span class="p">()</span>
+<span class="k">let</span> <span class="nv">city</span> <span class="o">=</span> <span class="n">jack</span><span class="o">.</span><span class="n">addressInfo</span><span class="o">.</span><span class="n">city</span>
+</code></pre></div></div>
+
+<p>如果想直接通过 <code class="language-plaintext highlighter-rouge">jack.city</code> 来访问 jack 所在的城市信息，该怎么处理？</p>
+<h4 id="1-使用计算属性">1. 使用计算属性</h4>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">var</span> <span class="nv">city</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">addressInfo</span><span class="o">.</span><span class="n">city</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<p>但这种方式的弊端是：万一如果想把 <code class="language-plaintext highlighter-rouge">AddressInfo</code> 这嵌套的一层直接去掉，得手写好多类似上面的代码。</p>
+
+<h4 id="2-使用嵌套的-codingkey-枚举">2. 使用嵌套的 CodingKey 枚举</h4>
+<p>使用嵌套的 CodingKey 枚举可以把具有层级的 JSON “拍扁”。</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">enum</span> <span class="kt">CodingKeys</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">name</span>
+        <span class="k">case</span> <span class="n">accessKey</span>
+        <span class="k">case</span> <span class="n">status</span>
+        <span class="k">case</span> <span class="n">addressInfo</span> <span class="o">=</span> <span class="s">"AddressInfo"</span>
+        <span class="k">case</span> <span class="n">contactInfo</span> <span class="o">=</span> <span class="s">"ContactInfo"</span>
+    <span class="p">}</span>
+    
+    <span class="kd">enum</span> <span class="kt">AddressInfo</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">atmCode</span>
+        <span class="k">case</span> <span class="n">street</span>
+        <span class="k">case</span> <span class="n">city</span>
+        <span class="k">case</span> <span class="n">zip</span>
+    <span class="p">}</span>
+    
+    <span class="kd">enum</span> <span class="kt">ContactInfo</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">homePhone</span><span class="p">,</span> <span class="n">cellularPhone</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">website</span>
+        <span class="k">case</span> <span class="n">addedOn</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<p>还得自己实现对应的 <code class="language-plaintext highlighter-rouge">decode</code> 方法：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nf">init</span><span class="p">(</span><span class="n">from</span> <span class="nv">decoder</span><span class="p">:</span> <span class="kt">Decoder</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">customer</span> <span class="o">=</span> <span class="k">try</span> <span class="n">decoder</span><span class="o">.</span><span class="nf">container</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">CodingKeys</span><span class="o">.</span><span class="k">self</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">name</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">accessKey</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">accessKey</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">status</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">Int</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">status</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">accessKey</span> <span class="o">=</span> <span class="n">accessKey</span>
+        
+        <span class="k">let</span> <span class="nv">addressInfo</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">AddressInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addressInfo</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">atmCode</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">atmCode</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">street</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">street</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">city</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">city</span><span class="p">)</span>
+        
+        <span class="c1">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span>
+        <span class="k">if</span> <span class="k">case</span> <span class="k">let</span> <span class="nv">zipString</span><span class="p">?</span> <span class="o">=</span> <span class="k">try</span><span class="p">?</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decodeIfPresent</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">),</span>
+            <span class="k">let</span> <span class="nv">zipString</span> <span class="o">=</span> <span class="n">zipString</span>
+        <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="kt">Int</span><span class="p">(</span><span class="n">zipString</span><span class="p">)</span> <span class="p">??</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="k">let</span> <span class="nv">zipInt</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decodeIfPresent</span><span class="p">(</span><span class="kt">Int</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="n">zipInt</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">}</span>
+        
+        <span class="k">self</span><span class="o">.</span><span class="n">atmCode</span> <span class="o">=</span> <span class="n">atmCode</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">street</span> <span class="o">=</span> <span class="n">street</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="n">city</span>
+        
+        <span class="k">let</span> <span class="nv">contactInfo</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">ContactInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">contactInfo</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">homePhone</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">homePhone</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">cellularPhone</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">cellularPhone</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">email</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">website</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">website</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">addedOn</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">Date</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addedOn</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">homePhone</span> <span class="o">=</span> <span class="n">homePhone</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">cellularPhone</span> <span class="o">=</span> <span class="n">cellularPhone</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">website</span> <span class="o">=</span> <span class="n">website</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">addedOn</span> <span class="o">=</span> <span class="n">addedOn</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<p>在自己实现 <code class="language-plaintext highlighter-rouge">decode</code> 方法时，还需要对几类容器（Container）有了解：<br />
+<img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png" alt="codable-01" /></p>
+<ul>
+  <li><strong>Keyed Container</strong>：最常见的容器之一，可用来解析键值对数据，对应的 key 定义在 <code class="language-plaintext highlighter-rouge">CodingKeys</code> 枚举中。</li>
+  <li><strong>Unkeyed Container</strong>：用来解析不是以字符串为 key 的结构，例如常见的数组结构。</li>
+  <li><strong>Single Value Container</strong>：用来把单一的数据解析为有具体类型的数据结构。</li>
+  <li><strong>Nested Container</strong>：当某个容器成为另一个容器的子容器时，它被称为嵌套容器</li>
+</ul>
+
+<p><strong>我们可以方便地把容器理解为：一个对数据编解码的环境。</strong></p>
+
+<p>被“拍扁”后的模型为：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">Customer2</span><span class="p">:</span> <span class="kt">Encodable</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">accessKey</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">family</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span>
+    
+    <span class="k">var</span> <span class="nv">atmCode</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">street</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">city</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">zip</span><span class="p">:</span> <span class="kt">Int</span>
+    
+    <span class="k">var</span> <span class="nv">homePhone</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">cellularPhone</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">email</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">website</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">addedOn</span> <span class="o">=</span> <span class="kt">Date</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="如何-encode">如何 Encode?</h2>
+<p>示例模型对象：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">Foundation</span>
+
+<span class="kd">struct</span> <span class="kt">Customer</span><span class="p">:</span> <span class="kt">Encodable</span> <span class="p">{</span>
+  <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">var</span> <span class="nv">accessKey</span><span class="p">:</span> <span class="kt">String</span>
+  
+  <span class="k">var</span> <span class="nv">atmCode</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">var</span> <span class="nv">street</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">var</span> <span class="nv">city</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">var</span> <span class="nv">zip</span><span class="p">:</span> <span class="kt">Int</span>
+  
+  <span class="k">var</span> <span class="nv">homePhone</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">var</span> <span class="nv">cellularPhone</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">var</span> <span class="nv">email</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">let</span> <span class="nv">website</span><span class="p">:</span> <span class="kt">String</span>
+  <span class="k">let</span> <span class="nv">addedOn</span> <span class="o">=</span> <span class="kt">Date</span><span class="p">()</span>
+  <span class="k">var</span> <span class="nv">family</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="nv">customer</span> <span class="o">=</span> <span class="kt">Customer</span><span class="p">(</span>
+  <span class="nv">name</span><span class="p">:</span> <span class="s">"Shai Mishali"</span><span class="p">,</span>
+  <span class="nv">accessKey</span><span class="p">:</span> <span class="s">"S|_|p3rs3cr37"</span><span class="p">,</span>
+  <span class="nv">atmCode</span><span class="p">:</span> <span class="s">"1132"</span><span class="p">,</span>
+  <span class="nv">street</span><span class="p">:</span> <span class="s">"3828 Piermont Drive"</span><span class="p">,</span>
+  <span class="nv">city</span><span class="p">:</span> <span class="s">"Albuquerque"</span><span class="p">,</span>
+  <span class="nv">zip</span><span class="p">:</span> <span class="mi">87119</span><span class="p">,</span>
+  <span class="nv">homePhone</span><span class="p">:</span> <span class="s">"+1 212-741-4695"</span><span class="p">,</span>
+  <span class="nv">cellularPhone</span><span class="p">:</span> <span class="s">"+972 542-288-482"</span><span class="p">,</span>
+  <span class="nv">email</span><span class="p">:</span> <span class="s">"freak4pc@gmail.com"</span><span class="p">,</span>
+  <span class="nv">website</span><span class="p">:</span> <span class="s">"http://github.com/freak4pc"</span><span class="p">,</span>
+  <span class="nv">family</span><span class="p">:</span> <span class="p">[</span><span class="s">"Tom"</span><span class="p">,</span> <span class="s">"Elia"</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>我们可以利用 <code class="language-plaintext highlighter-rouge">Encodable</code> 的默认实现来把模型对象转为 JSON 对象：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">dateFormatter</span><span class="p">:</span> <span class="kt">DateFormatter</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="nv">dateFormatter</span> <span class="o">=</span> <span class="kt">DateFormatter</span><span class="p">()</span>
+  <span class="n">dateFormatter</span><span class="o">.</span><span class="n">dateFormat</span> <span class="o">=</span> <span class="s">"MM-dd-yyyy HH:mm"</span>
+  <span class="k">return</span> <span class="n">dateFormatter</span>
+<span class="p">}()</span>
+
+<span class="k">let</span> <span class="nv">jsonEncoder</span> <span class="o">=</span> <span class="kt">JSONEncoder</span><span class="p">()</span>
+<span class="n">jsonEncoder</span><span class="o">.</span><span class="n">dateEncodingStrategy</span> <span class="o">=</span> <span class="o">.</span><span class="nf">formatted</span><span class="p">(</span><span class="n">dateFormatter</span><span class="p">)</span>
+<span class="n">jsonEncoder</span><span class="o">.</span><span class="n">outputFormatting</span> <span class="o">=</span> <span class="p">[</span><span class="o">.</span><span class="n">prettyPrinted</span><span class="p">,</span> <span class="o">.</span><span class="n">sortedKeys</span><span class="p">,</span> <span class="o">.</span><span class="n">withoutEscapingSlashes</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="k">let</span> <span class="nv">jsonObject</span> <span class="o">=</span> <span class="k">try</span><span class="p">?</span> <span class="n">jsonEncoder</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">customer</span><span class="p">),</span>
+<span class="k">let</span> <span class="nv">jsonString</span> <span class="o">=</span> <span class="kt">String</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="n">jsonObject</span><span class="p">,</span> <span class="nv">encoding</span><span class="p">:</span> <span class="o">.</span><span class="n">utf8</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nf">print</span><span class="p">(</span><span class="n">jsonString</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// 输出：</span>
+<span class="p">{</span>
+  <span class="s">"accessKey"</span> <span class="p">:</span> <span class="s">"S|_|p3rs3cr37"</span><span class="p">,</span>
+  <span class="s">"addedOn"</span> <span class="p">:</span> <span class="s">"04-14-2022 15:36"</span><span class="p">,</span>
+  <span class="s">"atmCode"</span> <span class="p">:</span> <span class="s">"1132"</span><span class="p">,</span>
+  <span class="s">"cellularPhone"</span> <span class="p">:</span> <span class="s">"+972 542-288-482"</span><span class="p">,</span>
+  <span class="s">"city"</span> <span class="p">:</span> <span class="s">"Albuquerque"</span><span class="p">,</span>
+  <span class="s">"email"</span> <span class="p">:</span> <span class="s">"freak4pc@gmail.com"</span><span class="p">,</span>
+  <span class="s">"family"</span> <span class="p">:</span> <span class="p">[</span>
+    <span class="s">"Tom"</span><span class="p">,</span>
+    <span class="s">"Elia"</span>
+  <span class="p">],</span>
+  <span class="s">"homePhone"</span> <span class="p">:</span> <span class="s">"+1 212-741-4695"</span><span class="p">,</span>
+  <span class="s">"name"</span> <span class="p">:</span> <span class="s">"Shai Mishali"</span><span class="p">,</span>
+  <span class="s">"street"</span> <span class="p">:</span> <span class="s">"3828 Piermont Drive"</span><span class="p">,</span>
+  <span class="s">"website"</span> <span class="p">:</span> <span class="s">"http://github.com/freak4pc"</span><span class="p">,</span>
+  <span class="s">"zip"</span> <span class="p">:</span> <span class="mi">87119</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="修改-json-对象的层级结构">修改 JSON 对象的层级结构</h3>
+<p>如果想修改 encode 之后的 JSON 对象的层级结构呢？还是得使用嵌套的 <code class="language-plaintext highlighter-rouge">CodingKey</code> 枚举，并自己实现 <code class="language-plaintext highlighter-rouge">encode</code> 方法：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">func</span> <span class="nf">encode</span><span class="p">(</span><span class="n">to</span> <span class="nv">encoder</span><span class="p">:</span> <span class="kt">Encoder</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="k">var</span> <span class="nv">customer</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="nf">container</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">CodingKeys</span><span class="o">.</span><span class="k">self</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">accessKey</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">accessKey</span><span class="p">)</span>
+        
+        <span class="k">var</span> <span class="nv">addressInfo</span> <span class="o">=</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">AddressInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addressInfo</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">atmCode</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">atmCode</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">street</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">street</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">city</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">city</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">zip</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">)</span>
+        
+        <span class="k">var</span> <span class="nv">contactInfo</span> <span class="o">=</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">ContactInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">contactInfo</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">homePhone</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">homePhone</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">cellularPhone</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">cellularPhone</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">website</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">website</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">addedOn</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addedOn</span><span class="p">)</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="达成-codable">达成 Codable</h2>
+<p>通过上述自定义 encode 和 decode 操作之后，就达成 Codable 。</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">Foundation</span>
+
+<span class="kd">struct</span> <span class="kt">Customer</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+    <span class="kd">internal</span> <span class="nf">init</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">accessKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">atmCode</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">street</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">city</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">zip</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">homePhone</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">cellularPhone</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">email</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">website</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">addedOn</span><span class="p">:</span> <span class="kt">Date</span> <span class="o">=</span> <span class="kt">Date</span><span class="p">(),</span> <span class="nv">family</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">accessKey</span> <span class="o">=</span> <span class="n">accessKey</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">atmCode</span> <span class="o">=</span> <span class="n">atmCode</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">street</span> <span class="o">=</span> <span class="n">street</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="n">city</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="n">zip</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">homePhone</span> <span class="o">=</span> <span class="n">homePhone</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">cellularPhone</span> <span class="o">=</span> <span class="n">cellularPhone</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">website</span> <span class="o">=</span> <span class="n">website</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">addedOn</span> <span class="o">=</span> <span class="n">addedOn</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="n">family</span>
+    <span class="p">}</span>
+    
+    <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">accessKey</span><span class="p">:</span> <span class="kt">String</span>
+    
+    <span class="k">var</span> <span class="nv">atmCode</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">street</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">city</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">zip</span><span class="p">:</span> <span class="kt">Int</span>
+    
+    <span class="k">var</span> <span class="nv">homePhone</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">cellularPhone</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">email</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">let</span> <span class="nv">website</span><span class="p">:</span> <span class="kt">String</span>
+    <span class="k">var</span> <span class="nv">addedOn</span><span class="p">:</span> <span class="kt">Date</span> <span class="o">=</span> <span class="kt">Date</span><span class="p">()</span>
+    <span class="k">var</span> <span class="nv">family</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span>
+    
+    <span class="kd">enum</span> <span class="kt">CodingKeys</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">name</span>
+        <span class="k">case</span> <span class="n">accessKey</span>
+        <span class="k">case</span> <span class="n">family</span>
+        <span class="k">case</span> <span class="n">addressInfo</span> <span class="o">=</span> <span class="s">"AddressInfo"</span>
+        <span class="k">case</span> <span class="n">contactInfo</span> <span class="o">=</span> <span class="s">"ContactInfo"</span>
+    <span class="p">}</span>
+
+    <span class="kd">enum</span> <span class="kt">AddressInfo</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">atmCode</span>
+        <span class="k">case</span> <span class="n">street</span>
+        <span class="k">case</span> <span class="n">city</span>
+        <span class="k">case</span> <span class="n">zip</span>
+    <span class="p">}</span>
+
+    <span class="kd">enum</span> <span class="kt">ContactInfo</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CodingKey</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">homePhone</span><span class="p">,</span> <span class="n">cellularPhone</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">website</span>
+        <span class="k">case</span> <span class="n">addedOn</span>
+    <span class="p">}</span>
+    
+    <span class="kd">func</span> <span class="nf">encode</span><span class="p">(</span><span class="n">to</span> <span class="nv">encoder</span><span class="p">:</span> <span class="kt">Encoder</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="k">var</span> <span class="nv">customer</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="nf">container</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">CodingKeys</span><span class="o">.</span><span class="k">self</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">accessKey</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">accessKey</span><span class="p">)</span>
+        
+        <span class="k">var</span> <span class="nv">family</span> <span class="o">=</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedUnkeyedContainer</span><span class="p">(</span><span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">family</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">family</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="nv">contentsOf</span><span class="p">:</span> <span class="k">self</span><span class="o">.</span><span class="n">family</span><span class="p">)</span>
+
+        <span class="k">var</span> <span class="nv">addressInfo</span> <span class="o">=</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">AddressInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addressInfo</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">atmCode</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">atmCode</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">street</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">street</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">city</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">city</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">zip</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">)</span>
+
+        <span class="k">var</span> <span class="nv">contactInfo</span> <span class="o">=</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">ContactInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">contactInfo</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">homePhone</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">homePhone</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">cellularPhone</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">cellularPhone</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">website</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">website</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">addedOn</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addedOn</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="nf">init</span><span class="p">(</span><span class="n">from</span> <span class="nv">decoder</span><span class="p">:</span> <span class="kt">Decoder</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">customer</span> <span class="o">=</span> <span class="k">try</span> <span class="n">decoder</span><span class="o">.</span><span class="nf">container</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">CodingKeys</span><span class="o">.</span><span class="k">self</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">name</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">accessKey</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">accessKey</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">accessKey</span> <span class="o">=</span> <span class="n">accessKey</span>
+
+        <span class="k">let</span> <span class="nv">addressInfo</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">AddressInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addressInfo</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">atmCode</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">atmCode</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">street</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">street</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">city</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">city</span><span class="p">)</span>
+
+        <span class="c1">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span>
+        <span class="k">if</span> <span class="k">case</span> <span class="k">let</span> <span class="nv">zipString</span><span class="p">?</span> <span class="o">=</span> <span class="k">try</span><span class="p">?</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decodeIfPresent</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">),</span>
+            <span class="k">let</span> <span class="nv">zipString</span> <span class="o">=</span> <span class="n">zipString</span>
+        <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="kt">Int</span><span class="p">(</span><span class="n">zipString</span><span class="p">)</span> <span class="p">??</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="k">let</span> <span class="nv">zipInt</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decodeIfPresent</span><span class="p">(</span><span class="kt">Int</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="n">zipInt</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">}</span>
+
+        <span class="k">self</span><span class="o">.</span><span class="n">atmCode</span> <span class="o">=</span> <span class="n">atmCode</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">street</span> <span class="o">=</span> <span class="n">street</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">city</span> <span class="o">=</span> <span class="n">city</span>
+
+        <span class="k">let</span> <span class="nv">contactInfo</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">nestedContainer</span><span class="p">(</span><span class="nv">keyedBy</span><span class="p">:</span> <span class="kt">ContactInfo</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">contactInfo</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">homePhone</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">homePhone</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">cellularPhone</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">cellularPhone</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">email</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">email</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">website</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">website</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">addedOn</span> <span class="o">=</span> <span class="k">try</span> <span class="n">contactInfo</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">Date</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">addedOn</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">homePhone</span> <span class="o">=</span> <span class="n">homePhone</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">cellularPhone</span> <span class="o">=</span> <span class="n">cellularPhone</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">website</span> <span class="o">=</span> <span class="n">website</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">addedOn</span> <span class="o">=</span> <span class="n">addedOn</span>
+
+        <span class="k">let</span> <span class="nv">family</span> <span class="o">=</span> <span class="k">try</span> <span class="n">customer</span><span class="o">.</span><span class="nf">decode</span><span class="p">([</span><span class="kt">String</span><span class="p">]</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">family</span><span class="p">)</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="n">family</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>可以看出：自定义实现 encode 和 decode 方法所带来的代码量还是不小的，然而于此同时也带来了较高的灵活度。</p>
+
+<p>举个例子，假如 JSON 对象中 <code class="language-plaintext highlighter-rouge">zip</code> 对应的值的类型是字符串，如“87119”。而 <code class="language-plaintext highlighter-rouge">Customer</code> 模型中 <code class="language-plaintext highlighter-rouge">zip</code> 变量类型为 <code class="language-plaintext highlighter-rouge">Int</code>，则可以在自定义 decode 方法中特别处理：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span>
+<span class="k">if</span> <span class="k">case</span> <span class="k">let</span> <span class="nv">zipString</span><span class="p">?</span> <span class="o">=</span> <span class="k">try</span><span class="p">?</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decodeIfPresent</span><span class="p">(</span><span class="kt">String</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">),</span>
+<span class="k">let</span> <span class="nv">zipString</span> <span class="o">=</span> <span class="n">zipString</span>
+<span class="p">{</span>
+    <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="kt">Int</span><span class="p">(</span><span class="n">zipString</span><span class="p">)</span> <span class="p">??</span> <span class="o">-</span><span class="mi">1</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="k">let</span> <span class="nv">zipInt</span> <span class="o">=</span> <span class="k">try</span> <span class="n">addressInfo</span><span class="o">.</span><span class="nf">decodeIfPresent</span><span class="p">(</span><span class="kt">Int</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="o">.</span><span class="n">zip</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="n">zipInt</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">self</span><span class="o">.</span><span class="n">zip</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>再者，如果 JSON 新加一个 <code class="language-plaintext highlighter-rouge">memberType</code> 字段来表示顾客的身份：</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">MemberType</span><span class="p">:</span> <span class="kt">Int</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">visitor</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">case</span> <span class="n">vip</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">case</span> <span class="n">unknown</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>突然某一天，收到的 JSON 对象中 <code class="language-plaintext highlighter-rouge">memberType</code> 为 3，意味超级 vip 客户，这是业务迭代新增的需求，而在 <code class="language-plaintext highlighter-rouge">Customer</code> 未对此改动作相应的更新时，也在 decode 方法里对这种情况作兼容处理，比如直接设为 <code class="language-plaintext highlighter-rouge">.unknown</code>。</p>
+
+<h2 id="jsonencoder">JSONEncoder</h2>
+<ul>
+  <li><strong>KeyEncodingStrategy</strong>：内置默认的 <code class="language-plaintext highlighter-rouge">convertToSnakeCase</code> 策略，如模型中的变量名为：<code class="language-plaintext highlighter-rouge">xmlContents</code>，经过 <code class="language-plaintext highlighter-rouge">convertToSnakeCase</code> 策略之后，对应的 JSON key 会变为 <code class="language-plaintext highlighter-rouge">xml_contents</code>。也提供自定义的接口，让开发者自行决定。</li>
+  <li><strong>OutputFormatting</strong>：内置三种默认的输出格式化方式
+    <ul>
+      <li>prettyPrinted：iOS 7 开始支持</li>
+      <li>sortedKeys：iOS 11 开始支持</li>
+      <li>withoutEscapingSlashes：iOS 13 开始支持</li>
+    </ul>
+  </li>
+  <li><strong>userInfo</strong>：外部可通过此与自定义的 encode 过程进行信息传递。</li>
+  <li><strong>DateEncodingStrategy</strong>：内置 <code class="language-plaintext highlighter-rouge">iso8601</code> 等编码格式，同时也提供传入自定义的 <code class="language-plaintext highlighter-rouge">DateFormatter</code> 对象对日期进行自定义处理。</li>
+  <li><strong>DataEncodingStrategy</strong>：内置 <code class="language-plaintext highlighter-rouge">base64</code> 等编码格式，同时也提供自定义接口，让开发者自行决定。</li>
+</ul>
+
+<p><a href="https://developer.apple.com/documentation/foundation/jsondecoder">JSONDecoder</a> 的结构与 <a href="https://developer.apple.com/documentation/foundation/jsonencoder">JSONEncoder</a> 很相似，不再一一赘述。</p>
+
+<h3 id="swiftyjson-源码分析未完待续">SwiftyJSON 源码分析（未完待续）</h3>
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-02.png" alt="" /></p>
+
+</div>
+
+
+<nav class="post-nav" aria-label="文章导航">
+  
+    <a class="post-nav-prev" href="/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/"><span class="post-nav-label">&larr; 上一篇</span>打造一个简单的 iOS App CI 系统</a>
+  
+  
+    <a class="post-nav-next" href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><span class="post-nav-label">下一篇 &rarr;</span>Alamofire 源码阅读（一）</a>
+  
 </nav>
 
 
-
-
-</header>
         
-  
-  <aside class="sidebar">
+          
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95-Decode%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">如何 Decode？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%B4%E6%8C%81%E5%8E%9F%E6%9C%89%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">维持原有层级结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-JSON-%E5%AF%B9%E5%BA%94%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">自定义 JSON 对应模型的层级结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E4%BD%BF%E7%94%A8%E8%AE%A1%E7%AE%97%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.1.</span> <span class="nav-text">1. 使用计算属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E4%BD%BF%E7%94%A8%E5%B5%8C%E5%A5%97%E7%9A%84-CodingKey-%E6%9E%9A%E4%B8%BE"><span class="nav-number">1.2.2.</span> <span class="nav-text">2. 使用嵌套的 CodingKey 枚举</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95-Encode"><span class="nav-number">2.</span> <span class="nav-text">如何 Encode?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-JSON-%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">修改 JSON 对象的层级结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%BE%E6%88%90-Codable"><span class="nav-number">3.</span> <span class="nav-text">达成 Codable</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSONEncoder"><span class="nav-number">4.</span> <span class="nav-text">JSONEncoder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SwiftyJSON-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%88%E6%9C%AA%E5%AE%8C%E5%BE%85%E7%BB%AD%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">SwiftyJSON 源码分析（未完待续）</span></a></li></ol></li></ol></div>
-        </div>
-        <!--/noindex-->
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </main><script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var defined_alerts = {
+      NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
+      TIP:       { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>', label: 'Tip' },
+      IMPORTANT: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Important' },
+      WARNING:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Warning' },
+      CAUTION:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Caution' }
+    };
 
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Sunset Wan</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">15</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">10</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author animated">
-      <span class="links-of-author-item">
-        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-  </div>
+    var blockquotes = document.querySelectorAll("blockquote");
+    for (var i = 0; i < blockquotes.length; i++) {
+      var bq = blockquotes[i];
+      var firstP = bq.querySelector("p:first-child");
+      if (!firstP) continue;
 
-        </div>
-      </div>
-    </div>
+      var text = firstP.innerHTML;
+      var match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br\s*\/?>)?/);
+      if (!match) continue;
 
-    
-  </aside>
+      var type = match[1];
+      var alert = defined_alerts[type];
 
+      // Remove the marker from the paragraph text
+      firstP.innerHTML = text.replace(match[0], "").trim();
 
-    </div>
+      // If the paragraph is now empty, remove it
+      if (!firstP.innerHTML) {
+        firstP.remove();
+      }
 
-    <div class="main-inner post posts-expand">
+      // Build the alert title
+      var title = document.createElement("p");
+      title.className = "markdown-alert-title";
+      title.innerHTML = alert.icon + " " + alert.label;
+      bq.insertBefore(title, bq.firstChild);
 
-
-  
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2022/04/14/Codable/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Codable 学习笔记 | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Codable 学习笔记
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-04-14 09:41:00" itemprop="dateCreated datePublished" datetime="2022-04-14T09:41:00+00:00">2022-04-14</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>本文为 Raywenderlich 出版的《Expert Swift》第 8 章节《Codable》阅读笔记。<span id="more"></span></p>
-<p>Swift 4.0 就引入了 <code>Codable</code> 协议。话不多说，进入正题：<br>示例 JSON：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;accessKey&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;S|_|p3rs3cr37&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;AddressInfo&quot;</span> <span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;atmCode&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;1132&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;city&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;Albuquerque&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;street&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;3828 Piermont Drive&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;zip&quot;</span> <span class="punctuation">:</span> <span class="number">87112</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;ContactInfo&quot;</span> <span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;addedOn&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;04-14-2022 13:58&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;cellularPhone&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;+972 542-288-482&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;email&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;freak4pc@gmail.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;homePhone&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;+1 212-741-4695&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;website&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;http://github.com/freak4pc&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;family&quot;</span> <span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;Tom&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;Elia&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;Shai Mishali&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-<h2 id="如何-Decode？"><a href="#如何-Decode？" class="headerlink" title="如何 Decode？"></a>如何 Decode？</h2><p>即如何解析这段 JSON？</p>
-<h3 id="维持原有层级结构"><a href="#维持原有层级结构" class="headerlink" title="维持原有层级结构"></a>维持原有层级结构</h3><p>这个 JSON 对应的 Swift 模型为：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Customer1</span>: <span class="title class_ inherited__">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> accessKey: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> addressInfo: <span class="type">AddressInfo</span></span><br><span class="line">    <span class="keyword">let</span> contactInfo: <span class="type">ContactInfo</span></span><br><span class="line">    <span class="keyword">let</span> family: [<span class="type">String</span>]</span><br><span class="line">    <span class="keyword">let</span> name: <span class="type">String</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> accessKey</span><br><span class="line">        <span class="keyword">case</span> addressInfo</span><br><span class="line">        <span class="keyword">case</span> contactInfo</span><br><span class="line">        <span class="keyword">case</span> family, name</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// MARK: - AddressInfo</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AddressInfo</span>: <span class="title class_ inherited__">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> atmCode, city, street: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> zip: <span class="type">Int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// MARK: - ContactInfo</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ContactInfo</span>: <span class="title class_ inherited__">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> addedOn, cellularPhone, email, homePhone: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> website: <span class="type">String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>Customer1</code> 结构体模型的层级结构与 JSON 对象的层级结构保持一致。这样就可以利用 <code>JSONDecoder</code> 把示例 JSON 成功地解析为 <code>Customer1</code> 结构体模型。</p>
-<h3 id="自定义-JSON-对应模型的层级结构"><a href="#自定义-JSON-对应模型的层级结构" class="headerlink" title="自定义 JSON 对应模型的层级结构"></a>自定义 JSON 对应模型的层级结构</h3><p>以上述 <code>Customer1</code> 模型为例，如果想访问该顾客所在的城市：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> jack <span class="operator">=</span> <span class="type">Customer1</span>()</span><br><span class="line"><span class="keyword">let</span> city <span class="operator">=</span> jack.addressInfo.city</span><br></pre></td></tr></table></figure>
-
-<p>如果想直接通过 <code>jack.city</code> 来访问 jack 所在的城市信息，该怎么处理？</p>
-<h4 id="1-使用计算属性"><a href="#1-使用计算属性" class="headerlink" title="1. 使用计算属性"></a>1. 使用计算属性</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> city: <span class="type">String</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addressInfo.city</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>但这种方式的弊端是：万一如果想把 <code>AddressInfo</code> 这嵌套的一层直接去掉，得手写好多类似上面的代码。</p>
-<h4 id="2-使用嵌套的-CodingKey-枚举"><a href="#2-使用嵌套的-CodingKey-枚举" class="headerlink" title="2. 使用嵌套的 CodingKey 枚举"></a>2. 使用嵌套的 CodingKey 枚举</h4><p>使用嵌套的 CodingKey 枚举可以把具有层级的 JSON “拍扁”。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> name</span><br><span class="line">    <span class="keyword">case</span> accessKey</span><br><span class="line">    <span class="keyword">case</span> status</span><br><span class="line">    <span class="keyword">case</span> addressInfo <span class="operator">=</span> <span class="string">&quot;AddressInfo&quot;</span></span><br><span class="line">    <span class="keyword">case</span> contactInfo <span class="operator">=</span> <span class="string">&quot;ContactInfo&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">AddressInfo</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> atmCode</span><br><span class="line">    <span class="keyword">case</span> street</span><br><span class="line">    <span class="keyword">case</span> city</span><br><span class="line">    <span class="keyword">case</span> zip</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">ContactInfo</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> homePhone, cellularPhone, email, website</span><br><span class="line">    <span class="keyword">case</span> addedOn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>还得自己实现对应的 <code>decode</code> 方法：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> customer <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">    <span class="keyword">let</span> name <span class="operator">=</span> <span class="keyword">try</span> customer.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .name)</span><br><span class="line">    <span class="keyword">let</span> accessKey <span class="operator">=</span> <span class="keyword">try</span> customer.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .accessKey)</span><br><span class="line">    <span class="keyword">let</span> status <span class="operator">=</span> <span class="keyword">try</span> customer.decode(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .status)</span><br><span class="line">    <span class="keyword">self</span>.name <span class="operator">=</span> name</span><br><span class="line">    <span class="keyword">self</span>.accessKey <span class="operator">=</span> accessKey</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> addressInfo <span class="operator">=</span> <span class="keyword">try</span> customer.nestedContainer(keyedBy: <span class="type">AddressInfo</span>.<span class="keyword">self</span>, forKey: .addressInfo)</span><br><span class="line">    <span class="keyword">let</span> atmCode <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .atmCode)</span><br><span class="line">    <span class="keyword">let</span> street <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .street)</span><br><span class="line">    <span class="keyword">let</span> city <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .city)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> zipString<span class="operator">?</span> <span class="operator">=</span> <span class="keyword">try?</span> addressInfo.decodeIfPresent(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .zip),</span><br><span class="line">        <span class="keyword">let</span> zipString <span class="operator">=</span> zipString</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="type">Int</span>(zipString) <span class="operator">??</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">let</span> zipInt <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decodeIfPresent(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .zip) &#123;</span><br><span class="line">        <span class="keyword">self</span>.zip <span class="operator">=</span> zipInt</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span>.atmCode <span class="operator">=</span> atmCode</span><br><span class="line">    <span class="keyword">self</span>.street <span class="operator">=</span> street</span><br><span class="line">    <span class="keyword">self</span>.city <span class="operator">=</span> city</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> contactInfo <span class="operator">=</span> <span class="keyword">try</span> customer.nestedContainer(keyedBy: <span class="type">ContactInfo</span>.<span class="keyword">self</span>, forKey: .contactInfo)</span><br><span class="line">    <span class="keyword">let</span> homePhone <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .homePhone)</span><br><span class="line">    <span class="keyword">let</span> cellularPhone <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .cellularPhone)</span><br><span class="line">    <span class="keyword">let</span> email <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .email)</span><br><span class="line">    <span class="keyword">let</span> website <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .website)</span><br><span class="line">    <span class="keyword">let</span> addedOn <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">Date</span>.<span class="keyword">self</span>, forKey: .addedOn)</span><br><span class="line">    <span class="keyword">self</span>.homePhone <span class="operator">=</span> homePhone</span><br><span class="line">    <span class="keyword">self</span>.cellularPhone <span class="operator">=</span> cellularPhone</span><br><span class="line">    <span class="keyword">self</span>.email <span class="operator">=</span> email</span><br><span class="line">    <span class="keyword">self</span>.website <span class="operator">=</span> website</span><br><span class="line">    <span class="keyword">self</span>.addedOn <span class="operator">=</span> addedOn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在自己实现 <code>decode</code> 方法时，还需要对几类容器（Container）有了解：<br><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-01.png" alt="codable-01"></p>
-<ul>
-<li><strong>Keyed Container</strong>：最常见的容器之一，可用来解析键值对数据，对应的 key 定义在 <code>CodingKeys</code> 枚举中。</li>
-<li><strong>Unkeyed Container</strong>：用来解析不是以字符串为 key 的结构，例如常见的数组结构。</li>
-<li><strong>Single Value Container</strong>：用来把单一的数据解析为有具体类型的数据结构。</li>
-<li><strong>Nested Container</strong>：当某个容器成为另一个容器的子容器时，它被称为嵌套容器</li>
-</ul>
-<p><strong>我们可以方便地把容器理解为：一个对数据编解码的环境。</strong></p>
-<p>被“拍扁”后的模型为：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Customer2</span>: <span class="title class_ inherited__">Encodable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> accessKey: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> family: [<span class="type">String</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> atmCode: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> street: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> city: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> zip: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> homePhone: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> cellularPhone: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> email: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> website: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> addedOn <span class="operator">=</span> <span class="type">Date</span>()</span><br></pre></td></tr></table></figure>
-
-<h2 id="如何-Encode"><a href="#如何-Encode" class="headerlink" title="如何 Encode?"></a>如何 Encode?</h2><p>示例模型对象：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Customer</span>: <span class="title class_ inherited__">Encodable</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> accessKey: <span class="type">String</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">var</span> atmCode: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> street: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> city: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> zip: <span class="type">Int</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">var</span> homePhone: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> cellularPhone: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> email: <span class="type">String</span></span><br><span class="line">  <span class="keyword">let</span> website: <span class="type">String</span></span><br><span class="line">  <span class="keyword">let</span> addedOn <span class="operator">=</span> <span class="type">Date</span>()</span><br><span class="line">  <span class="keyword">var</span> family: [<span class="type">String</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> customer <span class="operator">=</span> <span class="type">Customer</span>(</span><br><span class="line">  name: <span class="string">&quot;Shai Mishali&quot;</span>,</span><br><span class="line">  accessKey: <span class="string">&quot;S|_|p3rs3cr37&quot;</span>,</span><br><span class="line">  atmCode: <span class="string">&quot;1132&quot;</span>,</span><br><span class="line">  street: <span class="string">&quot;3828 Piermont Drive&quot;</span>,</span><br><span class="line">  city: <span class="string">&quot;Albuquerque&quot;</span>,</span><br><span class="line">  zip: <span class="number">87119</span>,</span><br><span class="line">  homePhone: <span class="string">&quot;+1 212-741-4695&quot;</span>,</span><br><span class="line">  cellularPhone: <span class="string">&quot;+972 542-288-482&quot;</span>,</span><br><span class="line">  email: <span class="string">&quot;freak4pc@gmail.com&quot;</span>,</span><br><span class="line">  website: <span class="string">&quot;http://github.com/freak4pc&quot;</span>,</span><br><span class="line">  family: [<span class="string">&quot;Tom&quot;</span>, <span class="string">&quot;Elia&quot;</span>]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>我们可以利用 <code>Encodable</code> 的默认实现来把模型对象转为 JSON 对象：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> dateFormatter: <span class="type">DateFormatter</span> <span class="operator">=</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> dateFormatter <span class="operator">=</span> <span class="type">DateFormatter</span>()</span><br><span class="line">  dateFormatter.dateFormat <span class="operator">=</span> <span class="string">&quot;MM-dd-yyyy HH:mm&quot;</span></span><br><span class="line">  <span class="keyword">return</span> dateFormatter</span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> jsonEncoder <span class="operator">=</span> <span class="type">JSONEncoder</span>()</span><br><span class="line">jsonEncoder.dateEncodingStrategy <span class="operator">=</span> .formatted(dateFormatter)</span><br><span class="line">jsonEncoder.outputFormatting <span class="operator">=</span> [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">let</span> jsonObject <span class="operator">=</span> <span class="keyword">try?</span> jsonEncoder.encode(customer),</span><br><span class="line"><span class="keyword">let</span> jsonString <span class="operator">=</span> <span class="type">String</span>(data: jsonObject, encoding: .utf8) &#123;</span><br><span class="line">  <span class="built_in">print</span>(jsonString)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出：</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;accessKey&quot;</span> : <span class="string">&quot;S|_|p3rs3cr37&quot;</span>,</span><br><span class="line">  <span class="string">&quot;addedOn&quot;</span> : <span class="string">&quot;04-14-2022 15:36&quot;</span>,</span><br><span class="line">  <span class="string">&quot;atmCode&quot;</span> : <span class="string">&quot;1132&quot;</span>,</span><br><span class="line">  <span class="string">&quot;cellularPhone&quot;</span> : <span class="string">&quot;+972 542-288-482&quot;</span>,</span><br><span class="line">  <span class="string">&quot;city&quot;</span> : <span class="string">&quot;Albuquerque&quot;</span>,</span><br><span class="line">  <span class="string">&quot;email&quot;</span> : <span class="string">&quot;freak4pc@gmail.com&quot;</span>,</span><br><span class="line">  <span class="string">&quot;family&quot;</span> : [</span><br><span class="line">    <span class="string">&quot;Tom&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Elia&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">&quot;homePhone&quot;</span> : <span class="string">&quot;+1 212-741-4695&quot;</span>,</span><br><span class="line">  <span class="string">&quot;name&quot;</span> : <span class="string">&quot;Shai Mishali&quot;</span>,</span><br><span class="line">  <span class="string">&quot;street&quot;</span> : <span class="string">&quot;3828 Piermont Drive&quot;</span>,</span><br><span class="line">  <span class="string">&quot;website&quot;</span> : <span class="string">&quot;http://github.com/freak4pc&quot;</span>,</span><br><span class="line">  <span class="string">&quot;zip&quot;</span> : <span class="number">87119</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="修改-JSON-对象的层级结构"><a href="#修改-JSON-对象的层级结构" class="headerlink" title="修改 JSON 对象的层级结构"></a>修改 JSON 对象的层级结构</h3><p>如果想修改 encode 之后的 JSON 对象的层级结构呢？还是得使用嵌套的 <code>CodingKey</code> 枚举，并自己实现 <code>encode</code> 方法：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> customer <span class="operator">=</span> encoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">    <span class="keyword">try</span> customer.encode(name, forKey: .name)</span><br><span class="line">    <span class="keyword">try</span> customer.encode(accessKey, forKey: .accessKey)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> addressInfo <span class="operator">=</span> customer.nestedContainer(keyedBy: <span class="type">AddressInfo</span>.<span class="keyword">self</span>, forKey: .addressInfo)</span><br><span class="line">    <span class="keyword">try</span> addressInfo.encode(atmCode, forKey: .atmCode)</span><br><span class="line">    <span class="keyword">try</span> addressInfo.encode(street, forKey: .street)</span><br><span class="line">    <span class="keyword">try</span> addressInfo.encode(city, forKey: .city)</span><br><span class="line">    <span class="keyword">try</span> addressInfo.encode(zip, forKey: .zip)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> contactInfo <span class="operator">=</span> customer.nestedContainer(keyedBy: <span class="type">ContactInfo</span>.<span class="keyword">self</span>, forKey: .contactInfo)</span><br><span class="line">    <span class="keyword">try</span> contactInfo.encode(homePhone, forKey: .homePhone)</span><br><span class="line">    <span class="keyword">try</span> contactInfo.encode(cellularPhone, forKey: .cellularPhone)</span><br><span class="line">    <span class="keyword">try</span> contactInfo.encode(email, forKey: .email)</span><br><span class="line">    <span class="keyword">try</span> contactInfo.encode(website, forKey: .website)</span><br><span class="line">    <span class="keyword">try</span> contactInfo.encode(addedOn, forKey: .addedOn)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="达成-Codable"><a href="#达成-Codable" class="headerlink" title="达成 Codable"></a>达成 Codable</h2><p>通过上述自定义 encode 和 decode 操作之后，就达成 Codable 。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Customer</span>: <span class="title class_ inherited__">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(<span class="params">name</span>: <span class="type">String</span>, <span class="params">accessKey</span>: <span class="type">String</span>, <span class="params">atmCode</span>: <span class="type">String</span>, <span class="params">street</span>: <span class="type">String</span>, <span class="params">city</span>: <span class="type">String</span>, <span class="params">zip</span>: <span class="type">Int</span>, <span class="params">homePhone</span>: <span class="type">String</span>, <span class="params">cellularPhone</span>: <span class="type">String</span>, <span class="params">email</span>: <span class="type">String</span>, <span class="params">website</span>: <span class="type">String</span>, <span class="params">addedOn</span>: <span class="type">Date</span> <span class="operator">=</span> <span class="type">Date</span>(), <span class="params">family</span>: [<span class="type">String</span>]) &#123;</span><br><span class="line">        <span class="keyword">self</span>.name <span class="operator">=</span> name</span><br><span class="line">        <span class="keyword">self</span>.accessKey <span class="operator">=</span> accessKey</span><br><span class="line">        <span class="keyword">self</span>.atmCode <span class="operator">=</span> atmCode</span><br><span class="line">        <span class="keyword">self</span>.street <span class="operator">=</span> street</span><br><span class="line">        <span class="keyword">self</span>.city <span class="operator">=</span> city</span><br><span class="line">        <span class="keyword">self</span>.zip <span class="operator">=</span> zip</span><br><span class="line">        <span class="keyword">self</span>.homePhone <span class="operator">=</span> homePhone</span><br><span class="line">        <span class="keyword">self</span>.cellularPhone <span class="operator">=</span> cellularPhone</span><br><span class="line">        <span class="keyword">self</span>.email <span class="operator">=</span> email</span><br><span class="line">        <span class="keyword">self</span>.website <span class="operator">=</span> website</span><br><span class="line">        <span class="keyword">self</span>.addedOn <span class="operator">=</span> addedOn</span><br><span class="line">        <span class="keyword">self</span>.family <span class="operator">=</span> family</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> accessKey: <span class="type">String</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> atmCode: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> street: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> city: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> zip: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> homePhone: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> cellularPhone: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> email: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> website: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> addedOn: <span class="type">Date</span> <span class="operator">=</span> <span class="type">Date</span>()</span><br><span class="line">    <span class="keyword">var</span> family: [<span class="type">String</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> name</span><br><span class="line">        <span class="keyword">case</span> accessKey</span><br><span class="line">        <span class="keyword">case</span> family</span><br><span class="line">        <span class="keyword">case</span> addressInfo <span class="operator">=</span> <span class="string">&quot;AddressInfo&quot;</span></span><br><span class="line">        <span class="keyword">case</span> contactInfo <span class="operator">=</span> <span class="string">&quot;ContactInfo&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">AddressInfo</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> atmCode</span><br><span class="line">        <span class="keyword">case</span> street</span><br><span class="line">        <span class="keyword">case</span> city</span><br><span class="line">        <span class="keyword">case</span> zip</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">ContactInfo</span>: <span class="title class_ inherited__">String</span>, <span class="title class_ inherited__">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> homePhone, cellularPhone, email, website</span><br><span class="line">        <span class="keyword">case</span> addedOn</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> customer <span class="operator">=</span> encoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">try</span> customer.encode(name, forKey: .name)</span><br><span class="line">        <span class="keyword">try</span> customer.encode(accessKey, forKey: .accessKey)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">var</span> family <span class="operator">=</span> customer.nestedUnkeyedContainer(forKey: .family)</span><br><span class="line">        <span class="keyword">try</span> family.encode(contentsOf: <span class="keyword">self</span>.family)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> addressInfo <span class="operator">=</span> customer.nestedContainer(keyedBy: <span class="type">AddressInfo</span>.<span class="keyword">self</span>, forKey: .addressInfo)</span><br><span class="line">        <span class="keyword">try</span> addressInfo.encode(atmCode, forKey: .atmCode)</span><br><span class="line">        <span class="keyword">try</span> addressInfo.encode(street, forKey: .street)</span><br><span class="line">        <span class="keyword">try</span> addressInfo.encode(city, forKey: .city)</span><br><span class="line">        <span class="keyword">try</span> addressInfo.encode(zip, forKey: .zip)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> contactInfo <span class="operator">=</span> customer.nestedContainer(keyedBy: <span class="type">ContactInfo</span>.<span class="keyword">self</span>, forKey: .contactInfo)</span><br><span class="line">        <span class="keyword">try</span> contactInfo.encode(homePhone, forKey: .homePhone)</span><br><span class="line">        <span class="keyword">try</span> contactInfo.encode(cellularPhone, forKey: .cellularPhone)</span><br><span class="line">        <span class="keyword">try</span> contactInfo.encode(email, forKey: .email)</span><br><span class="line">        <span class="keyword">try</span> contactInfo.encode(website, forKey: .website)</span><br><span class="line">        <span class="keyword">try</span> contactInfo.encode(addedOn, forKey: .addedOn)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> customer <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">let</span> name <span class="operator">=</span> <span class="keyword">try</span> customer.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .name)</span><br><span class="line">        <span class="keyword">let</span> accessKey <span class="operator">=</span> <span class="keyword">try</span> customer.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .accessKey)</span><br><span class="line">        <span class="keyword">self</span>.name <span class="operator">=</span> name</span><br><span class="line">        <span class="keyword">self</span>.accessKey <span class="operator">=</span> accessKey</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> addressInfo <span class="operator">=</span> <span class="keyword">try</span> customer.nestedContainer(keyedBy: <span class="type">AddressInfo</span>.<span class="keyword">self</span>, forKey: .addressInfo)</span><br><span class="line">        <span class="keyword">let</span> atmCode <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .atmCode)</span><br><span class="line">        <span class="keyword">let</span> street <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .street)</span><br><span class="line">        <span class="keyword">let</span> city <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .city)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> zipString<span class="operator">?</span> <span class="operator">=</span> <span class="keyword">try?</span> addressInfo.decodeIfPresent(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .zip),</span><br><span class="line">            <span class="keyword">let</span> zipString <span class="operator">=</span> zipString</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="type">Int</span>(zipString) <span class="operator">??</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">let</span> zipInt <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decodeIfPresent(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .zip) &#123;</span><br><span class="line">            <span class="keyword">self</span>.zip <span class="operator">=</span> zipInt</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">self</span>.atmCode <span class="operator">=</span> atmCode</span><br><span class="line">        <span class="keyword">self</span>.street <span class="operator">=</span> street</span><br><span class="line">        <span class="keyword">self</span>.city <span class="operator">=</span> city</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> contactInfo <span class="operator">=</span> <span class="keyword">try</span> customer.nestedContainer(keyedBy: <span class="type">ContactInfo</span>.<span class="keyword">self</span>, forKey: .contactInfo)</span><br><span class="line">        <span class="keyword">let</span> homePhone <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .homePhone)</span><br><span class="line">        <span class="keyword">let</span> cellularPhone <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .cellularPhone)</span><br><span class="line">        <span class="keyword">let</span> email <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .email)</span><br><span class="line">        <span class="keyword">let</span> website <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .website)</span><br><span class="line">        <span class="keyword">let</span> addedOn <span class="operator">=</span> <span class="keyword">try</span> contactInfo.decode(<span class="type">Date</span>.<span class="keyword">self</span>, forKey: .addedOn)</span><br><span class="line">        <span class="keyword">self</span>.homePhone <span class="operator">=</span> homePhone</span><br><span class="line">        <span class="keyword">self</span>.cellularPhone <span class="operator">=</span> cellularPhone</span><br><span class="line">        <span class="keyword">self</span>.email <span class="operator">=</span> email</span><br><span class="line">        <span class="keyword">self</span>.website <span class="operator">=</span> website</span><br><span class="line">        <span class="keyword">self</span>.addedOn <span class="operator">=</span> addedOn</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> family <span class="operator">=</span> <span class="keyword">try</span> customer.decode([<span class="type">String</span>].<span class="keyword">self</span>, forKey: .family)</span><br><span class="line">        <span class="keyword">self</span>.family <span class="operator">=</span> family</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看出：自定义实现 encode 和 decode 方法所带来的代码量还是不小的，然而于此同时也带来了较高的灵活度。</p>
-<p>举个例子，假如 JSON 对象中 <code>zip</code> 对应的值的类型是字符串，如“87119”。而 <code>Customer</code> 模型中 <code>zip</code> 变量类型为 <code>Int</code>，则可以在自定义 decode 方法中特别处理：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当 JSON 对象中 `zip` key 对应的 value 类型是 String 时的兼容处理</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> zipString<span class="operator">?</span> <span class="operator">=</span> <span class="keyword">try?</span> addressInfo.decodeIfPresent(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .zip),</span><br><span class="line"><span class="keyword">let</span> zipString <span class="operator">=</span> zipString</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="type">Int</span>(zipString) <span class="operator">??</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">let</span> zipInt <span class="operator">=</span> <span class="keyword">try</span> addressInfo.decodeIfPresent(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .zip) &#123;</span><br><span class="line">    <span class="keyword">self</span>.zip <span class="operator">=</span> zipInt</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">self</span>.zip <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>再者，如果 JSON 新加一个 <code>memberType</code> 字段来表示顾客的身份：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">MemberType</span>: <span class="title class_ inherited__">Int</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> visitor <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">case</span> vip <span class="operator">=</span> <span class="number">2</span></span><br><span class="line">    <span class="keyword">case</span> unknown <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>突然某一天，收到的 JSON 对象中 <code>memberType</code> 为 3，意味超级 vip 客户，这是业务迭代新增的需求，而在 <code>Customer</code> 未对此改动作相应的更新时，也在 decode 方法里对这种情况作兼容处理，比如直接设为 <code>.unknown</code>。</p>
-<h2 id="JSONEncoder"><a href="#JSONEncoder" class="headerlink" title="JSONEncoder"></a>JSONEncoder</h2><ul>
-<li><strong>KeyEncodingStrategy</strong>：内置默认的 <code>convertToSnakeCase</code> 策略，如模型中的变量名为：<code>xmlContents</code>，经过 <code>convertToSnakeCase</code> 策略之后，对应的 JSON key 会变为 <code>xml_contents</code>。也提供自定义的接口，让开发者自行决定。</li>
-<li><strong>OutputFormatting</strong>：内置三种默认的输出格式化方式<ul>
-<li>prettyPrinted：iOS 7 开始支持</li>
-<li>sortedKeys：iOS 11 开始支持</li>
-<li>withoutEscapingSlashes：iOS 13 开始支持</li>
-</ul>
-</li>
-<li><strong>userInfo</strong>：外部可通过此与自定义的 encode 过程进行信息传递。</li>
-<li><strong>DateEncodingStrategy</strong>：内置 <code>iso8601</code> 等编码格式，同时也提供传入自定义的 <code>DateFormatter</code> 对象对日期进行自定义处理。</li>
-<li><strong>DataEncodingStrategy</strong>：内置 <code>base64</code> 等编码格式，同时也提供自定义接口，让开发者自行决定。</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/foundation/jsondecoder">JSONDecoder</a> 的结构与 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/foundation/jsonencoder">JSONEncoder</a> 很相似，不再一一赘述。</p>
-<h3 id="SwiftyJSON-源码分析（未完待续）"><a href="#SwiftyJSON-源码分析（未完待续）" class="headerlink" title="SwiftyJSON 源码分析（未完待续）"></a>SwiftyJSON 源码分析（未完待续）</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/Codable/codable-02.png"></p>
-
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Codable/" rel="tag"># Codable</a>
-          </div>
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2022/03/30/%E6%89%93%E9%80%A0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%20iOS%20App%20CI%20%E7%B3%BB%E7%BB%9F/" rel="prev" title="打造一个简单的 iOS App CI 系统">
-                  <i class="fa fa-angle-left"></i> 打造一个简单的 iOS App CI 系统
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" rel="next" title="Alamofire 源码阅读（一）">
-                  Alamofire 源码阅读（一） <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
+      bq.classList.add("markdown-alert", "markdown-alert-" + type.toLowerCase());
+    }
+  });
+</script>
 
 
+<script>
+(function() {
+  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+    block.style.position = 'relative';
+
+    // Language label derived from rouge's language-* class
+    var langClass = Array.from(block.classList).find(function(c) {
+      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
+    });
+    if (langClass) {
+      var label = document.createElement('span');
+      label.className = 'code-lang';
+      label.textContent = langClass.replace('language-', '');
+      block.appendChild(label);
+    }
+
+    var btn = document.createElement('button');
+    btn.className = 'code-copy';
+    btn.setAttribute('aria-label', "复制代码");
+    btn.textContent = "复制";
+    btn.addEventListener('click', function() {
+      var code = block.querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(function() {
+        btn.textContent = "已复制";
+        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+      });
+    });
+    block.appendChild(btn);
+  });
+})();
+</script>
 
 
-
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-user"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
-  </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
-
-    </div>
-  </footer>
-
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+<style>
+  .back-to-top {
+    position: fixed;
+    bottom: 2em;
+    right: 2em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .back-to-top:hover {
+    color: var(--links);
+  }
+  @media screen and (max-width: 600px) {
+    .back-to-top {
+      bottom: 1em;
+      right: 1em;
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>
+<script>
+(function() {
+  var btn = document.querySelector('.back-to-top');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
+  });
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  });
+})();
+</script>
 </body>
 </html>

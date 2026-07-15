@@ -1,365 +1,605 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+<html lang="zh-CN" class="html" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <title>
+    
+      Alamofire 源码阅读（一）
+    
+  </title>
 
-<link rel="stylesheet" href="/css/main.css">
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Alamofire 源码阅读（一）" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。" />
+<meta name="twitter:description" property="og:description" content="阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。" />
+<link rel="canonical" href="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" />
+<meta property="og:url" content="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-06-15T00:01:13+08:00" />
+<meta property="article:modified_time" content="2024-06-15T00:01:13+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Alamofire 源码阅读（一）" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2024-06-15T00:01:13+08:00","datePublished":"2024-06-15T00:01:13+08:00","description":"阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。","headline":"Alamofire 源码阅读（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"},"url":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"}</script>
+<!-- End Jekyll SEO tag -->
 
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
-
-    <meta name="description" content="阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Alamofire 源码阅读（一）">
-<meta property="og:url" content="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
-<meta property="og:site_name" content="日落大道">
-<meta property="og:description" content="阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg">
-<meta property="article:published_time" content="2024-06-15T00:01:13.000Z">
-<meta property="article:modified_time" content="2024-06-15T00:01:13.000Z">
-<meta property="article:author" content="Sunset Wan">
-<meta property="article:tag" content="Alamofire">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg">
-
-
-<link rel="canonical" href="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/","path":"2024/06/15/Alamofire-源码阅读笔记/","title":"Alamofire 源码阅读（一）"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Alamofire 源码阅读（一） | 日落大道</title>
-  
-
-
-
-
-
-
-
-
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
-<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
 
   
 
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
 
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
 
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
 
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
 
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
 
   
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
+  <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
+<body><div class="progress-bar" aria-hidden="true"></div>
+<style>
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--links);
+    z-index: 100;
+    transition: width 50ms linear;
+  }
+</style>
+<script>
+(function() {
+  var bar = document.querySelector('.progress-bar');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      bar.style.width = (scrollTop / docHeight * 100) + '%';
+    }
+  });
+})();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="w">
+        
 
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
 
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
+<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</a>
+
+<h1 class="post-title">Alamofire 源码阅读（一）</h1>
+
+
+
+<div class="post-meta">
+  <div class="post-meta-line">
+    
+    
+      <time class="post-meta-date" datetime="2024-06-15T00:01:13+08:00">
+        发布于 2024-06-15
+      </time>
+    
+    
+      <span class="post-meta-sep">·</span>
+      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
+        更新于 2026-07-15
+      </time>
+    
+    
+  </div>
+
+  
+    <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/Alamofire/" class="tag">Alamofire</a>
+
+      
     </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">日落大道</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
+  
 </div>
 
 
 
-<nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+
+
+
+
+
+<details class="toc">
+  <summary>目录</summary>
+  <ul>
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#创建-urlsession">创建 URLSession</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#af-创建-request-的流程">AF 创建 Request 的流程</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#af-处理-response-的流程">AF 处理 Response 的流程</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#af-中是如何解决数据竞争的">AF 中是如何解决数据竞争的？</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#ssl-pinning">SSL Pinning</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#什么是-pinning">什么是 Pinning？</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#什么是中间人攻击man-in-the-middle-attack">什么是中间人攻击（Man-in-the-middle attack）</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#cache">Cache</a></li>
+        
+      
+    
   </ul>
+</details>
+
+<div class="post-content">
+  <p>阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。<!-- more --></p>
+
+<h2 id="创建-urlsession">创建 URLSession</h2>
+
+<p>AF 在初始化 <code class="language-plaintext highlighter-rouge">URLSession</code> 时，使用到三个队列，分别是：rootQueue、requestQueue 和 serializationQueue。rootQueue 默认为 DispatchQueue(label: “org.alamofire.session.rootQueue”)。</p>
+
+<p>而 requestQueue 和 serializationQueue 默认均是以 rootQueue 为 target 的串行队列。也就是说，提交到 requestQueue 上的 task A 是会在 rootQueue 上执行的。</p>
+
+<p>假设 iOS 会给 rootQueue 分配一个线程 T1，那么提交到 requestQueue 和 rootQueue 上的任务均会在线程 T1 上执行。</p>
+
+<p>如果 requestQueue 自己是个单独的串行队列呢？iOS 会专门给 requestQueue 分配另一个线程 T2，这样 App 就可能使用了不必要的线程资源。</p>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="" /></p>
+
+<p>当存在过多线程时，不仅会增加内存压力，更重要的是，这些线程在有限的 CPU 核心上运行，导致频繁的线程上下文切换。有时候，与实际执行需要的指令相比，这些上下文切换所消耗的资源和时间反而占据了主要部分。这种情况下，由于线程被阻塞的同时，又不断有新的任务以 async 的方式提交到并行队列，导致过多的新线程被创建，我们将其称为<strong>线程爆炸</strong>。</p>
+
+<p>Apple 也在 DispatchQueue <a href="https://developer.apple.com/documentation/dispatch/dispatchqueue#3136752">文档</a> 中提示我们避免创建过多线程，限制线程数量可以避免资源的过度占用和性能下降。</p>
+
+<h2 id="af-创建-request-的流程">AF 创建 Request 的流程</h2>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="" /></p>
+
+<h2 id="af-处理-response-的流程">AF 处理 Response 的流程</h2>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="" /></p>
+
+<h2 id="af-中是如何解决数据竞争的">AF 中是如何解决数据竞争的？</h2>
+
+<p>AF 中是利用泛型类 <a href="https://github.com/Alamofire/Alamofire/blob/master/Source/Core/Protected.swift">Protected&lt;Value&gt;</a> 来实现线程安全的读和写。</p>
+
+<p>泛型类 <code class="language-plaintext highlighter-rouge">Protected&lt;Value&gt;</code> 的核心思路是利用锁的机制来实现线程同步。除此以外，还利用到<code class="language-plaintext highlighter-rouge">@dynamicMemberLookup</code> 和 <code class="language-plaintext highlighter-rouge">KeyPath</code> 的特性，以方便地访问/修改 Value 的成员变量（属性）。</p>
+
+<p>我也借鉴它的思路，解决了工作中的一个数据竞争导致的崩溃（EXC_BAD_ACCESS KERN_INVALID_ADDRESS）。在读取硬件设备的数据时，业务层会以并发的方式发送蓝牙指令，而蓝牙发送工具类中使用一个结构体 <code class="language-plaintext highlighter-rouge">FIFO</code> 队列来控制蓝牙指令的执行顺序。</p>
+
+<pre><code class="language-Swift">public protocol Queue {
+    associatedtype Element
+    mutating func enqueue(_ element: Element)
+    mutating func dequeue() -&gt; Element?
+}
+
+public struct FIFOQueue&lt;Element&gt;: Queue {
+    ...
+    ...
+}
+</code></pre>
+
+<p>该结构体 <code class="language-plaintext highlighter-rouge">FIFO</code> 队列的入队出队方法均是 <code class="language-plaintext highlighter-rouge">mutating</code> 方法，结构体的 <code class="language-plaintext highlighter-rouge">mutating</code> 方法本质上是把当前的值拷贝一份，作出修改后，重新赋值给 <code class="language-plaintext highlighter-rouge">self</code>。</p>
+
+<p>假设要发出的两个蓝牙指令分别在不同的线程中发送，那么这两个线程就有可能同时执行 <code class="language-plaintext highlighter-rouge">FIFO</code> 队列的入队方法，即出现数据竞争的情况。</p>
+
+<p>在定位到这个崩溃的根本原因后，利用泛型类 <code class="language-plaintext highlighter-rouge">Protected&lt;Value&gt;</code> 就能很方便地解决问题。</p>
+
+<pre><code class="language-Swift">extension FIFOQueue {
+    /// Return a thread-safe reference of a `FIFOQueue`.
+    public static func makeThreadSafeReference(_ elements: [Element] = []) -&gt; Protected&lt;Self&gt; {
+        Protected(Self.init(elements))
+    }
+}
+
+extension Protected: Queue where Value: Queue {
+    public typealias Element = Value.Element
+
+    public func enqueue(_ element: Value.Element) {
+        write { queue in queue.enqueue(element) }
+    }
+
+    public func dequeue() -&gt; Value.Element? {
+        write { queue in queue.dequeue() }
+    }
+}
+</code></pre>
+
+<p>在添加上述代码之后，只需改动蓝牙发送工具类中初始化 FIFO 队列 一行代码。</p>
+
+<pre><code class="language-Swift">// Before
+var queue = FIFOQueue&lt;Value&gt;()
+
+// After
+var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
+</code></pre>
+
+<p>这一刻，我觉得 Swift 是真的优雅！</p>
+
+<h2 id="ssl-pinning">SSL Pinning</h2>
+
+<p>AF 也内置了常见的 SSL pinning 方式，比如通过固定证书的方式和使用公钥的方式等。</p>
+
+<blockquote>
+  <p>For projects deploying to iOS 14, tvOS 14, watchOS 7, or macOS 11 or later, <a href="https://developer.apple.com/news/?id=g9ejcf8y">Apple now provides built in pinning capabilities</a> configurable in your app’s Info.plist. Please use that capability before implementing your own using Alamofire.</p>
+</blockquote>
+
+<p>但如果 iOS 项目是最低支持 iOS 14 的，AF 优先推荐使用 iOS 系统内置的方案来实现 SSL Pinning。</p>
+
+<h3 id="什么是-pinning">什么是 Pinning？</h3>
+<p>把主机名（Host）与预设好的 X509 证书或者公钥关联起来的过程叫做 pinning。iOS App 中可内置关联好的证书或公钥来防止中间人攻击（Man-in-the-middle attack）。</p>
+
+<h3 id="什么是中间人攻击man-in-the-middle-attack">什么是中间人攻击（Man-in-the-middle attack）</h3>
+<p>在使用非对称加密中，Alice 若想与 Bob 进行安全的通信，Alice 需要拿到 Bob 的公钥，然后 Alice 使用 Bob 的公钥加密通信内容。而加密后的内容只能以 Bob 的私钥解密，这似乎听起来很安全。那么设想这样一个场景：</p>
+
+<ol>
+  <li>Alice 向 Bob 发送：嗨！Bob 请给我你的公钥。</li>
+  <li>Jack 窃取到了这条信息，且转发给了 Bob。</li>
+  <li>Bob 把自己的公钥发送给 Alice。</li>
+  <li>Jack 收到了 Bob 的公钥，但却把他自己的公钥发给 Alice。</li>
+  <li>Alice 认为自己收到了 Bob 的公钥，其实是 Jack 的公钥。</li>
+  <li>Alice 向 Bob 发送：今晚 7 点去吃麦当劳吧，并用（她认为的） Bob 的公钥加密。</li>
+  <li>Jack 收到 Alice 用自己的公钥加密的信息后，用自己的私钥解密，并把信息篡改为“今晚 6 点去吃食其家吧”，再用 Bob 的公钥加密，发给 Bob。</li>
+  <li>Bob 收到信息，用自己的私钥解密后，就去准备晚上 6 点和 Alice 在食其家碰头了。</li>
+</ol>
+
+<p>在上述场景中，Alice 需要一种方式来确保自己收到的公钥是 Bob 的公钥，而不是攻击者 Jack 的公钥。Bob 可以向权威机构申请一个证书，这个证书会包含 Bob 的公钥，由权威机构来给 Bob 的公钥作背书。</p>
+
+<p>所以 iOS app 中常见的防止中间人攻击的方法之一就是预先把与公司主机名关联好的公钥内置在 app 中。在建立 HTTPS 安全连接时，读取证书链中的叶子节点证书，先通过证书的签名和所使用的加密算法来验证证书的完整性。完整性验证通过后，再对比公钥是否一致。</p>
+
+<h2 id="cache">Cache</h2>
+<p>AF 使用 <code class="language-plaintext highlighter-rouge">URLSession</code> 的系统实现来缓存网络请求的响应的，即默认存入 <code class="language-plaintext highlighter-rouge">URLCache.shared</code> 中。</p>
+
+<p><code class="language-plaintext highlighter-rouge">URLSession</code> 的缓存策略（<code class="language-plaintext highlighter-rouge">requestCachePolicy</code>）有 6 种：</p>
+<ol>
+  <li>useProtocolCachePolicy
+    <ol>
+      <li>解释：遵循 HTTP 中的缓存机制，详见 <a href="https://datatracker.ietf.org/doc/html/rfc2616#autoid-129">Caching in HTTP</a>。</li>
+    </ol>
+  </li>
+  <li>reloadIgnoringLocalCacheData
+    <ol>
+      <li>解释：不使用任何缓存数据。</li>
+    </ol>
+  </li>
+  <li>reloadIgnoringLocalAndRemoteCacheData</li>
+  <li>returnCacheDataElseLoad
+    <ol>
+      <li>解释：优先使用缓存数据，若没有缓存数据，则开始网络请求。</li>
+    </ol>
+  </li>
+  <li>returnCacheDataDontLoad
+    <ol>
+      <li>解释：使用缓存数据，若没有缓存数据，则直接网络请求失败，这种行为有点像<strong>离线模式</strong>。</li>
+    </ol>
+  </li>
+  <li>reloadRevalidatingCacheData</li>
+</ol>
+
+<p>我们还可以通过实现这个代理方法，来实现更细节的控制，比如阻止对某个特定 URL 的响应进行缓存。</p>
+<pre><code class="language-Swift">    open func urlSession(_ session: URLSession,
+                         dataTask: URLSessionDataTask,
+                         willCacheResponse proposedResponse: CachedURLResponse,
+                         completionHandler: @escaping (CachedURLResponse?) -&gt; Void) {
+    // Add your implementation
+    }
+</code></pre>
+
+<p>但需要注意的是，这个代理方法被调用的条件有些苛刻，得同时满足以下 7 个条件才行！</p>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="" /></p>
+
+</div>
+
+
+<nav class="post-nav" aria-label="文章导航">
+  
+    <a class="post-nav-prev" href="/2022/04/14/Codable/"><span class="post-nav-label">&larr; 上一篇</span>Codable 学习笔记</a>
+  
+  
+    <a class="post-nav-next" href="/2024/06/23/Swift-Protocol-Witness/"><span class="post-nav-label">下一篇 &rarr;</span>Protocol Witness in Swift</a>
+  
 </nav>
 
 
-
-
-</header>
         
-  
-  <aside class="sidebar">
+          
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-URLSession"><span class="nav-number">1.</span> <span class="nav-text">创建 URLSession</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AF-%E5%88%9B%E5%BB%BA-Request-%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">AF 创建 Request 的流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AF-%E5%A4%84%E7%90%86-Response-%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">AF 处理 Response 的流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AF-%E4%B8%AD%E6%98%AF%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E6%95%B0%E6%8D%AE%E7%AB%9E%E4%BA%89%E7%9A%84%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">AF 中是如何解决数据竞争的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-Pinning"><span class="nav-number">5.</span> <span class="nav-text">SSL Pinning</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Pinning%EF%BC%9F"><span class="nav-number">5.1.</span> <span class="nav-text">什么是 Pinning？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%AD%E9%97%B4%E4%BA%BA%E6%94%BB%E5%87%BB%EF%BC%88Man-in-the-middle-attack%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">什么是中间人攻击（Man-in-the-middle attack）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache"><span class="nav-number">6.</span> <span class="nav-text">Cache</span></a></li></ol></div>
-        </div>
-        <!--/noindex-->
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </main><script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var defined_alerts = {
+      NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
+      TIP:       { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>', label: 'Tip' },
+      IMPORTANT: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Important' },
+      WARNING:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Warning' },
+      CAUTION:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Caution' }
+    };
 
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Sunset Wan</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">15</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">10</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author animated">
-      <span class="links-of-author-item">
-        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-  </div>
+    var blockquotes = document.querySelectorAll("blockquote");
+    for (var i = 0; i < blockquotes.length; i++) {
+      var bq = blockquotes[i];
+      var firstP = bq.querySelector("p:first-child");
+      if (!firstP) continue;
 
-        </div>
-      </div>
-    </div>
+      var text = firstP.innerHTML;
+      var match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br\s*\/?>)?/);
+      if (!match) continue;
 
-    
-  </aside>
+      var type = match[1];
+      var alert = defined_alerts[type];
 
+      // Remove the marker from the paragraph text
+      firstP.innerHTML = text.replace(match[0], "").trim();
 
-    </div>
+      // If the paragraph is now empty, remove it
+      if (!firstP.innerHTML) {
+        firstP.remove();
+      }
 
-    <div class="main-inner post posts-expand">
+      // Build the alert title
+      var title = document.createElement("p");
+      title.className = "markdown-alert-title";
+      title.innerHTML = alert.icon + " " + alert.label;
+      bq.insertBefore(title, bq.firstChild);
 
-
-  
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Alamofire 源码阅读（一） | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Alamofire 源码阅读（一）
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-06-15 00:01:13" itemprop="dateCreated datePublished" datetime="2024-06-15T00:01:13+00:00">2024-06-15</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。<span id="more"></span></p>
-<h2 id="创建-URLSession"><a href="#创建-URLSession" class="headerlink" title="创建 URLSession"></a>创建 URLSession</h2><p>AF 在初始化 <code>URLSession</code> 时，使用到三个队列，分别是：rootQueue、requestQueue 和 serializationQueue。rootQueue 默认为 DispatchQueue(label: “org.alamofire.session.rootQueue”)。</p>
-<p>而 requestQueue 和 serializationQueue 默认均是以 rootQueue 为 target 的串行队列。也就是说，提交到 requestQueue 上的 task A 是会在 rootQueue 上执行的。</p>
-<p>假设 iOS 会给 rootQueue 分配一个线程 T1，那么提交到 requestQueue 和 rootQueue 上的任务均会在线程 T1 上执行。</p>
-<p>如果 requestQueue 自己是个单独的串行队列呢？iOS 会专门给 requestQueue 分配另一个线程 T2，这样 App 就可能使用了不必要的线程资源。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg"></p>
-<p>当存在过多线程时，不仅会增加内存压力，更重要的是，这些线程在有限的 CPU 核心上运行，导致频繁的线程上下文切换。有时候，与实际执行需要的指令相比，这些上下文切换所消耗的资源和时间反而占据了主要部分。这种情况下，由于线程被阻塞的同时，又不断有新的任务以 async 的方式提交到并行队列，导致过多的新线程被创建，我们将其称为<strong>线程爆炸</strong>。</p>
-<p>Apple 也在 DispatchQueue <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/dispatch/dispatchqueue#3136752">文档</a> 中提示我们避免创建过多线程，限制线程数量可以避免资源的过度占用和性能下降。</p>
-<h2 id="AF-创建-Request-的流程"><a href="#AF-创建-Request-的流程" class="headerlink" title="AF 创建 Request 的流程"></a>AF 创建 Request 的流程</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png"></p>
-<h2 id="AF-处理-Response-的流程"><a href="#AF-处理-Response-的流程" class="headerlink" title="AF 处理 Response 的流程"></a>AF 处理 Response 的流程</h2><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png"></p>
-<h2 id="AF-中是如何解决数据竞争的？"><a href="#AF-中是如何解决数据竞争的？" class="headerlink" title="AF 中是如何解决数据竞争的？"></a>AF 中是如何解决数据竞争的？</h2><p>AF 中是利用泛型类 <a target="_blank" rel="noopener" href="https://github.com/Alamofire/Alamofire/blob/master/Source/Core/Protected.swift">Protected&lt;Value&gt;</a> 来实现线程安全的读和写。</p>
-<p>泛型类 <code>Protected&lt;Value&gt;</code> 的核心思路是利用锁的机制来实现线程同步。除此以外，还利用到<code>@dynamicMemberLookup</code> 和 <code>KeyPath</code> 的特性，以方便地访问&#x2F;修改 Value 的成员变量（属性）。</p>
-<p>我也借鉴它的思路，解决了工作中的一个数据竞争导致的崩溃（EXC_BAD_ACCESS KERN_INVALID_ADDRESS）。在读取硬件设备的数据时，业务层会以并发的方式发送蓝牙指令，而蓝牙发送工具类中使用一个结构体 <code>FIFO</code> 队列来控制蓝牙指令的执行顺序。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Queue</span> &#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Element</span></span><br><span class="line">    <span class="keyword">mutating</span> <span class="keyword">func</span> <span class="title function_">enqueue</span>(<span class="keyword">_</span> <span class="params">element</span>: <span class="type">Element</span>)</span><br><span class="line">    <span class="keyword">mutating</span> <span class="keyword">func</span> <span class="title function_">dequeue</span>() -&gt; <span class="type">Element</span>?</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">FIFOQueue</span>&lt;<span class="type">Element</span>&gt;: <span class="title class_ inherited__">Queue</span> &#123;</span><br><span class="line">    <span class="operator">...</span></span><br><span class="line">    <span class="operator">...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该结构体 <code>FIFO</code> 队列的入队出队方法均是 <code>mutating</code> 方法，结构体的 <code>mutating</code> 方法本质上是把当前的值拷贝一份，作出修改后，重新赋值给 <code>self</code>。</p>
-<p>假设要发出的两个蓝牙指令分别在不同的线程中发送，那么这两个线程就有可能同时执行 <code>FIFO</code> 队列的入队方法，即出现数据竞争的情况。</p>
-<p>在定位到这个崩溃的根本原因后，利用泛型类 <code>Protected&lt;Value&gt;</code> 就能很方便地解决问题。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">FIFOQueue</span> &#123;</span><br><span class="line">    <span class="comment">/// Return a thread-safe reference of a `FIFOQueue`.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">makeThreadSafeReference</span>(<span class="keyword">_</span> <span class="params">elements</span>: [<span class="type">Element</span>] <span class="operator">=</span> []) -&gt; <span class="type">Protected</span>&lt;<span class="keyword">Self</span>&gt; &#123;</span><br><span class="line">        <span class="type">Protected</span>(<span class="keyword">Self</span>.<span class="keyword">init</span>(elements))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">Protected</span>: <span class="title class_ inherited__">Queue</span> <span class="keyword">where</span> <span class="title class_ inherited__">Value</span>: <span class="title class_ inherited__">Queue</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">typealias</span> <span class="type">Element</span> <span class="operator">=</span> <span class="type">Value</span>.<span class="type">Element</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">enqueue</span>(<span class="keyword">_</span> <span class="params">element</span>: <span class="type">Value</span>.<span class="type">Element</span>) &#123;</span><br><span class="line">        write &#123; queue <span class="keyword">in</span> queue.enqueue(element) &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">dequeue</span>() -&gt; <span class="type">Value</span>.<span class="type">Element</span>? &#123;</span><br><span class="line">        write &#123; queue <span class="keyword">in</span> queue.dequeue() &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在添加上述代码之后，只需改动蓝牙发送工具类中初始化 FIFO 队列 一行代码。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Before</span></span><br><span class="line"><span class="keyword">var</span> queue <span class="operator">=</span> <span class="type">FIFOQueue</span>&lt;<span class="type">Value</span>&gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">// After</span></span><br><span class="line"><span class="keyword">var</span> queue <span class="operator">=</span> <span class="type">FIFOQueue</span>&lt;<span class="type">Value</span>&gt;.makeThreadSafeReference()</span><br></pre></td></tr></table></figure>
-
-<p>这一刻，我觉得 Swift 是真的优雅！</p>
-<h2 id="SSL-Pinning"><a href="#SSL-Pinning" class="headerlink" title="SSL Pinning"></a>SSL Pinning</h2><p>AF 也内置了常见的 SSL pinning 方式，比如通过固定证书的方式和使用公钥的方式等。</p>
-<blockquote>
-<p>For projects deploying to iOS 14, tvOS 14, watchOS 7, or macOS 11 or later, <a target="_blank" rel="noopener" href="https://developer.apple.com/news/?id=g9ejcf8y">Apple now provides built in pinning capabilities</a> configurable in your app’s Info.plist. Please use that capability before implementing your own using Alamofire.</p>
-</blockquote>
-<p>但如果 iOS 项目是最低支持 iOS 14 的，AF 优先推荐使用 iOS 系统内置的方案来实现 SSL Pinning。</p>
-<h3 id="什么是-Pinning？"><a href="#什么是-Pinning？" class="headerlink" title="什么是 Pinning？"></a>什么是 Pinning？</h3><p>把主机名（Host）与预设好的 X509 证书或者公钥关联起来的过程叫做 pinning。iOS App 中可内置关联好的证书或公钥来防止中间人攻击（Man-in-the-middle attack）。</p>
-<h3 id="什么是中间人攻击（Man-in-the-middle-attack）"><a href="#什么是中间人攻击（Man-in-the-middle-attack）" class="headerlink" title="什么是中间人攻击（Man-in-the-middle attack）"></a>什么是中间人攻击（Man-in-the-middle attack）</h3><p>在使用非对称加密中，Alice 若想与 Bob 进行安全的通信，Alice 需要拿到 Bob 的公钥，然后 Alice 使用 Bob 的公钥加密通信内容。而加密后的内容只能以 Bob 的私钥解密，这似乎听起来很安全。那么设想这样一个场景：</p>
-<ol>
-<li>Alice 向 Bob 发送：嗨！Bob 请给我你的公钥。</li>
-<li>Jack 窃取到了这条信息，且转发给了 Bob。</li>
-<li>Bob 把自己的公钥发送给 Alice。</li>
-<li>Jack 收到了 Bob 的公钥，但却把他自己的公钥发给 Alice。</li>
-<li>Alice 认为自己收到了 Bob 的公钥，其实是 Jack 的公钥。</li>
-<li>Alice 向 Bob 发送：今晚 7 点去吃麦当劳吧，并用（她认为的） Bob 的公钥加密。</li>
-<li>Jack 收到 Alice 用自己的公钥加密的信息后，用自己的私钥解密，并把信息篡改为“今晚 6 点去吃食其家吧”，再用 Bob 的公钥加密，发给 Bob。</li>
-<li>Bob 收到信息，用自己的私钥解密后，就去准备晚上 6 点和 Alice 在食其家碰头了。</li>
-</ol>
-<p>在上述场景中，Alice 需要一种方式来确保自己收到的公钥是 Bob 的公钥，而不是攻击者 Jack 的公钥。Bob 可以向权威机构申请一个证书，这个证书会包含 Bob 的公钥，由权威机构来给 Bob 的公钥作背书。</p>
-<p>所以 iOS app 中常见的防止中间人攻击的方法之一就是预先把与公司主机名关联好的公钥内置在 app 中。在建立 HTTPS 安全连接时，读取证书链中的叶子节点证书，先通过证书的签名和所使用的加密算法来验证证书的完整性。完整性验证通过后，再对比公钥是否一致。</p>
-<h2 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h2><p>AF 使用 <code>URLSession</code> 的系统实现来缓存网络请求的响应的，即默认存入 <code>URLCache.shared</code> 中。</p>
-<p><code>URLSession</code> 的缓存策略（<code>requestCachePolicy</code>）有 6 种：</p>
-<ol>
-<li>useProtocolCachePolicy<ol>
-<li>解释：遵循 HTTP 中的缓存机制，详见 <a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc2616#autoid-129">Caching in HTTP</a>。</li>
-</ol>
-</li>
-<li>reloadIgnoringLocalCacheData<ol>
-<li>解释：不使用任何缓存数据。</li>
-</ol>
-</li>
-<li>reloadIgnoringLocalAndRemoteCacheData</li>
-<li>returnCacheDataElseLoad<ol>
-<li>解释：优先使用缓存数据，若没有缓存数据，则开始网络请求。</li>
-</ol>
-</li>
-<li>returnCacheDataDontLoad<ol>
-<li>解释：使用缓存数据，若没有缓存数据，则直接网络请求失败，这种行为有点像<strong>离线模式</strong>。</li>
-</ol>
-</li>
-<li>reloadRevalidatingCacheData</li>
-</ol>
-<p>我们还可以通过实现这个代理方法，来实现更细节的控制，比如阻止对某个特定 URL 的响应进行缓存。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">open</span> <span class="keyword">func</span> <span class="title function_">urlSession</span>(<span class="keyword">_</span> <span class="params">session</span>: <span class="type">URLSession</span>,</span><br><span class="line">                     <span class="params">dataTask</span>: <span class="type">URLSessionDataTask</span>,</span><br><span class="line">                     <span class="params">willCacheResponse</span> <span class="params">proposedResponse</span>: <span class="type">CachedURLResponse</span>,</span><br><span class="line">                     <span class="params">completionHandler</span>: <span class="keyword">@escaping</span> (<span class="type">CachedURLResponse</span>?) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line"><span class="comment">// Add your implementation</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但需要注意的是，这个代理方法被调用的条件有些苛刻，得同时满足以下 7 个条件才行！</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg"></p>
-
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Alamofire/" rel="tag"># Alamofire</a>
-          </div>
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2022/04/14/Codable/" rel="prev" title="Codable 学习笔记">
-                  <i class="fa fa-angle-left"></i> Codable 学习笔记
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2024/06/23/Swift-Protocol-Witness/" rel="next" title="Protocol Witness in Swift">
-                  Protocol Witness in Swift <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
+      bq.classList.add("markdown-alert", "markdown-alert-" + type.toLowerCase());
+    }
+  });
+</script>
 
 
+<script>
+(function() {
+  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+    block.style.position = 'relative';
+
+    // Language label derived from rouge's language-* class
+    var langClass = Array.from(block.classList).find(function(c) {
+      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
+    });
+    if (langClass) {
+      var label = document.createElement('span');
+      label.className = 'code-lang';
+      label.textContent = langClass.replace('language-', '');
+      block.appendChild(label);
+    }
+
+    var btn = document.createElement('button');
+    btn.className = 'code-copy';
+    btn.setAttribute('aria-label', "复制代码");
+    btn.textContent = "复制";
+    btn.addEventListener('click', function() {
+      var code = block.querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(function() {
+        btn.textContent = "已复制";
+        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+      });
+    });
+    block.appendChild(btn);
+  });
+})();
+</script>
 
 
-
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-user"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
-  </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
-
-    </div>
-  </footer>
-
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+<style>
+  .back-to-top {
+    position: fixed;
+    bottom: 2em;
+    right: 2em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .back-to-top:hover {
+    color: var(--links);
+  }
+  @media screen and (max-width: 600px) {
+    .back-to-top {
+      bottom: 1em;
+      right: 1em;
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>
+<script>
+(function() {
+  var btn = document.querySelector('.back-to-top');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
+  });
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  });
+})();
+</script>
 </body>
 </html>

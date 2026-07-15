@@ -1,531 +1,979 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+<html lang="zh-CN" class="html" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <title>
+    
+      WebSocket 协议学习笔记
+    
+  </title>
 
-<link rel="stylesheet" href="/css/main.css">
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="WebSocket 协议学习笔记" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！ 教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo" />
+<meta name="twitter:description" property="og:description" content="工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！ 教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo" />
+<link rel="canonical" href="https://sunsetwan.github.io/2026/01/25/WebSocket-note/" />
+<meta property="og:url" content="https://sunsetwan.github.io/2026/01/25/WebSocket-note/" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-01-25T10:48:23+08:00" />
+<meta property="article:modified_time" content="2026-01-25T10:48:23+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="WebSocket 协议学习笔记" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2026-01-25T10:48:23+08:00","datePublished":"2026-01-25T10:48:23+08:00","description":"工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！ 教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo","headline":"WebSocket 协议学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/"},"url":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/"}</script>
+<!-- End Jekyll SEO tag -->
 
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"sunsetwan.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"default"},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
-
-    <meta name="description" content="工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！  教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo">
-<meta property="og:type" content="article">
-<meta property="og:title" content="WebSocket 协议学习笔记">
-<meta property="og:url" content="https://sunsetwan.github.io/2026/01/25/WebSocket-note/index.html">
-<meta property="og:site_name" content="日落大道">
-<meta property="og:description" content="工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！  教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg">
-<meta property="og:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png">
-<meta property="article:published_time" content="2026-01-25T10:48:23.000Z">
-<meta property="article:modified_time" content="2026-01-29T13:59:27.000Z">
-<meta property="article:author" content="Sunset Wan">
-<meta property="article:tag" content="Networking">
-<meta property="article:tag" content="WebSocket">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png">
-
-
-<link rel="canonical" href="https://sunsetwan.github.io/2026/01/25/WebSocket-note/">
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/","path":"2026/01/25/WebSocket-note/","title":"WebSocket 协议学习笔记"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>WebSocket 协议学习笔记 | 日落大道</title>
-  
-
-
-
-
-
-
-
-
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
-<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
 
   
 
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
 
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
 
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
 
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
 
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
 
   
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
+  <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
+<body><div class="progress-bar" aria-hidden="true"></div>
+<style>
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--links);
+    z-index: 100;
+    transition: width 50ms linear;
+  }
+</style>
+<script>
+(function() {
+  var bar = document.querySelector('.progress-bar');
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      bar.style.width = (scrollTop / docHeight * 100) + '%';
+    }
+  });
+})();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="w">
+        
 
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
 
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
+<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</a>
+
+<h1 class="post-title">WebSocket 协议学习笔记</h1>
+
+
+
+<div class="post-meta">
+  <div class="post-meta-line">
+    
+    
+      <time class="post-meta-date" datetime="2026-01-25T10:48:23+08:00">
+        发布于 2026-01-25
+      </time>
+    
+    
+      <span class="post-meta-sep">·</span>
+      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
+        更新于 2026-07-15
+      </time>
+    
+    
+  </div>
+
+  
+    <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/WebSocket/" class="tag">WebSocket</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Networking/" class="tag">Networking</a>
+
+      
     </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">日落大道</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
+  
 </div>
 
 
 
-<nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+
+
+
+
+
+<details class="toc">
+  <summary>目录</summary>
+  <ul>
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#websocket-协议简介">WebSocket 协议简介</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#建立连接时的握手阶段">建立连接时的握手阶段</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#解析数据帧data-frame">解析数据帧（Data Frame）</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#关闭连接">关闭连接</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#用-wireshark-分析">用 Wireshark 分析</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#建立连接时的握手阶段-1">建立连接时的握手阶段</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#解析数据帧data-frame-1">解析数据帧（Data Frame）</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#心得体会">心得体会</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#q--a">Q &amp; A</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#websocket-的出现是为了解决什么问题">WebSocket 的出现是为了解决什么问题？</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#websocket-握手为什么要借用-http">WebSocket 握手为什么要借用 HTTP？</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li class="toc-sub"><a href="#tcp-不是已经有-finack-关闭流程了吗为什么-websocket-还要多此一举">TCP 不是已经有 FIN/ACK 关闭流程了吗？为什么 WebSocket 还要多此一举？</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#参考">参考</a></li>
+        
+      
+    
+      
+        
+        
+        
+        
+        
+          <li><a href="#starscream-源码分析">Starscream 源码分析</a></li>
+        
+      
+    
   </ul>
+</details>
+
+<div class="post-content">
+  <p>工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket <strong>客户端</strong> 的 <strong>一小部分</strong> 功能，以达到了解 WebSocket 协议的目标！</p>
+
+<ol>
+  <li>教科书：<a href="https://www.rfc-editor.org/rfc/rfc6455.txt">RFC 6455</a></li>
+  <li>老师：Codex</li>
+  <li>代码仓库地址：<a href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a><br />
+<!-- more --></li>
+</ol>
+
+<h2 id="websocket-协议简介">WebSocket 协议简介</h2>
+
+<p>WebSocket 协议是一种能让客户端（浏览器）与服务端进行双向通信的协议。该协议由基于传输控制协议（Transmission Control Protocol, TCP）的打开握手与后续的基本消息成帧组成。</p>
+
+<h3 id="建立连接时的握手阶段">建立连接时的握手阶段</h3>
+
+<h4 id="客户端发起握手">客户端发起握手</h4>
+
+<p>WebSocket 在握手阶段是利用 HTTP GET 请求来与服务端建立连接的，但对于 HTTP 有版本要求：至少大于等于 1.1。</p>
+
+<p>常见的客户端发起握手请求头如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        GET /chat HTTP/1.1
+        Host: server.example.com
+        Upgrade: websocket
+        Connection: Upgrade
+        Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+        Sec-WebSocket-Version: 13
+</code></pre></div></div>
+
+<p>以下是握手中必须包含的关键头字段：<code class="language-plaintext highlighter-rouge">Upgrade</code>，<code class="language-plaintext highlighter-rouge">Connection</code>，<code class="language-plaintext highlighter-rouge">Sec-WebSocket-Key</code>，<code class="language-plaintext highlighter-rouge">Sec-WebSocket-Version</code>。且根据协议的定义：</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">Upgrade: websocket</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Connection: Upgrade</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Sec-WebSocket-Version: 13</code></li>
+</ol>
+
+<p>这三组键值对是固定的（大小写不敏感）。</p>
+
+<h5 id="如何计算出-sec-websocket-key">如何计算出 Sec-WebSocket-Key？</h5>
+
+<p>首先，设客户端随机生成 16 个字节长度的随机数为 A，再对 A 做 Base64 编码，得出的结果就是该 Key 对应的 value。客户端每次开始握手都得重新生成一次，不可重复。</p>
+
+<h5 id="为什么需要-sec-websocket-key">为什么需要 Sec-WebSocket-Key？</h5>
+
+<p>它用于让服务端根据该随机值生成 <code class="language-plaintext highlighter-rouge">Sec-WebSocket-Accept</code>，客户端再进行校验，从而确认对端确实理解并接受 WebSocket 握手。</p>
+
+<h5 id="实现客户端握手中产生的思考">实现客户端握手中产生的思考</h5>
+
+<p>因为是基于 <code class="language-plaintext highlighter-rouge">NWConnection</code> <a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/TransportConnection.swift#L41">利用 TCP 协议直接发送</a> GET 请求头，所以我们得自己 <a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/WebSocketClient.swift#L277">手动调整字符串</a> 构造 Data，以遵循 HTTP 请求头的格式。这一开始把我难到了，意识到还需多复习 HTTP 协议。</p>
+
+<h4 id="服务端响应握手">服务端响应握手</h4>
+
+<p>服务端会阅读客户端请求头，并检查是否符合以下几点：</p>
+
+<ol>
+  <li>GET 请求且 HTTP 版本至少为 1.1</li>
+  <li>得有键值对 Upgrade: websocket（大小写不敏感）</li>
+  <li>得有键值对 Connection: Upgrade（大小写不敏感）</li>
+  <li>得有键值对 Sec-WebSocket-Version: 13（大小写不敏感）</li>
+  <li>对 <code class="language-plaintext highlighter-rouge">Sec-WebSocket-Key</code> 作 Base64 decode，检查长度得是 16 个字节</li>
+</ol>
+
+<p>如果以上的检查通过且可以创建连接，服务端会发出 HTTP Response：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        HTTP/1.1 101 Switching Protocols
+        Upgrade: websocket
+        Connection: Upgrade
+        Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+</code></pre></div></div>
+
+<h5 id="如何计算-sec-websocket-accept">如何计算 Sec-WebSocket-Accept？</h5>
+
+<p>具体实现可见 <a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/Handshake.swift">Handshake.swift</a>。</p>
+
+<h6 id="拼接字符串">拼接字符串</h6>
+
+<p>首先获取到客户端发来的 Sec-WebSocket-Key（dGhlIHNhbXBsZSBub25jZQ==），拼接上这段协议中定义好的 GUID（全局唯一标识符）：258EAFA5-E914-47DA-95CA-C5AB0DC85B11。</p>
+
+<p>结果为 dGhlIHNhbXBsZSBub25jZQ==258EAFA5-E914-47DA-95CA-C5AB0DC85B11</p>
+
+<h6 id="对拼接后的字符串做-sha1">对拼接后的字符串做 SHA‑1</h6>
+
+<p>结果是 20 字节（160 位）的散列值：b3 7a 4f 2c c0 62 4f 16 90 f6 46 06 cf 38 59 45 b2 be c4 ea</p>
+
+<h6 id="把-sha1-结果做-base64-编码">把 SHA‑1 结果做 Base64 编码</h6>
+
+<p>结果为 s3pPLMBiTxaQ9kYGzzhZRbK+xOo=。客户端收到这个 accept key 后，还会自行校验一遍。如果与自己算出来的不一致，会导致握手失败。</p>
+
+<h3 id="解析数据帧data-frame">解析数据帧（Data Frame）</h3>
+
+<p>具体实现可见 <a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/DataFrameParser.swift">DataFrameParser.swift</a>。</p>
+
+<p>在握手成功后，双端严格以数据帧格式通信，格式如下图：</p>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="image-20260123201016373" /></p>
+
+<h4 id="头部结构2-个字节">头部结构（2 个字节）</h4>
+
+<p>第 1 个字节：FIN（Final，是否是消息最后一个分片）、RSV1/RSV2/RSV3（Reserved，保留位）、opcode（操作码，4 位）。</p>
+
+<p>FIN 为 1 表示这是消息的最后一个分片；0 表示后续还有分片。</p>
+
+<p>RSV1/RSV2/RSV3：除非协商了扩展，否则必须为 0；否则接收方必须关闭连接。</p>
+
+<p>opcode：</p>
+
+<ul>
+  <li>0x0 续帧（Continuation）</li>
+  <li>0x1 文本帧（Text）</li>
+  <li>0x2 二进制帧（Binary）</li>
+  <li>0x3–0x7 预留给未来非控制帧</li>
+  <li>0x8 关闭（Close）</li>
+  <li>0x9 Ping</li>
+  <li>0xA Pong</li>
+  <li>0xB–0xF 预留给未来控制帧</li>
+</ul>
+
+<p>第 2 个字节：MASK（是否掩码）+ Payload len（负载长度，7 比特）。客户端向服务端发送的数据帧必须进行 masking，故 MASK 为 1，服务端向客户端发送的数据帧不进行 masking，故 MASK 为 0。</p>
+
+<h4 id="payload-data">Payload Data</h4>
+
+<p>若 Payload len 为 126：后面跟 2 字节扩展长度（16 位无符号整数）。若 Payload len 为 127：后面跟 8 字节扩展长度（64 位无符号整数，最高位必须为 0）。扩展长度使用网络字节序（network byte order，大端序）。若 MASK 为 1：后面跟 4 字节 Masking-key（掩码键）。最后是 Payload Data（负载数据）：由 Extension data（扩展数据）+ Application data（应用数据）拼接组成。Payload Data 的总长度等于负载长度；其中扩展数据长度由扩展协议定义，未协商扩展时为 0。</p>
+
+<h4 id="特殊的数据帧控制帧control-frame">特殊的数据帧——控制帧（Control Frame）</h4>
+
+<ul>
+  <li>定义与类型：操作码（opcode）最高位为 1 的帧即控制帧，已定义的有 0x8 关闭、0x9 Ping、0xA Pong；0xB–0xF 预留给未来控制帧。</li>
+  <li>不能分片：控制帧必须 FIN = 1，且不得分片；如果接收方收到分片的控制帧，必须按协议失败处理（Fail the WebSocket Connection）。</li>
+  <li>负载长度限制：控制帧负载长度必须 ≤ 125 字节；超过上限必须按协议失败处理。</li>
+  <li>可穿插发送：控制帧可以在分片消息的中间插入发送，用于及时传达连接状态；接收方必须能在分片过程中处理控制帧。</li>
+  <li>掩码规则：客户端发送的所有帧（包括控制帧）都必须带掩码；服务器发送的帧不得掩码。</li>
+</ul>
+
+<h5 id="close0x8">Close（0x8）</h5>
+
+<ul>
+  <li>作用：发起关闭握手，告知对端准备关闭连接。</li>
+  <li>负载结构：可选负载由状态码（2 字节）+ 关闭原因（可选 UTF‑8 文本）组成；若带原因文本，必须是有效 UTF‑8。</li>
+  <li>行为要求：
+    <ul>
+      <li>一端发送 Close 后，不得再发送数据帧。</li>
+      <li>一端收到 Close 且自己尚未发送 Close，必须回送 Close 作为响应。</li>
+      <li>完成双方 Close 交换后，连接关闭。</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="ping0x9与-pong0xa">Ping（0x9）与 Pong（0xA）</h5>
+
+<ul>
+  <li>Ping 可携带应用数据；收到 Ping 必须尽快回送 Pong。</li>
+  <li>Pong 的负载必须与对应 Ping 完全一致（逐字节相同）。</li>
+  <li>Pong 可以主动发送（非响应），作为单向心跳；对主动 Pong 不要求再回 Pong。</li>
+</ul>
+
+<h5 id="实现数据帧解析中产生的思考">实现数据帧解析中产生的思考</h5>
+
+<p>复习了位运算，原来位运算发光发热的地方是这里！（例如获取 FIN 位）</p>
+
+<p>复习了大端序和小端序：</p>
+
+<ul>
+  <li>大端序（Big Endian）：最高有效字节放在最低内存地址；符合人类的阅读习惯</li>
+  <li>小端序（Little Endian）：最低有效字节放在最低内存地址</li>
+</ul>
+
+<p>强调「有效」是为了排除前导零或无效位造成的歧义。</p>
+
+<p>当 payloadLength 等于 126 或 127 时，真正的 payloadLength 是要从紧接的 2 个字节或 8 个字节去读。这时候协议规定这段字节序是 network byte order（即大端序）。</p>
+
+<p>在研究如何操作 Data 时，我仔细看了 Data 目前提供的 API，发现有 <a href="https://developer.apple.com/documentation/foundation/data/span">Span types</a>！WWDC 25 <a href="https://developer.apple.com/videos/play/wwdc2025/312/">Improve memory usage and performance with Swift</a> 中有对它的介绍！Apple 也推出了 <a href="https://github.com/apple/swift-binary-parsing">Swift Binary Parsing</a>，后面计划抽空看看，应该能用来优化目前 <a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/DataFrameParser.swift">DataFrameParser.swift</a> 的实现。</p>
+
+<h4 id="分片fragmentation">分片（Fragmentation）</h4>
+
+<p>WebSocket 允许把一个消息拆成多个帧发送，降低内存压力与延迟，支持流式处理。数据帧也可以是不分片的。一个不分片的数据帧，FIN 位总是 1，opcode 肯定不为 0。</p>
+
+<p>规则：</p>
+
+<ul>
+  <li>第一个分片帧的 opcode 必须是文本帧（0x1）或二进制帧（0x2），FIN 位为 0。</li>
+  <li>后续分片帧必须是续帧（0x0）。</li>
+  <li>最后一个分片帧 FIN 为 1，opcode 仍为续帧（0x0）。</li>
+  <li>消息边界：接收方用 FIN 判断一条消息结束；所有分片负载拼接成完整消息。</li>
+  <li>控制帧：控制帧不能分片，但可以插入在分片序列中；接收方必须能在分片过程中处理控制帧。</li>
+  <li>一致性约束：在一个消息分片未结束前，不能开始新的数据消息分片序列；否则属于协议错误。</li>
+</ul>
+
+<h3 id="关闭连接">关闭连接</h3>
+
+<h4 id="正常关闭连接">正常关闭连接</h4>
+
+<p>任一端可发起：发送 Close 控制帧（可带状态码与原因），连接进入 CLOSING；双方都发送并接收 Close 后，应关闭底层传输控制协议（Transmission Control Protocol，TCP）连接，进入 CLOSED 状态。如果完成关闭握手后再关闭 TCP 连接，可称之为「干净关闭」，否则视为「非干净关闭」。</p>
+
+<h4 id="异常断开连接">异常断开连接</h4>
+
+<p>出现错误即需关闭连接（握手阶段失败、协议错误、传输层连接意外中断等）。服务器在握手阶段可直接「中止连接（Abort）」并关闭 TCP 连接，不必发送 Close 帧。</p>
+
+<h2 id="用-wireshark-分析">用 Wireshark 分析</h2>
+
+<p>因为 WebSocket 的数据帧直接跑在 TCP 之上，很多只关注 HTTP 的抓包工具无法直接解析，所以我使用 Wireshark 来分析 <a href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a> 发送的数据帧。我使用的是 <a href="https://github.com/vi/websocat">websocat</a>，用它来运行一个本地的 WebSocket 回声（echo）服务器。你给它发「hello」，它也会默认回你「hello」。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 回声服务器在本地 8080 端口监听
+websocat -t ws-listen:127.0.0.1:8080 mirror:
+</code></pre></div></div>
+
+<p>在另一个终端里连接回声服务器：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>websocat -t ws://127.0.0.1:8080
+</code></pre></div></div>
+
+<h3 id="建立连接时的握手阶段-1">建立连接时的握手阶段</h3>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Xnip2026-01-24_14-58-02" /></p>
+
+<p>点击 Connect，客户端主动发送 HTTP 升级请求，并收到服务端的同意协议升级响应。</p>
+
+<h3 id="解析数据帧data-frame-1">解析数据帧（Data Frame）</h3>
+
+<p>建立连接成功后，发送 “hello” 字符串</p>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Xnip2026-01-24_15-24-15" /></p>
+
+<p>我们可以看到数据帧为：0x81 0x85 0x88 0x56 0xa3 0xf5 0xe0 0x33 0xcf 0x99 0xe7</p>
+
+<p>数据帧头部为两个字节：</p>
+
+<ol>
+  <li>0x81 -&gt; 0b1000_0001；可得 FIN 为 1，后面保留的三位均为 0，最后四位是 opcode，为 1，即代表该数据帧为文本。</li>
+  <li>0x85 -&gt; 0b1000_0101；可得 MASK 为 1，因为这是客户端发送的数据，必须 masking。后面七位是 payload length，为 5，等于 “hello” 字符串的长度。</li>
+</ol>
+
+<p>因为 MASK 为 1，所以接下来的四个字节是客户端随机生成的 4 字节 masking key：0x88 0x56 0xa3 0xf5；</p>
+
+<p>因为从头部分析出 payload length 是 5，所以后续 5 个字节就是 masked payload。</p>
+
+<p><a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/DataFrameBuilder.swift#L92">客户端 masking</a>：遍历 unmasked payload 中的每个字节，与 masking key 中每个字节（取余 4）作异或操作。</p>
+
+<p>服务端从数据帧中取出 masking key，用其与 masked payload 再做一遍异或操作，就能还原出 unmasked payload。这是利用了异或的可逆性。设任意 bit 为 b，masking key 为 k，那么可得 b XOR k XOR k = b XOR (k XOR k) = b XOR 0 = b。</p>
+
+<p>“hello” 对应的 16 进制的表达为：0x68 0x65 0x6c 0x6c 0x6f，与 masking key（0x88 0x56 0xa3 0xf5）异或后为：0xe0 0x33 0xcf 0x99 0xe7；与 Wireshark 上捕捉的结果相符！</p>
+
+<h4 id="服务端发来的数据帧">服务端发来的数据帧</h4>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Xnip2026-01-24_22-27-48" /></p>
+
+<p>因为是回声服务器，所以服务端也是发来 “hello”，没有做 masking，能直接看到 payload 是 “hello”。</p>
+
+<h4 id="客户端主动与服务端断开连接">客户端主动与服务端断开连接</h4>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Xnip2026-01-24_22-58-26" /></p>
+
+<p>上图中：客户端发出关闭控制帧，FIN 位为 1，opcode 为 8。</p>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Xnip2026-01-24_22-58-53" /></p>
+
+<p>上图中：客户端收到服务端响应的关闭控制帧。</p>
+
+<h2 id="心得体会">心得体会</h2>
+
+<p>首先得：</p>
+
+<ol>
+  <li>把各个类的类名取好，能把类名取得比较恰当，说明心里已经把它的职责划分好。</li>
+  <li>定好各自公开/私有的接口。</li>
+  <li>开始使用之前「空实现」的类，把逻辑写对。</li>
+  <li>在第三步中，会带来很多思考，会使你退回第二步，重新思考接口的定义。重复几轮下来，大概率能完善接口的设计！</li>
+  <li>补上一些单元测试</li>
+  <li>补上具体方法的实现</li>
+</ol>
+
+<p>我感觉通过前四步的操作，能对全局的实现以及方向有个更清晰的认识，俗称把握大局观。第一步和第二步只要和 Codex 老师进入 Plan mode 猛聊一小时（实际取决于实现的功能大小）。第三第四步自己开始尝试，遇到新的思路，再回头与 Codex 继续聊。第五第六步已经是来到 Codex 老师的舒适区了，要么是 review 它的代码，要么就是虚心学习它的代码。</p>
+
+<h2 id="q--a">Q &amp; A</h2>
+
+<h3 id="websocket-的出现是为了解决什么问题">WebSocket 的出现是为了解决什么问题？</h3>
+
+<p>在 WebSocket 出现前，大家想在浏览器里做「服务端能主动推、客户端也能随时发」的双向通信，常见是这些方案：</p>
+
+<ol>
+  <li>Long Polling（长轮询）：客户端发起一个超文本传输协议（Hypertext Transfer Protocol，HTTP）请求，服务器在新消息前「挂起」响应；一旦返回，客户端立即发起下一次请求，以此近似持续连接与服务端推送。</li>
+  <li>流式传输：服务器保持单个 HTTP 连接很久，持续写入分块数据，客户端边接收边处理，达到持续推送效果。</li>
+</ol>
+
+<p>它们能用，但都有明显缺点：开销大、延迟不稳定、实现复杂。WebSocket 设计出来就是要<strong>用一个标准协议把这事正规化</strong>：一次升级握手后，真正实现<strong>全双工</strong>，不再靠「把 HTTP 请求拖得很长」来模拟。</p>
+
+<h3 id="websocket-握手为什么要借用-http">WebSocket 握手为什么要借用 HTTP？</h3>
+
+<p>它通过 HTTP/1.1 Upgrade 发起请求，升级成功之后，同一条 TCP 连接上跑的是 WebSocket 帧协议，已经不是 HTTP 报文了。它「借用了 HTTP 这张门票」进入现有网络环境。WebSocket 想把那些「伪装成 HTTP 的双向通信方案」统一替换掉；它通过 HTTP Upgrade 来建立连接，从而<strong>继续利用现有的代理、过滤和鉴权等基础设施</strong>。</p>
+
+<h3 id="tcp-不是已经有-finack-关闭流程了吗为什么-websocket-还要多此一举">TCP 不是已经有 FIN/ACK 关闭流程了吗？为什么 WebSocket 还要多此一举？</h3>
+
+<p>现实网络中的中间设备有很多，TCP 关闭原因/时机，不一定能可靠地表达「对端按应用层语义关了」。</p>
+
+<p>TCP 的 FIN/ACK 只表达「字节流结束」，不表达「消息语义结束」。但 WebSocket 有「消息/帧语义」和「关闭码/原因」。Close 帧可以带：关闭状态码（比如正常关闭、协议错误、消息太大、服务端异常等）和可选原因字符串。</p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a> 中仅实现了：</p>
+
+<ol>
+  <li>握手过程</li>
+  <li>仅支持解析/构造控制帧和 text 数据帧</li>
+</ol>
+
+<p>所以，还是很有必要去看看其他 WebSocket 客户端/服务端的实现，我搜集了如下几个：</p>
+
+<ul>
+  <li><a href="https://github.com/daltoniam/Starscream">Starscream</a></li>
+  <li>Vapor 的 <a href="https://github.com/vapor/websocket-kit">websocket-kit</a></li>
+  <li>Swift-NIO 里的 <a href="https://github.com/apple/swift-nio/tree/main/Sources/NIOWebSocket">NIOWebSocket</a></li>
+  <li>WebSocket <a href="https://github.com/vi/websocat">命令行客户端 websocat</a></li>
+</ul>
+
+<h2 id="starscream-源码分析">Starscream 源码分析</h2>
+
+<p>看来看去还是 Starscream 的星星数比较多多，同时也是 Socket.IO iOS 客户端的依赖之一，所有首先来看看它的架构图：</p>
+
+<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="" /></p>
+
+<h4 id="设计特点">设计特点</h4>
+
+<ol>
+  <li>
+    <p><strong>面向协议设计（POP）</strong>：每一层都通过协议（<code class="language-plaintext highlighter-rouge">Engine</code>, <code class="language-plaintext highlighter-rouge">Transport</code>, <code class="language-plaintext highlighter-rouge">Framer</code>, <code class="language-plaintext highlighter-rouge">CertificatePinning</code>, <code class="language-plaintext highlighter-rouge">CompressionHandler</code>）定义接口，实现可替换。</p>
+  </li>
+  <li>
+    <p><strong>双引擎策略</strong>：<code class="language-plaintext highlighter-rouge">WSEngine</code> 提供完整的自定义 RFC 6455 实现；<code class="language-plaintext highlighter-rouge">NativeEngine</code> 封装系统的 <code class="language-plaintext highlighter-rouge">URLSessionWebSocketTask</code>。在 <code class="language-plaintext highlighter-rouge">WebSocket.init</code> 中根据系统版本和 <code class="language-plaintext highlighter-rouge">useCustomEngine</code> 参数自动选择。</p>
+  </li>
+  <li>
+    <p><strong>WSEngine 是组合中心</strong>：它实现了 <code class="language-plaintext highlighter-rouge">TransportEventClient</code>、<code class="language-plaintext highlighter-rouge">FramerEventClient</code>、<code class="language-plaintext highlighter-rouge">FrameCollectorDelegate</code>、<code class="language-plaintext highlighter-rouge">HTTPHandlerDelegate</code> 四个回调协议，将 Transport → HTTP 握手 → 帧解析 → 分片重组 → 压缩/解压 的完整流程串联起来。</p>
+  </li>
+  <li>
+    <p><strong>传输层适配</strong>：<code class="language-plaintext highlighter-rouge">TCPTransport</code>（基于 Network.framework）用于 iOS 12+；<code class="language-plaintext highlighter-rouge">FoundationTransport</code>（基于 Stream）兼容更早的系统。</p>
+  </li>
+</ol>
+
+<h4 id="starscreamwebsocket-的初始化过程">Starscream.WebSocket 的初始化过程</h4>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span>
+        <span class="nv">request</span><span class="p">:</span> <span class="kt">URLRequest</span><span class="p">,</span>
+        <span class="nv">certPinner</span><span class="p">:</span> <span class="kt">CertificatePinning</span><span class="p">?</span> <span class="o">=</span> <span class="kt">FoundationSecurity</span><span class="p">(),</span>
+        <span class="nv">compressionHandler</span><span class="p">:</span> <span class="kt">CompressionHandler</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+        <span class="nv">useCustomEngine</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">#available</span><span class="p">(</span><span class="n">macOS</span> <span class="mf">10.15</span><span class="p">,</span> <span class="n">iOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">watchOS</span> <span class="mf">6.0</span><span class="p">,</span> <span class="n">tvOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="o">*</span><span class="p">),</span> <span class="o">!</span><span class="n">useCustomEngine</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">request</span><span class="p">:</span> <span class="n">request</span><span class="p">,</span> <span class="nv">engine</span><span class="p">:</span> <span class="p">())</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="k">#available</span><span class="p">(</span><span class="n">macOS</span> <span class="mf">10.14</span><span class="p">,</span> <span class="n">iOS</span> <span class="mf">12.0</span><span class="p">,</span> <span class="n">watchOS</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">tvOS</span> <span class="mf">12.0</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">request</span><span class="p">:</span> <span class="n">request</span><span class="p">,</span> <span class="nv">engine</span><span class="p">:</span> <span class="kt">WSEngine</span><span class="p">(</span><span class="nv">transport</span><span class="p">:</span> <span class="kt">TCPTransport</span><span class="p">(),</span> <span class="nv">certPinner</span><span class="p">:</span> <span class="n">certPinner</span><span class="p">,</span> <span class="nv">compressionHandler</span><span class="p">:</span> <span class="n">compressionHandler</span><span class="p">))</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">request</span><span class="p">:</span> <span class="n">request</span><span class="p">,</span> <span class="nv">engine</span><span class="p">:</span> <span class="kt">WSEngine</span><span class="p">(</span><span class="nv">transport</span><span class="p">:</span> <span class="kt">FoundationTransport</span><span class="p">(),</span> <span class="nv">certPinner</span><span class="p">:</span> <span class="n">certPinner</span><span class="p">,</span> <span class="nv">compressionHandler</span><span class="p">:</span> <span class="n">compressionHandler</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>当最低支持 iOS 13 时，Starscream.WebSocket 背后的核心实现依赖于 <a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/NativeEngine.swift">NativeEngine</a>，而 NativeEngine 则是构建于 <a href="https://developer.apple.com/documentation/foundation/urlsessionwebsockettask">URLSessionWebSocketTask</a> 之上。现在大部分的 iOS app 早就最低支持 iOS 13 了吧，我怀疑可能就是这个原因让这个项目基本上不活跃了，最近的一次 release 已经是 2024 年三月份的了！</p>
+
+<p>本着学习协议的目标，我们可以阅读 <a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift">WSEngine</a> 的代码。</p>
+
+<h4 id="握手阶段">握手阶段</h4>
+
+<p><a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift#L143">代码</a></p>
+
+<ol>
+  <li>创建一个 HTTP Upgrade 的 URLRequest</li>
+  <li>利用 CFHTTPMessageCopySerializedMessage 方法把 URLRequest 转为 Data （<a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/FoundationHTTPHandler.swift#L47">代码</a>）</li>
+  <li>使用 NWConnection 的 TCP 连接发送该 Data （<a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Transport/TCPTransport.swift#L99">代码</a>）</li>
+  <li>等待 NWConnection 收齐服务端发来的 HTTP Response 头时，检验其是否合法 （<a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/FoundationHTTPHandler.swift#L94">代码</a>）</li>
+  <li>若合法，在 <a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift#L177">didReceiveHTTP</a> 回调中更新标志位 isConnecting = false, didUpgrade = true, canSend = true。使用 Value 为 1 的 DispatchSemaphore 来保护这些共享状态，以防出现数据竞争。</li>
+</ol>
+
+<p>对比我写的 demo 里，是 <a href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/WebSocketClient.swift#L266">手动构造一个多行 String</a> 来实现 HTTP 请求头，而 Starscream 的做法在工程角度上说更好，先创建的是 URLRequest 对象，再用 CFNetwork 中的方法把它序列化为 Data，交给 TCP 传输层发送。</p>
+
+<h4 id="接受数据">接受数据</h4>
+
+<p><a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift#L154">代码</a></p>
+
+<ol>
+  <li><a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Transport/TCPTransport.swift">TCPTransport</a> 把 TCP 连接中的字节流组装为 Data，喂给 <a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/Framer.swift#L86">WSFramer</a></li>
+  <li>WSFramer 把 Data 解析为 WebSocket 帧数据（是续帧，还是文本帧，还是二进制帧，还是控制帧）</li>
+  <li>WSFrame 把解析出来的帧数据喂给 <a href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/FrameCollector.swift">FrameCollector</a></li>
+  <li>FrameCollector 把续帧拼接起来，组装为完整的“消息”（.text(String) / .binary(Data)）</li>
+</ol>
+
+<h4 id="代理链条">代理链条</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──────────────┐    TransportEventClient     ┌──────────┐
+│ TCPTransport │ ──────────────────────────▶  │ WSEngine  │
+└──────────────┘  "TCP 有数据来了/连上了"       └────┬─────┘
+                                                   │
+                    ┌──────────────────────────────┤
+                    │ WSEngine 把数据分发给          │
+                    │ 两个下游模块                   │
+                    ▼                              ▼
+          ┌─────────────────────┐        ┌──────────────┐
+          │ FoundationHTTPHandler│        │   WSFramer    │
+          └────────┬────────────┘        └──────┬───────┘
+                   │ HTTPHandlerDelegate         │ FramerEventClient
+                   │ "HTTP 握手成功了"             │ "解析出一个帧了"
+                   ▼                              ▼
+             ┌──────────┐                  ┌──────────┐
+             │ WSEngine  │                 │ WSEngine  │
+             └──────────┘                  └────┬─────┘
+                                                │
+                                                │ WSEngine 把帧交给
+                                                ▼
+                                       ┌────────────────┐
+                                       │ FrameCollector  │
+                                       └───────┬────────┘
+                                               │ FrameCollectorDelegate
+                                               │ "完整消息拼好了"
+                                               ▼
+                                         ┌──────────┐
+                                         │ WSEngine  │
+                                         └────┬─────┘
+                                               │ EngineDelegate
+                                               │ "这是最终事件"
+                                               ▼
+                                         ┌──────────┐
+                                         │ WebSocket │
+                                         └────┬─────┘
+                                               │
+                                               ▼
+                                       用户 delegate / onEvent
+</code></pre></div></div>
+
+<p>WSEngine 在图中反复出现——它<strong>同时是 4 个模块的 delegate</strong>：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>谁通知 WSEngine</th>
+      <th>通过什么协议</th>
+      <th>WSEngine 的回调方法</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>TCPTransport</td>
+      <td><code class="language-plaintext highlighter-rouge">TransportEventClient</code></td>
+      <td><code class="language-plaintext highlighter-rouge">connectionChanged(state:)</code></td>
+    </tr>
+    <tr>
+      <td>FoundationHTTPHandler</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPHandlerDelegate</code></td>
+      <td><code class="language-plaintext highlighter-rouge">didReceiveHTTP(event:)</code></td>
+    </tr>
+    <tr>
+      <td>WSFramer</td>
+      <td><code class="language-plaintext highlighter-rouge">FramerEventClient</code></td>
+      <td><code class="language-plaintext highlighter-rouge">frameProcessed(event:)</code></td>
+    </tr>
+    <tr>
+      <td>FrameCollector</td>
+      <td><code class="language-plaintext highlighter-rouge">FrameCollectorDelegate</code></td>
+      <td><code class="language-plaintext highlighter-rouge">didForm(event:)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>WSEngine 作为”中枢调度器”：所有事件都汇聚到 WSEngine，由它决定下一步交给谁处理，最终通过 <code class="language-plaintext highlighter-rouge">EngineDelegate</code> 把结果传给 WebSocket。</p>
+
+</div>
+
+
+<nav class="post-nav" aria-label="文章导航">
+  
+    <a class="post-nav-prev" href="/2025/12/01/SwiftUI_Identity_lifetime/"><span class="post-nav-label">&larr; 上一篇</span>SwiftUI View 的 Identity 与 Lifetime</a>
+  
+  
+    <a class="post-nav-next" href="/2026/01/26/tca-101-p1/"><span class="post-nav-label">下一篇 &rarr;</span>初识 The Composable Architecture（一）</a>
+  
 </nav>
 
 
-
-
-</header>
         
-  
-  <aside class="sidebar">
+          
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#WebSocket-%E5%8D%8F%E8%AE%AE%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">WebSocket 协议简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E6%97%B6%E7%9A%84%E6%8F%A1%E6%89%8B%E9%98%B6%E6%AE%B5"><span class="nav-number">1.1.</span> <span class="nav-text">建立连接时的握手阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%8F%91%E8%B5%B7%E6%8F%A1%E6%89%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">客户端发起握手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E5%87%BA-Sec-WebSocket-Key%EF%BC%9F"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">如何计算出 Sec-WebSocket-Key？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-Sec-WebSocket-Key%EF%BC%9F"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">为什么需要 Sec-WebSocket-Key？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8F%A1%E6%89%8B%E4%B8%AD%E4%BA%A7%E7%94%9F%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">实现客户端握手中产生的思考</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%93%8D%E5%BA%94%E6%8F%A1%E6%89%8B"><span class="nav-number">1.1.2.</span> <span class="nav-text">服务端响应握手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97-Sec-WebSocket-Accept%EF%BC%9F"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">如何计算 Sec-WebSocket-Accept？</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8B%BC%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">1.1.2.1.1.</span> <span class="nav-text">拼接字符串</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AF%B9%E6%8B%BC%E6%8E%A5%E5%90%8E%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%81%9A-SHA%E2%80%911"><span class="nav-number">1.1.2.1.2.</span> <span class="nav-text">对拼接后的字符串做 SHA‑1</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%8A-SHA%E2%80%911-%E7%BB%93%E6%9E%9C%E5%81%9A-Base64-%E7%BC%96%E7%A0%81"><span class="nav-number">1.1.2.1.3.</span> <span class="nav-text">把 SHA‑1 结果做 Base64 编码</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E6%95%B0%E6%8D%AE%E5%B8%A7%EF%BC%88Data-Frame%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">解析数据帧（Data Frame）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%B4%E9%83%A8%E7%BB%93%E6%9E%84%EF%BC%882-%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">头部结构（2 个字节）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Payload-Data"><span class="nav-number">1.2.2.</span> <span class="nav-text">Payload Data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B8%A7%E2%80%94%E2%80%94%E6%8E%A7%E5%88%B6%E5%B8%A7%EF%BC%88Control-Frame%EF%BC%89"><span class="nav-number">1.2.3.</span> <span class="nav-text">特殊的数据帧——控制帧（Control Frame）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Close%EF%BC%880x8%EF%BC%89"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">Close（0x8）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ping%EF%BC%880x9%EF%BC%89%E4%B8%8E-Pong%EF%BC%880xA%EF%BC%89"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">Ping（0x9）与 Pong（0xA）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E5%B8%A7%E8%A7%A3%E6%9E%90%E4%B8%AD%E4%BA%A7%E7%94%9F%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">实现数据帧解析中产生的思考</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E7%89%87%EF%BC%88Fragmentation%EF%BC%89"><span class="nav-number">1.2.4.</span> <span class="nav-text">分片（Fragmentation）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.3.</span> <span class="nav-text">关闭连接</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A3%E5%B8%B8%E5%85%B3%E9%97%AD%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.3.1.</span> <span class="nav-text">正常关闭连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E6%96%AD%E5%BC%80%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.3.2.</span> <span class="nav-text">异常断开连接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8-Wireshark-%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">用 Wireshark 分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E6%97%B6%E7%9A%84%E6%8F%A1%E6%89%8B%E9%98%B6%E6%AE%B5-1"><span class="nav-number">2.1.</span> <span class="nav-text">建立连接时的握手阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E6%95%B0%E6%8D%AE%E5%B8%A7%EF%BC%88Data-Frame%EF%BC%89-1"><span class="nav-number">2.2.</span> <span class="nav-text">解析数据帧（Data Frame）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%8F%91%E6%9D%A5%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B8%A7"><span class="nav-number">2.2.1.</span> <span class="nav-text">服务端发来的数据帧</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%BB%E5%8A%A8%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%96%AD%E5%BC%80%E8%BF%9E%E6%8E%A5"><span class="nav-number">2.2.2.</span> <span class="nav-text">客户端主动与服务端断开连接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">心得体会</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q-A"><span class="nav-number">4.</span> <span class="nav-text">Q &amp; A</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#WebSocket-%E7%9A%84%E5%87%BA%E7%8E%B0%E6%98%AF%E4%B8%BA%E4%BA%86%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F"><span class="nav-number">4.1.</span> <span class="nav-text">WebSocket 的出现是为了解决什么问题？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WebSocket-%E6%8F%A1%E6%89%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%80%9F%E7%94%A8-HTTP%EF%BC%9F"><span class="nav-number">4.2.</span> <span class="nav-text">WebSocket 握手为什么要借用 HTTP？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E4%B8%8D%E6%98%AF%E5%B7%B2%E7%BB%8F%E6%9C%89-FIN-ACK-%E5%85%B3%E9%97%AD%E6%B5%81%E7%A8%8B%E4%BA%86%E5%90%97%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88-WebSocket-%E8%BF%98%E8%A6%81%E5%A4%9A%E6%AD%A4%E4%B8%80%E4%B8%BE%EF%BC%9F"><span class="nav-number">4.3.</span> <span class="nav-text">TCP 不是已经有 FIN&#x2F;ACK 关闭流程了吗？为什么 WebSocket 还要多此一举？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Starscream-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">Starscream 源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%89%B9%E7%82%B9"><span class="nav-number">6.1.</span> <span class="nav-text">设计特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Starscream-WebSocket-%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">6.2.</span> <span class="nav-text">Starscream.WebSocket 的初始化过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%A1%E6%89%8B%E9%98%B6%E6%AE%B5"><span class="nav-number">6.3.</span> <span class="nav-text">握手阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%97%E6%95%B0%E6%8D%AE"><span class="nav-number">6.4.</span> <span class="nav-text">接受数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E9%93%BE%E6%9D%A1"><span class="nav-number">6.5.</span> <span class="nav-text">代理链条</span></a></li></ol></li></ol></div>
-        </div>
-        <!--/noindex-->
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </main><script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var defined_alerts = {
+      NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
+      TIP:       { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>', label: 'Tip' },
+      IMPORTANT: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Important' },
+      WARNING:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>', label: 'Warning' },
+      CAUTION:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Caution' }
+    };
 
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Sunset Wan</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">15</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">10</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author animated">
-      <span class="links-of-author-item">
-        <a href="https://github.com/SunsetWan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;SunsetWan" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-  </div>
+    var blockquotes = document.querySelectorAll("blockquote");
+    for (var i = 0; i < blockquotes.length; i++) {
+      var bq = blockquotes[i];
+      var firstP = bq.querySelector("p:first-child");
+      if (!firstP) continue;
 
-        </div>
-      </div>
-    </div>
+      var text = firstP.innerHTML;
+      var match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br\s*\/?>)?/);
+      if (!match) continue;
 
-    
-  </aside>
+      var type = match[1];
+      var alert = defined_alerts[type];
 
+      // Remove the marker from the paragraph text
+      firstP.innerHTML = text.replace(match[0], "").trim();
 
-    </div>
+      // If the paragraph is now empty, remove it
+      if (!firstP.innerHTML) {
+        firstP.remove();
+      }
 
-    <div class="main-inner post posts-expand">
+      // Build the alert title
+      var title = document.createElement("p");
+      title.className = "markdown-alert-title";
+      title.innerHTML = alert.icon + " " + alert.label;
+      bq.insertBefore(title, bq.firstChild);
 
-
-  
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://sunsetwan.github.io/2026/01/25/WebSocket-note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Sunset Wan">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="日落大道">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="WebSocket 协议学习笔记 | 日落大道">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          WebSocket 协议学习笔记
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2026-01-25 10:48:23" itemprop="dateCreated datePublished" datetime="2026-01-25T10:48:23+00:00">2026-01-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-01-29 13:59:27" itemprop="dateModified" datetime="2026-01-29T13:59:27+00:00">2026-01-29</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket <strong>客户端</strong> 的 <strong>一小部分</strong> 功能，以达到了解 WebSocket 协议的目标！</p>
-<ol>
-<li>教科书：<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc6455.txt">RFC 6455</a></li>
-<li>老师：Codex</li>
-<li>代码仓库地址：<a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a></li>
-</ol>
-<span id="more"></span>
-
-<h2 id="WebSocket-协议简介"><a href="#WebSocket-协议简介" class="headerlink" title="WebSocket 协议简介"></a>WebSocket 协议简介</h2><p>WebSocket 协议是一种能让客户端（浏览器）与服务端进行双向通信的协议。该协议由基于传输控制协议（Transmission Control Protocol, TCP）的打开握手与后续的基本消息成帧组成。</p>
-<h3 id="建立连接时的握手阶段"><a href="#建立连接时的握手阶段" class="headerlink" title="建立连接时的握手阶段"></a>建立连接时的握手阶段</h3><h4 id="客户端发起握手"><a href="#客户端发起握手" class="headerlink" title="客户端发起握手"></a>客户端发起握手</h4><p>WebSocket 在握手阶段是利用 HTTP GET 请求来与服务端建立连接的，但对于 HTTP 有版本要求：至少大于等于 1.1。</p>
-<p>常见的客户端发起握手请求头如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">GET /chat HTTP/1.1</span><br><span class="line">Host: server.example.com</span><br><span class="line">Upgrade: websocket</span><br><span class="line">Connection: Upgrade</span><br><span class="line">Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</span><br><span class="line">Sec-WebSocket-Version: 13</span><br></pre></td></tr></table></figure>
-
-<p>以下是握手中必须包含的关键头字段：<code>Upgrade</code>，<code>Connection</code>，<code>Sec-WebSocket-Key</code>，<code>Sec-WebSocket-Version</code>。且根据协议的定义：</p>
-<ol>
-<li><code>Upgrade: websocket</code></li>
-<li><code>Connection: Upgrade</code></li>
-<li><code>Sec-WebSocket-Version: 13</code></li>
-</ol>
-<p>这三组键值对是固定的（大小写不敏感）。</p>
-<h5 id="如何计算出-Sec-WebSocket-Key？"><a href="#如何计算出-Sec-WebSocket-Key？" class="headerlink" title="如何计算出 Sec-WebSocket-Key？"></a>如何计算出 Sec-WebSocket-Key？</h5><p>首先，设客户端随机生成 16 个字节长度的随机数为 A，再对 A 做 Base64 编码，得出的结果就是该 Key 对应的 value。客户端每次开始握手都得重新生成一次，不可重复。</p>
-<h5 id="为什么需要-Sec-WebSocket-Key？"><a href="#为什么需要-Sec-WebSocket-Key？" class="headerlink" title="为什么需要 Sec-WebSocket-Key？"></a>为什么需要 Sec-WebSocket-Key？</h5><p>它用于让服务端根据该随机值生成 <code>Sec-WebSocket-Accept</code>，客户端再进行校验，从而确认对端确实理解并接受 WebSocket 握手。</p>
-<h5 id="实现客户端握手中产生的思考"><a href="#实现客户端握手中产生的思考" class="headerlink" title="实现客户端握手中产生的思考"></a>实现客户端握手中产生的思考</h5><p>因为是基于 <code>NWConnection</code> <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/TransportConnection.swift#L41">利用 TCP 协议直接发送</a> GET 请求头，所以我们得自己 <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/WebSocketClient.swift#L277">手动调整字符串</a> 构造 Data，以遵循 HTTP 请求头的格式。这一开始把我难到了，意识到还需多复习 HTTP 协议。</p>
-<h4 id="服务端响应握手"><a href="#服务端响应握手" class="headerlink" title="服务端响应握手"></a>服务端响应握手</h4><p>服务端会阅读客户端请求头，并检查是否符合以下几点：</p>
-<ol>
-<li>GET 请求且 HTTP 版本至少为 1.1</li>
-<li>得有键值对 Upgrade: websocket（大小写不敏感）</li>
-<li>得有键值对 Connection: Upgrade（大小写不敏感）</li>
-<li>得有键值对 Sec-WebSocket-Version: 13（大小写不敏感）</li>
-<li>对 <code>Sec-WebSocket-Key</code> 作 Base64 decode，检查长度得是 16 个字节</li>
-</ol>
-<p>如果以上的检查通过且可以创建连接，服务端会发出 HTTP Response：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 101 Switching Protocols</span><br><span class="line">Upgrade: websocket</span><br><span class="line">Connection: Upgrade</span><br><span class="line">Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=</span><br></pre></td></tr></table></figure>
-
-<h5 id="如何计算-Sec-WebSocket-Accept？"><a href="#如何计算-Sec-WebSocket-Accept？" class="headerlink" title="如何计算 Sec-WebSocket-Accept？"></a>如何计算 Sec-WebSocket-Accept？</h5><p>具体实现可见 <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/Handshake.swift">Handshake.swift</a>。</p>
-<h6 id="拼接字符串"><a href="#拼接字符串" class="headerlink" title="拼接字符串"></a>拼接字符串</h6><p>首先获取到客户端发来的 Sec-WebSocket-Key（dGhlIHNhbXBsZSBub25jZQ&#x3D;&#x3D;），拼接上这段协议中定义好的 GUID（全局唯一标识符）：258EAFA5-E914-47DA-95CA-C5AB0DC85B11。</p>
-<p>结果为 dGhlIHNhbXBsZSBub25jZQ&#x3D;&#x3D;258EAFA5-E914-47DA-95CA-C5AB0DC85B11</p>
-<h6 id="对拼接后的字符串做-SHA‑1"><a href="#对拼接后的字符串做-SHA‑1" class="headerlink" title="对拼接后的字符串做 SHA‑1"></a>对拼接后的字符串做 SHA‑1</h6><p>结果是 20 字节（160 位）的散列值：b3 7a 4f 2c c0 62 4f 16 90 f6 46 06 cf 38 59 45 b2 be c4 ea</p>
-<h6 id="把-SHA‑1-结果做-Base64-编码"><a href="#把-SHA‑1-结果做-Base64-编码" class="headerlink" title="把 SHA‑1 结果做 Base64 编码"></a>把 SHA‑1 结果做 Base64 编码</h6><p>结果为 s3pPLMBiTxaQ9kYGzzhZRbK+xOo&#x3D;。客户端收到这个 accept key 后，还会自行校验一遍。如果与自己算出来的不一致，会导致握手失败。</p>
-<h3 id="解析数据帧（Data-Frame）"><a href="#解析数据帧（Data-Frame）" class="headerlink" title="解析数据帧（Data Frame）"></a>解析数据帧（Data Frame）</h3><p>具体实现可见 <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/DataFrameParser.swift">DataFrameParser.swift</a>。</p>
-<p>在握手成功后，双端严格以数据帧格式通信，格式如下图：</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="image-20260123201016373"></p>
-<h4 id="头部结构（2-个字节）"><a href="#头部结构（2-个字节）" class="headerlink" title="头部结构（2 个字节）"></a>头部结构（2 个字节）</h4><p>第 1 个字节：FIN（Final，是否是消息最后一个分片）、RSV1&#x2F;RSV2&#x2F;RSV3（Reserved，保留位）、opcode（操作码，4 位）。</p>
-<p>FIN 为 1 表示这是消息的最后一个分片；0 表示后续还有分片。</p>
-<p>RSV1&#x2F;RSV2&#x2F;RSV3：除非协商了扩展，否则必须为 0；否则接收方必须关闭连接。</p>
-<p>opcode：</p>
-<ul>
-<li>0x0 续帧（Continuation）</li>
-<li>0x1 文本帧（Text）</li>
-<li>0x2 二进制帧（Binary）</li>
-<li>0x3–0x7 预留给未来非控制帧</li>
-<li>0x8 关闭（Close）</li>
-<li>0x9 Ping</li>
-<li>0xA Pong</li>
-<li>0xB–0xF 预留给未来控制帧</li>
-</ul>
-<p>第 2 个字节：MASK（是否掩码）+ Payload len（负载长度，7 比特）。客户端向服务端发送的数据帧必须进行 masking，故 MASK 为 1，服务端向客户端发送的数据帧不进行 masking，故 MASK 为 0。</p>
-<h4 id="Payload-Data"><a href="#Payload-Data" class="headerlink" title="Payload Data"></a>Payload Data</h4><p>若 Payload len 为 126：后面跟 2 字节扩展长度（16 位无符号整数）。若 Payload len 为 127：后面跟 8 字节扩展长度（64 位无符号整数，最高位必须为 0）。扩展长度使用网络字节序（network byte order，大端序）。若 MASK 为 1：后面跟 4 字节 Masking-key（掩码键）。最后是 Payload Data（负载数据）：由 Extension data（扩展数据）+ Application data（应用数据）拼接组成。Payload Data 的总长度等于负载长度；其中扩展数据长度由扩展协议定义，未协商扩展时为 0。</p>
-<h4 id="特殊的数据帧——控制帧（Control-Frame）"><a href="#特殊的数据帧——控制帧（Control-Frame）" class="headerlink" title="特殊的数据帧——控制帧（Control Frame）"></a>特殊的数据帧——控制帧（Control Frame）</h4><ul>
-<li>定义与类型：操作码（opcode）最高位为 1 的帧即控制帧，已定义的有 0x8 关闭、0x9 Ping、0xA Pong；0xB–0xF 预留给未来控制帧。</li>
-<li>不能分片：控制帧必须 FIN &#x3D; 1，且不得分片；如果接收方收到分片的控制帧，必须按协议失败处理（Fail the WebSocket Connection）。</li>
-<li>负载长度限制：控制帧负载长度必须 ≤ 125 字节；超过上限必须按协议失败处理。</li>
-<li>可穿插发送：控制帧可以在分片消息的中间插入发送，用于及时传达连接状态；接收方必须能在分片过程中处理控制帧。</li>
-<li>掩码规则：客户端发送的所有帧（包括控制帧）都必须带掩码；服务器发送的帧不得掩码。</li>
-</ul>
-<h5 id="Close（0x8）"><a href="#Close（0x8）" class="headerlink" title="Close（0x8）"></a>Close（0x8）</h5><ul>
-<li>作用：发起关闭握手，告知对端准备关闭连接。</li>
-<li>负载结构：可选负载由状态码（2 字节）+ 关闭原因（可选 UTF‑8 文本）组成；若带原因文本，必须是有效 UTF‑8。</li>
-<li>行为要求：<ul>
-<li>一端发送 Close 后，不得再发送数据帧。</li>
-<li>一端收到 Close 且自己尚未发送 Close，必须回送 Close 作为响应。</li>
-<li>完成双方 Close 交换后，连接关闭。</li>
-</ul>
-</li>
-</ul>
-<h5 id="Ping（0x9）与-Pong（0xA）"><a href="#Ping（0x9）与-Pong（0xA）" class="headerlink" title="Ping（0x9）与 Pong（0xA）"></a>Ping（0x9）与 Pong（0xA）</h5><ul>
-<li>Ping 可携带应用数据；收到 Ping 必须尽快回送 Pong。</li>
-<li>Pong 的负载必须与对应 Ping 完全一致（逐字节相同）。</li>
-<li>Pong 可以主动发送（非响应），作为单向心跳；对主动 Pong 不要求再回 Pong。</li>
-</ul>
-<h5 id="实现数据帧解析中产生的思考"><a href="#实现数据帧解析中产生的思考" class="headerlink" title="实现数据帧解析中产生的思考"></a>实现数据帧解析中产生的思考</h5><p>复习了位运算，原来位运算发光发热的地方是这里！（例如获取 FIN 位）</p>
-<p>复习了大端序和小端序：</p>
-<ul>
-<li>大端序（Big Endian）：最高有效字节放在最低内存地址；符合人类的阅读习惯</li>
-<li>小端序（Little Endian）：最低有效字节放在最低内存地址</li>
-</ul>
-<p>强调「有效」是为了排除前导零或无效位造成的歧义。</p>
-<p>当 payloadLength 等于 126 或 127 时，真正的 payloadLength 是要从紧接的 2 个字节或 8 个字节去读。这时候协议规定这段字节序是 network byte order（即大端序）。</p>
-<p>在研究如何操作 Data 时，我仔细看了 Data 目前提供的 API，发现有 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/foundation/data/span">Span types</a>！WWDC 25 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2025/312/">Improve memory usage and performance with Swift</a> 中有对它的介绍！Apple 也推出了 <a target="_blank" rel="noopener" href="https://github.com/apple/swift-binary-parsing">Swift Binary Parsing</a>，后面计划抽空看看，应该能用来优化目前 <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/DataFrameParser.swift">DataFrameParser.swift</a> 的实现。</p>
-<h4 id="分片（Fragmentation）"><a href="#分片（Fragmentation）" class="headerlink" title="分片（Fragmentation）"></a>分片（Fragmentation）</h4><p>WebSocket 允许把一个消息拆成多个帧发送，降低内存压力与延迟，支持流式处理。数据帧也可以是不分片的。一个不分片的数据帧，FIN 位总是 1，opcode 肯定不为 0。</p>
-<p>规则：</p>
-<ul>
-<li>第一个分片帧的 opcode 必须是文本帧（0x1）或二进制帧（0x2），FIN 位为 0。</li>
-<li>后续分片帧必须是续帧（0x0）。</li>
-<li>最后一个分片帧 FIN 为 1，opcode 仍为续帧（0x0）。</li>
-<li>消息边界：接收方用 FIN 判断一条消息结束；所有分片负载拼接成完整消息。</li>
-<li>控制帧：控制帧不能分片，但可以插入在分片序列中；接收方必须能在分片过程中处理控制帧。</li>
-<li>一致性约束：在一个消息分片未结束前，不能开始新的数据消息分片序列；否则属于协议错误。</li>
-</ul>
-<h3 id="关闭连接"><a href="#关闭连接" class="headerlink" title="关闭连接"></a>关闭连接</h3><h4 id="正常关闭连接"><a href="#正常关闭连接" class="headerlink" title="正常关闭连接"></a>正常关闭连接</h4><p>任一端可发起：发送 Close 控制帧（可带状态码与原因），连接进入 CLOSING；双方都发送并接收 Close 后，应关闭底层传输控制协议（Transmission Control Protocol，TCP）连接，进入 CLOSED 状态。如果完成关闭握手后再关闭 TCP 连接，可称之为「干净关闭」，否则视为「非干净关闭」。</p>
-<h4 id="异常断开连接"><a href="#异常断开连接" class="headerlink" title="异常断开连接"></a>异常断开连接</h4><p>出现错误即需关闭连接（握手阶段失败、协议错误、传输层连接意外中断等）。服务器在握手阶段可直接「中止连接（Abort）」并关闭 TCP 连接，不必发送 Close 帧。</p>
-<h2 id="用-Wireshark-分析"><a href="#用-Wireshark-分析" class="headerlink" title="用 Wireshark 分析"></a>用 Wireshark 分析</h2><p>因为 WebSocket 的数据帧直接跑在 TCP 之上，很多只关注 HTTP 的抓包工具无法直接解析，所以我使用 Wireshark 来分析 <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a> 发送的数据帧。我使用的是 <a target="_blank" rel="noopener" href="https://github.com/vi/websocat">websocat</a>，用它来运行一个本地的 WebSocket 回声（echo）服务器。你给它发「hello」，它也会默认回你「hello」。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 回声服务器在本地 8080 端口监听</span><br><span class="line">websocat -t ws-listen:127.0.0.1:8080 mirror:</span><br></pre></td></tr></table></figure>
-
-<p>在另一个终端里连接回声服务器：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">websocat -t ws://127.0.0.1:8080</span><br></pre></td></tr></table></figure>
-
-<h3 id="建立连接时的握手阶段-1"><a href="#建立连接时的握手阶段-1" class="headerlink" title="建立连接时的握手阶段"></a>建立连接时的握手阶段</h3><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Xnip2026-01-24_14-58-02"></p>
-<p>点击 Connect，客户端主动发送 HTTP 升级请求，并收到服务端的同意协议升级响应。</p>
-<h3 id="解析数据帧（Data-Frame）-1"><a href="#解析数据帧（Data-Frame）-1" class="headerlink" title="解析数据帧（Data Frame）"></a>解析数据帧（Data Frame）</h3><p>建立连接成功后，发送 “hello” 字符串</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Xnip2026-01-24_15-24-15"></p>
-<p>我们可以看到数据帧为：0x81 0x85 0x88 0x56 0xa3 0xf5 0xe0 0x33 0xcf 0x99 0xe7</p>
-<p>数据帧头部为两个字节：</p>
-<ol>
-<li>0x81 -&gt; 0b1000_0001；可得 FIN 为 1，后面保留的三位均为 0，最后四位是 opcode，为 1，即代表该数据帧为文本。</li>
-<li>0x85 -&gt; 0b1000_0101；可得 MASK 为 1，因为这是客户端发送的数据，必须 masking。后面七位是 payload length，为 5，等于 “hello” 字符串的长度。</li>
-</ol>
-<p>因为 MASK 为 1，所以接下来的四个字节是客户端随机生成的 4 字节 masking key：0x88 0x56 0xa3 0xf5；</p>
-<p>因为从头部分析出 payload length 是 5，所以后续 5 个字节就是 masked payload。</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/DataFrameBuilder.swift#L92">客户端 masking</a>：遍历 unmasked payload 中的每个字节，与 masking key 中每个字节（取余 4）作异或操作。</p>
-<p>服务端从数据帧中取出 masking key，用其与 masked payload 再做一遍异或操作，就能还原出 unmasked payload。这是利用了异或的可逆性。设任意 bit 为 b，masking key 为 k，那么可得 b XOR k XOR k &#x3D; b XOR (k XOR k) &#x3D; b XOR 0 &#x3D; b。</p>
-<p>“hello” 对应的 16 进制的表达为：0x68 0x65 0x6c 0x6c 0x6f，与 masking key（0x88 0x56 0xa3 0xf5）异或后为：0xe0 0x33 0xcf 0x99 0xe7；与 Wireshark 上捕捉的结果相符！</p>
-<h4 id="服务端发来的数据帧"><a href="#服务端发来的数据帧" class="headerlink" title="服务端发来的数据帧"></a>服务端发来的数据帧</h4><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Xnip2026-01-24_22-27-48"></p>
-<p>因为是回声服务器，所以服务端也是发来 “hello”，没有做 masking，能直接看到 payload 是 “hello”。</p>
-<h4 id="客户端主动与服务端断开连接"><a href="#客户端主动与服务端断开连接" class="headerlink" title="客户端主动与服务端断开连接"></a>客户端主动与服务端断开连接</h4><p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Xnip2026-01-24_22-58-26"></p>
-<p>上图中：客户端发出关闭控制帧，FIN 位为 1，opcode 为 8。</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Xnip2026-01-24_22-58-53"></p>
-<p>上图中：客户端收到服务端响应的关闭控制帧。</p>
-<h2 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h2><p>首先得：</p>
-<ol>
-<li>把各个类的类名取好，能把类名取得比较恰当，说明心里已经把它的职责划分好。</li>
-<li>定好各自公开&#x2F;私有的接口。</li>
-<li>开始使用之前「空实现」的类，把逻辑写对。</li>
-<li>在第三步中，会带来很多思考，会使你退回第二步，重新思考接口的定义。重复几轮下来，大概率能完善接口的设计！</li>
-<li>补上一些单元测试</li>
-<li>补上具体方法的实现</li>
-</ol>
-<p>我感觉通过前四步的操作，能对全局的实现以及方向有个更清晰的认识，俗称把握大局观。第一步和第二步只要和 Codex 老师进入 Plan mode 猛聊一小时（实际取决于实现的功能大小）。第三第四步自己开始尝试，遇到新的思路，再回头与 Codex 继续聊。第五第六步已经是来到 Codex 老师的舒适区了，要么是 review 它的代码，要么就是虚心学习它的代码。</p>
-<h2 id="Q-A"><a href="#Q-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h2><h3 id="WebSocket-的出现是为了解决什么问题？"><a href="#WebSocket-的出现是为了解决什么问题？" class="headerlink" title="WebSocket 的出现是为了解决什么问题？"></a>WebSocket 的出现是为了解决什么问题？</h3><p>在 WebSocket 出现前，大家想在浏览器里做「服务端能主动推、客户端也能随时发」的双向通信，常见是这些方案：</p>
-<ol>
-<li>Long Polling（长轮询）：客户端发起一个超文本传输协议（Hypertext Transfer Protocol，HTTP）请求，服务器在新消息前「挂起」响应；一旦返回，客户端立即发起下一次请求，以此近似持续连接与服务端推送。</li>
-<li>流式传输：服务器保持单个 HTTP 连接很久，持续写入分块数据，客户端边接收边处理，达到持续推送效果。</li>
-</ol>
-<p>它们能用，但都有明显缺点：开销大、延迟不稳定、实现复杂。WebSocket 设计出来就是要<strong>用一个标准协议把这事正规化</strong>：一次升级握手后，真正实现<strong>全双工</strong>，不再靠「把 HTTP 请求拖得很长」来模拟。</p>
-<h3 id="WebSocket-握手为什么要借用-HTTP？"><a href="#WebSocket-握手为什么要借用-HTTP？" class="headerlink" title="WebSocket 握手为什么要借用 HTTP？"></a>WebSocket 握手为什么要借用 HTTP？</h3><p>它通过 HTTP&#x2F;1.1 Upgrade 发起请求，升级成功之后，同一条 TCP 连接上跑的是 WebSocket 帧协议，已经不是 HTTP 报文了。它「借用了 HTTP 这张门票」进入现有网络环境。WebSocket 想把那些「伪装成 HTTP 的双向通信方案」统一替换掉；它通过 HTTP Upgrade 来建立连接，从而<strong>继续利用现有的代理、过滤和鉴权等基础设施</strong>。</p>
-<h3 id="TCP-不是已经有-FIN-ACK-关闭流程了吗？为什么-WebSocket-还要多此一举？"><a href="#TCP-不是已经有-FIN-ACK-关闭流程了吗？为什么-WebSocket-还要多此一举？" class="headerlink" title="TCP 不是已经有 FIN&#x2F;ACK 关闭流程了吗？为什么 WebSocket 还要多此一举？"></a>TCP 不是已经有 FIN&#x2F;ACK 关闭流程了吗？为什么 WebSocket 还要多此一举？</h3><p>现实网络中的中间设备有很多，TCP 关闭原因&#x2F;时机，不一定能可靠地表达「对端按应用层语义关了」。</p>
-<p>TCP 的 FIN&#x2F;ACK 只表达「字节流结束」，不表达「消息语义结束」。但 WebSocket 有「消息&#x2F;帧语义」和「关闭码&#x2F;原因」。Close 帧可以带：关闭状态码（比如正常关闭、协议错误、消息太大、服务端异常等）和可选原因字符串。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/tree/main/Sources/LearnWebSocket">WebSocketClient-Demo</a> 中仅实现了：</p>
-<ol>
-<li>握手过程</li>
-<li>仅支持解析&#x2F;构造控制帧和 text 数据帧</li>
-</ol>
-<p>所以，还是很有必要去看看其他 WebSocket 客户端&#x2F;服务端的实现，我搜集了如下几个：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream">Starscream</a></li>
-<li>Vapor 的 <a target="_blank" rel="noopener" href="https://github.com/vapor/websocket-kit">websocket-kit</a></li>
-<li>Swift-NIO 里的 <a target="_blank" rel="noopener" href="https://github.com/apple/swift-nio/tree/main/Sources/NIOWebSocket">NIOWebSocket</a></li>
-<li>WebSocket <a target="_blank" rel="noopener" href="https://github.com/vi/websocat">命令行客户端 websocat</a></li>
-</ul>
-<h2 id="Starscream-源码分析"><a href="#Starscream-源码分析" class="headerlink" title="Starscream 源码分析"></a>Starscream 源码分析</h2><p>看来看去还是 Starscream 的星星数比较多多，同时也是 Socket.IO iOS 客户端的依赖之一，所有首先来看看它的架构图：</p>
-<p><img src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png"></p>
-<h4 id="设计特点"><a href="#设计特点" class="headerlink" title="设计特点"></a>设计特点</h4><ol>
-<li><p><strong>面向协议设计（POP）</strong>：每一层都通过协议（<code>Engine</code>, <code>Transport</code>, <code>Framer</code>, <code>CertificatePinning</code>, <code>CompressionHandler</code>）定义接口，实现可替换。</p>
-</li>
-<li><p><strong>双引擎策略</strong>：<code>WSEngine</code> 提供完整的自定义 RFC 6455 实现；<code>NativeEngine</code> 封装系统的 <code>URLSessionWebSocketTask</code>。在 <code>WebSocket.init</code> 中根据系统版本和 <code>useCustomEngine</code> 参数自动选择。</p>
-</li>
-<li><p><strong>WSEngine 是组合中心</strong>：它实现了 <code>TransportEventClient</code>、<code>FramerEventClient</code>、<code>FrameCollectorDelegate</code>、<code>HTTPHandlerDelegate</code> 四个回调协议，将 Transport → HTTP 握手 → 帧解析 → 分片重组 → 压缩&#x2F;解压 的完整流程串联起来。</p>
-</li>
-<li><p><strong>传输层适配</strong>：<code>TCPTransport</code>（基于 Network.framework）用于 iOS 12+；<code>FoundationTransport</code>（基于 Stream）兼容更早的系统。</p>
-</li>
-</ol>
-<h4 id="Starscream-WebSocket-的初始化过程"><a href="#Starscream-WebSocket-的初始化过程" class="headerlink" title="Starscream.WebSocket 的初始化过程"></a>Starscream.WebSocket 的初始化过程</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">convenience</span> <span class="keyword">init</span>(</span><br><span class="line">    <span class="params">request</span>: <span class="type">URLRequest</span>,</span><br><span class="line">    <span class="params">certPinner</span>: <span class="type">CertificatePinning</span>? <span class="operator">=</span> <span class="type">FoundationSecurity</span>(),</span><br><span class="line">    <span class="params">compressionHandler</span>: <span class="type">CompressionHandler</span>? <span class="operator">=</span> <span class="literal">nil</span>,</span><br><span class="line">    <span class="params">useCustomEngine</span>: <span class="type">Bool</span> <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">#available</span>(<span class="keyword">macOS</span> <span class="number">10.15</span>, <span class="keyword">iOS</span> <span class="number">13.0</span>, <span class="keyword">watchOS</span> <span class="number">6.0</span>, <span class="keyword">tvOS</span> <span class="number">13.0</span>, <span class="operator">*</span>), <span class="operator">!</span>useCustomEngine &#123;</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(request: request, engine: ())</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">#available</span>(<span class="keyword">macOS</span> <span class="number">10.14</span>, <span class="keyword">iOS</span> <span class="number">12.0</span>, <span class="keyword">watchOS</span> <span class="number">5.0</span>, <span class="keyword">tvOS</span> <span class="number">12.0</span>, <span class="operator">*</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(request: request, engine: <span class="type">WSEngine</span>(transport: <span class="type">TCPTransport</span>(), certPinner: certPinner, compressionHandler: compressionHandler))</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(request: request, engine: <span class="type">WSEngine</span>(transport: <span class="type">FoundationTransport</span>(), certPinner: certPinner, compressionHandler: compressionHandler))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>当最低支持 iOS 13 时，Starscream.WebSocket 背后的核心实现依赖于 <a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/NativeEngine.swift">NativeEngine</a>，而 NativeEngine 则是构建于 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/foundation/urlsessionwebsockettask">URLSessionWebSocketTask</a> 之上。现在大部分的 iOS app 早就最低支持 iOS 13 了吧，我怀疑可能就是这个原因让这个项目基本上不活跃了，最近的一次 release 已经是 2024 年三月份的了！</p>
-<p>本着学习协议的目标，我们可以阅读 <a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift">WSEngine</a> 的代码。</p>
-<h4 id="握手阶段"><a href="#握手阶段" class="headerlink" title="握手阶段"></a>握手阶段</h4><p><a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift#L143">代码</a></p>
-<ol>
-<li>创建一个 HTTP Upgrade 的 URLRequest </li>
-<li>利用 CFHTTPMessageCopySerializedMessage 方法把 URLRequest 转为 Data （<a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/FoundationHTTPHandler.swift#L47">代码</a>）</li>
-<li>使用 NWConnection 的 TCP 连接发送该 Data （<a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Transport/TCPTransport.swift#L99">代码</a>）</li>
-<li>等待 NWConnection 收齐服务端发来的 HTTP Response 头时，检验其是否合法 （<a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/FoundationHTTPHandler.swift#L94">代码</a>）</li>
-<li>若合法，在 <a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift#L177">didReceiveHTTP</a> 回调中更新标志位 isConnecting &#x3D; false, didUpgrade &#x3D; true, canSend &#x3D; true。使用 Value 为 1 的 DispatchSemaphore 来保护这些共享状态，以防出现数据竞争。</li>
-</ol>
-<p>对比我写的 demo 里，是 <a target="_blank" rel="noopener" href="https://github.com/SunsetWan/WebSocketClient-Demo/blob/main/Sources/LearnWebSocket/WebSocketClient.swift#L266">手动构造一个多行 String</a> 来实现 HTTP 请求头，而 Starscream 的做法在工程角度上说更好，先创建的是 URLRequest 对象，再用 CFNetwork 中的方法把它序列化为 Data，交给 TCP 传输层发送。</p>
-<h4 id="接受数据"><a href="#接受数据" class="headerlink" title="接受数据"></a>接受数据</h4><p><a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Engine/WSEngine.swift#L154">代码</a></p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Transport/TCPTransport.swift">TCPTransport</a> 把 TCP 连接中的字节流组装为 Data，喂给 <a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/Framer.swift#L86">WSFramer</a></li>
-<li>WSFramer 把 Data 解析为 WebSocket 帧数据（是续帧，还是文本帧，还是二进制帧，还是控制帧）</li>
-<li>WSFrame 把解析出来的帧数据喂给 <a target="_blank" rel="noopener" href="https://github.com/daltoniam/Starscream/blob/master/Sources/Framer/FrameCollector.swift">FrameCollector</a> </li>
-<li>FrameCollector 把续帧拼接起来，组装为完整的“消息”（.text(String) &#x2F; .binary(Data)）</li>
-</ol>
-<h4 id="代理链条"><a href="#代理链条" class="headerlink" title="代理链条"></a>代理链条</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────┐    TransportEventClient     ┌──────────┐</span><br><span class="line">│ TCPTransport │ ──────────────────────────▶  │ WSEngine  │</span><br><span class="line">└──────────────┘  &quot;TCP 有数据来了/连上了&quot;       └────┬─────┘</span><br><span class="line">                                                   │</span><br><span class="line">                    ┌──────────────────────────────┤</span><br><span class="line">                    │ WSEngine 把数据分发给          │</span><br><span class="line">                    │ 两个下游模块                   │</span><br><span class="line">                    ▼                              ▼</span><br><span class="line">          ┌─────────────────────┐        ┌──────────────┐</span><br><span class="line">          │ FoundationHTTPHandler│        │   WSFramer    │</span><br><span class="line">          └────────┬────────────┘        └──────┬───────┘</span><br><span class="line">                   │ HTTPHandlerDelegate         │ FramerEventClient</span><br><span class="line">                   │ &quot;HTTP 握手成功了&quot;             │ &quot;解析出一个帧了&quot;</span><br><span class="line">                   ▼                              ▼</span><br><span class="line">             ┌──────────┐                  ┌──────────┐</span><br><span class="line">             │ WSEngine  │                 │ WSEngine  │</span><br><span class="line">             └──────────┘                  └────┬─────┘</span><br><span class="line">                                                │</span><br><span class="line">                                                │ WSEngine 把帧交给</span><br><span class="line">                                                ▼</span><br><span class="line">                                       ┌────────────────┐</span><br><span class="line">                                       │ FrameCollector  │</span><br><span class="line">                                       └───────┬────────┘</span><br><span class="line">                                               │ FrameCollectorDelegate</span><br><span class="line">                                               │ &quot;完整消息拼好了&quot;</span><br><span class="line">                                               ▼</span><br><span class="line">                                         ┌──────────┐</span><br><span class="line">                                         │ WSEngine  │</span><br><span class="line">                                         └────┬─────┘</span><br><span class="line">                                               │ EngineDelegate</span><br><span class="line">                                               │ &quot;这是最终事件&quot;</span><br><span class="line">                                               ▼</span><br><span class="line">                                         ┌──────────┐</span><br><span class="line">                                         │ WebSocket │</span><br><span class="line">                                         └────┬─────┘</span><br><span class="line">                                               │</span><br><span class="line">                                               ▼</span><br><span class="line">                                       用户 delegate / onEvent</span><br></pre></td></tr></table></figure>
-
-<p>WSEngine 在图中反复出现——它<strong>同时是 4 个模块的 delegate</strong>：</p>
-<table>
-<thead>
-<tr>
-<th>谁通知 WSEngine</th>
-<th>通过什么协议</th>
-<th>WSEngine 的回调方法</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>TCPTransport</td>
-<td><code>TransportEventClient</code></td>
-<td><code>connectionChanged(state:)</code></td>
-</tr>
-<tr>
-<td>FoundationHTTPHandler</td>
-<td><code>HTTPHandlerDelegate</code></td>
-<td><code>didReceiveHTTP(event:)</code></td>
-</tr>
-<tr>
-<td>WSFramer</td>
-<td><code>FramerEventClient</code></td>
-<td><code>frameProcessed(event:)</code></td>
-</tr>
-<tr>
-<td>FrameCollector</td>
-<td><code>FrameCollectorDelegate</code></td>
-<td><code>didForm(event:)</code></td>
-</tr>
-</tbody></table>
-<p>WSEngine 作为”中枢调度器”：所有事件都汇聚到 WSEngine，由它决定下一步交给谁处理，最终通过 <code>EngineDelegate</code> 把结果传给 WebSocket。</p>
-
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/WebSocket/" rel="tag"># WebSocket</a>
-              <a href="/tags/Networking/" rel="tag"># Networking</a>
-          </div>
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2025/12/01/SwiftUI_Identity_lifetime/" rel="prev" title="SwiftUI View 的 Identity 与 Lifetime">
-                  <i class="fa fa-angle-left"></i> SwiftUI View 的 Identity 与 Lifetime
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2026/01/26/tca-101-p1/" rel="next" title="初识 The Composable Architecture（一）">
-                  初识 The Composable Architecture（一） <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
+      bq.classList.add("markdown-alert", "markdown-alert-" + type.toLowerCase());
+    }
+  });
+</script>
 
 
+<script>
+(function() {
+  document.querySelectorAll('div.highlighter-rouge').forEach(function(block) {
+    block.style.position = 'relative';
+
+    // Language label derived from rouge's language-* class
+    var langClass = Array.from(block.classList).find(function(c) {
+      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
+    });
+    if (langClass) {
+      var label = document.createElement('span');
+      label.className = 'code-lang';
+      label.textContent = langClass.replace('language-', '');
+      block.appendChild(label);
+    }
+
+    var btn = document.createElement('button');
+    btn.className = 'code-copy';
+    btn.setAttribute('aria-label', "复制代码");
+    btn.textContent = "复制";
+    btn.addEventListener('click', function() {
+      var code = block.querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(function() {
+        btn.textContent = "已复制";
+        setTimeout(function() { btn.textContent = "复制"; }, 2000);
+      });
+    });
+    block.appendChild(btn);
+  });
+})();
+</script>
 
 
-
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-user"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">Sunset Wan</span>
-  </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
-
-    </div>
-  </footer>
-
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
+<button class="back-to-top" aria-label="返回顶部" title="返回顶部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+<style>
+  .back-to-top {
+    position: fixed;
+    bottom: 2em;
+    right: 2em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .back-to-top:hover {
+    color: var(--links);
+  }
+  @media screen and (max-width: 600px) {
+    .back-to-top {
+      bottom: 1em;
+      right: 1em;
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>
+<script>
+(function() {
+  var btn = document.querySelector('.back-to-top');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'});
+  });
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  });
+})();
+</script>
 </body>
 </html>

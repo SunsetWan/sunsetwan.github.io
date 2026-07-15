@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="html" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    
+      搜索
+    
+  </title>
+
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="搜索" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="Sunset Wan 的 Swift、iOS 与软件设计技术博客。" />
+<meta name="twitter:description" property="og:description" content="Sunset Wan 的 Swift、iOS 与软件设计技术博客。" />
+<link rel="canonical" href="https://sunsetwan.github.io/search/" />
+<meta property="og:url" content="https://sunsetwan.github.io/search/" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="搜索" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Sunset Wan"},"description":"Sunset Wan 的 Swift、iOS 与软件设计技术博客。","headline":"搜索","url":"https://sunsetwan.github.io/search/"}</script>
+<!-- End Jekyll SEO tag -->
+
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
+
+  
+
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
+
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
+
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
+
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
+
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
+
+  
+  <link rel="stylesheet" href="/assets/css/main.css" />
+</head>
+<body><main class="page-content" aria-label="Content">
+      <div class="w">
+        
+
+
+
+
+
+<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</a>
+
+
+<header>
+  <h1>搜索</h1>
+</header>
+
+
+
+
+
+
+
+
+<div class="search">
+  <input
+    type="search"
+    id="search-input"
+    class="search-input"
+    placeholder="搜索文章……"
+    aria-label="搜索文章"
+    autocomplete="off"
+    data-index-url="/search.json"
+    data-max-results="8"
+    data-no-results="没有找到与“{query}”匹配的文章"
+    data-load-error="暂时无法加载搜索索引。"
+  >
+  <ul id="search-results" class="search-results" hidden></ul>
+</div>
+
+<script>
+(function() {
+  var input = document.getElementById('search-input');
+  var list = document.getElementById('search-results');
+  if (!input || !list) return;
+  var maxResults = Number(input.dataset.maxResults) || 8;
+
+  var index = null;
+  function loadIndex() {
+    return fetch(input.dataset.indexUrl)
+      .then(function(r) {
+        if (!r.ok) throw new Error('Search index request failed');
+        return r.json();
+      })
+      .then(function(data) { index = Array.isArray(data) ? data : []; return index; });
+  }
+
+  function score(p, q) {
+    var s = 0;
+    var ql = q.toLowerCase();
+    if ((p.title || '').toLowerCase().indexOf(ql) !== -1) s += 5;
+    if ((p.tags || []).some(function(t) { return String(t).toLowerCase().indexOf(ql) !== -1; })) s += 3;
+    if ((p.excerpt || '').toLowerCase().indexOf(ql) !== -1) s += 1;
+    return s;
+  }
+  function escape(s) {
+    return String(s || '').replace(/[&<>"']/g, function(c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  function render(results, q) {
+    if (!results.length) {
+      var message = input.dataset.noResults.replace('{query}', escape(q));
+      list.innerHTML = '<li class="search-empty">' + message + '</li>';
+      list.hidden = false;
+      return;
+    }
+    list.innerHTML = results.slice(0, maxResults).map(function(p) {
+      return '<li class="search-result">' +
+        '<a href="' + escape(p.url) + '">' +
+        '<span class="search-result-body">' +
+        '<span class="search-result-title">' + escape(p.title) + '</span>' +
+        (p.excerpt ? '<span class="search-result-excerpt">' + escape(p.excerpt) + '</span>' : '') +
+        '</span>' +
+        '<span class="search-result-date">' + escape(p.date) + '</span>' +
+        '</a></li>';
+    }).join('');
+    list.hidden = false;
+  }
+
+  input.addEventListener('input', function() {
+    var q = input.value.trim();
+    if (!q) { list.hidden = true; list.innerHTML = ''; return; }
+    var run = function() {
+      var hits = index.map(function(p) { return [score(p, q), p]; })
+                      .filter(function(r) { return r[0] > 0; })
+                      .sort(function(a, b) { return b[0] - a[0]; })
+                      .map(function(r) { return r[1]; });
+      render(hits, q);
+    };
+    if (!index) {
+      loadIndex().then(run).catch(function() {
+        list.innerHTML = '<li class="search-empty">' + escape(input.dataset.loadError) + '</li>';
+        list.hidden = false;
+      });
+    } else {
+      run();
+    }
+  });
+})();
+</script>
+
+
+        
+          
+
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </main></body>
+</html>
