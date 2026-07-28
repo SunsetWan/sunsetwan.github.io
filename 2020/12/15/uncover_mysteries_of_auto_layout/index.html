@@ -107,6 +107,7 @@
     
     
     <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
+<div class="progress-viewport-height" aria-hidden="true"></div>
 <style>
   .progress-bar {
     position: fixed;
@@ -120,20 +121,47 @@
     transform-origin: left center;
     will-change: transform;
   }
+
+  .progress-viewport-height {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100vh;
+    height: 100lvh;
+    visibility: hidden;
+    pointer-events: none;
+    contain: strict;
+  }
 </style>
 <script>
 (function() {
   var bar = document.querySelector('.progress-bar');
+  var viewportProbe = document.querySelector('.progress-viewport-height');
   if (!bar) return;
 
   var animationFrame = null;
   var resizeObserver = null;
+  var stableViewportHeight = window.innerHeight;
+
+  function measureStableViewportHeight() {
+    var measuredHeight = viewportProbe
+      ? viewportProbe.getBoundingClientRect().height
+      : 0;
+    stableViewportHeight = measuredHeight > 0
+      ? measuredHeight
+      : window.innerHeight;
+  }
 
   function updateProgress() {
     animationFrame = null;
-    var scrollTop = window.scrollY || document.documentElement.scrollTop;
-    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var scrollRoot = document.scrollingElement || document.documentElement;
+    var scrollTop = scrollRoot.scrollTop;
+    var scrollHeight = scrollRoot.scrollHeight;
+    var docHeight = scrollHeight - stableViewportHeight;
+    var hasReachedEnd = scrollTop + window.innerHeight >= scrollHeight - 1;
     var progress = docHeight > 0 ? scrollTop / docHeight : 0;
+    progress = hasReachedEnd ? 1 : Math.min(0.999, progress);
     progress = Math.min(1, Math.max(0, progress));
     bar.style.transform = 'scaleX(' + progress + ')';
   }
@@ -143,22 +171,41 @@
     animationFrame = window.requestAnimationFrame(updateProgress);
   }
 
-  function observePageHeight() {
-    if ('ResizeObserver' in window && document.body) {
-      resizeObserver = new ResizeObserver(requestProgressUpdate);
-      resizeObserver.observe(document.body);
+  function observePageGeometry() {
+    measureStableViewportHeight();
+
+    if ('ResizeObserver' in window) {
+      resizeObserver = new ResizeObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.target === viewportProbe && entry.contentRect.height > 0) {
+            stableViewportHeight = entry.contentRect.height;
+          }
+        });
+        requestProgressUpdate();
+      });
+
+      if (document.body) {
+        resizeObserver.observe(document.body);
+      }
+      if (viewportProbe) {
+        resizeObserver.observe(viewportProbe);
+      }
     }
     requestProgressUpdate();
   }
 
   window.addEventListener('scroll', requestProgressUpdate, { passive: true });
-  window.addEventListener('resize', requestProgressUpdate, { passive: true });
+  window.addEventListener('resize', function() {
+    if (resizeObserver) return;
+    measureStableViewportHeight();
+    requestProgressUpdate();
+  }, { passive: true });
   window.addEventListener('pageshow', requestProgressUpdate, { passive: true });
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', observePageHeight, { once: true });
+    document.addEventListener('DOMContentLoaded', observePageGeometry, { once: true });
   } else {
-    observePageHeight();
+    observePageGeometry();
   }
 })();
 </script>
