@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="html" data-theme="auto"><head>
+<html lang="zh-CN" class="html site-refresh" data-theme="auto"><head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -102,8 +102,11 @@
 
   
   <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+
+
 </head>
-<body>
+<body class="site-layout site-layout--post">
     
     
     <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
@@ -212,16 +215,67 @@
 <main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
+          <header class="site-header">
+  
+    <a class="site-brand" href="/">日落大道</a>
+  
+  
+    <nav class="site-nav" aria-label="站点导航">
+      
+        
+        
+        <a href="/archives/">归档</a>
+      
+        
+        
+        <a href="/tags/">标签</a>
+      
+        
+        
+        <a href="/search/">搜索</a>
+      
+        
+        
+        <a href="/about/">关于</a>
+      
+    </nav>
+  
+  
+    
 
-
-<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <polyline points="15 18 9 12 15 6"></polyline>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
   </svg>
-</a>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-<h1 class="post-title">Protocol Witness in Swift</h1>
+  
+</header>
 
+        
+        
+
+<article class="reading-layout reading-layout--with-toc">
+  <header class="reading-header">
+    <h1 class="post-title">Protocol Witness in Swift</h1>
+    
 
 
 <div class="post-meta">
@@ -255,112 +309,19 @@
   
 </div>
 
-
-
-
-
-
-
-
-<details class="toc">
-  <summary>目录</summary>
-  <ul>
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#问题-1">问题 1</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#问题-2">问题 2</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#问题-3">问题 3</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#protocol-witnesses-协议目击者">Protocol Witnesses （协议目击者）</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#解决问题-1">解决问题 1</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#解决问题-2">解决问题 2</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#解决问题-3">解决问题 3</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#收获">收获</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#wwdc-24-中也提到了-protocol-witness">WWDC 24 中也提到了 Protocol Witness</a></li>
-        
-      
-    
-  </ul>
-</details>
-
-<div class="post-content">
-  <p>在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。<!-- more --></p>
+  </header>
+  <aside class="reading-toc" aria-label="文章目录">
+    <nav class="toc-desktop" aria-label="目录">
+      <p class="toc-title">目录</p>
+      <ul><li><a href="#问题-1">问题 1</a></li><li><a href="#问题-2">问题 2</a></li><li><a href="#问题-3">问题 3</a></li><li><a href="#protocol-witnesses-协议目击者">Protocol Witnesses （协议目击者）</a></li><li class="toc-sub"><a href="#解决问题-1">解决问题 1</a></li><li class="toc-sub"><a href="#解决问题-2">解决问题 2</a></li><li class="toc-sub"><a href="#解决问题-3">解决问题 3</a></li><li><a href="#收获">收获</a></li><li><a href="#wwdc-24-中也提到了-protocol-witness">WWDC 24 中也提到了 Protocol Witness</a></li></ul>
+    </nav>
+    <details class="toc toc-mobile">
+      <summary>目录</summary>
+      <nav aria-label="目录"><ul><li><a href="#问题-1">问题 1</a></li><li><a href="#问题-2">问题 2</a></li><li><a href="#问题-3">问题 3</a></li><li><a href="#protocol-witnesses-协议目击者">Protocol Witnesses （协议目击者）</a></li><li class="toc-sub"><a href="#解决问题-1">解决问题 1</a></li><li class="toc-sub"><a href="#解决问题-2">解决问题 2</a></li><li class="toc-sub"><a href="#解决问题-3">解决问题 3</a></li><li><a href="#收获">收获</a></li><li><a href="#wwdc-24-中也提到了-protocol-witness">WWDC 24 中也提到了 Protocol Witness</a></li></ul></nav>
+    </details>
+  </aside>
+  <div class="post-content">
+    <p>在 Swift 中，协议是非常重要的部分之一。使用协议，可以让我们写出灵活的代码，而不必拘泥于接口和实现的耦合，但协议也有自己的问题。<!-- more --></p>
 
 <h2 id="问题-1">问题 1</h2>
 
@@ -635,7 +596,9 @@ let 小蜘蛛 = 蜘蛛()
 
 <p>在每个协议要求的方法中，均有一个额外的隐藏参数——指向 witness 的指针。</p>
 
-</div>
+  </div>
+  
+    
 
 
 <nav class="post-nav" aria-label="文章导航">
@@ -648,31 +611,8 @@ let 小蜘蛛 = 蜘蛛()
 </nav>
 
 
-        
-          
-
-<button
-  aria-label="切换到深色模式"
-  aria-pressed="false"
-  class="theme-toggle"
-  data-label-light="切换到浅色模式"
-  data-label-dark="切换到深色模式"
->
-  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="5"></circle>
-    <line x1="12" y1="1" x2="12" y2="3"></line>
-    <line x1="12" y1="21" x2="12" y2="23"></line>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-    <line x1="1" y1="12" x2="3" y2="12"></line>
-    <line x1="21" y1="12" x2="23" y2="12"></line>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-  </svg>
-  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
-</button>
+  
+</article>
 
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •

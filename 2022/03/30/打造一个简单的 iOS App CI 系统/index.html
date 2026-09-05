@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="html" data-theme="auto"><head>
+<html lang="zh-CN" class="html site-refresh" data-theme="auto"><head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -102,8 +102,11 @@
 
   
   <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+
+
 </head>
-<body>
+<body class="site-layout site-layout--post">
     
     
     <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
@@ -212,16 +215,67 @@
 <main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
+          <header class="site-header">
+  
+    <a class="site-brand" href="/">日落大道</a>
+  
+  
+    <nav class="site-nav" aria-label="站点导航">
+      
+        
+        
+        <a href="/archives/">归档</a>
+      
+        
+        
+        <a href="/tags/">标签</a>
+      
+        
+        
+        <a href="/search/">搜索</a>
+      
+        
+        
+        <a href="/about/">关于</a>
+      
+    </nav>
+  
+  
+    
 
-
-<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <polyline points="15 18 9 12 15 6"></polyline>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
   </svg>
-</a>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-<h1 class="post-title">打造一个简单的 iOS App CI 系统</h1>
+  
+</header>
 
+        
+        
+
+<article class="reading-layout reading-layout--with-toc">
+  <header class="reading-header">
+    <h1 class="post-title">打造一个简单的 iOS App CI 系统</h1>
+    
 
 
 <div class="post-meta">
@@ -255,172 +309,19 @@
   
 </div>
 
-
-
-
-
-
-
-
-<details class="toc">
-  <summary>目录</summary>
-  <ul>
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#在安装-fastlane-之前">在安装 fastlane 之前</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#与-macos-系统自带的-ruby-环境隔离">与 macOS 系统自带的 Ruby 环境隔离</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#使用-bundler-管理-gem">使用 bundler 管理 gem</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#使用-fastlane-接管应用的打包和上传-app-store-流程">使用 fastlane 接管应用的打包和上传 App store 流程</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#1-设置打包参数">1. 设置打包参数</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#2-自动同步签名证书和-provisioning-profile">2. 自动同步签名证书和 Provisioning Profile</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#3-更新代码">3. 更新代码</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#4-安装-pod-依赖">4. 安装 Pod 依赖</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#5-清除-xcode-缓存">5. 清除 Xcode 缓存</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#6-开始打包">6. 开始打包</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#7-上传至-app-store">7. 上传至 App store</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#ci-的核心是什么">CI 的核心是什么？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#xctest-是如何管理-test-case-的">XCTest 是如何管理 Test case 的？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#避免重复测试代码的正确方式">避免重复测试代码的正确方式</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li><a href="#结语">结语</a></li>
-        
-      
-    
-  </ul>
-</details>
-
-<div class="post-content">
-  <p>除了 Xcode Cloud，你还有别的选择。<!-- more --><br />
+  </header>
+  <aside class="reading-toc" aria-label="文章目录">
+    <nav class="toc-desktop" aria-label="目录">
+      <p class="toc-title">目录</p>
+      <ul><li><a href="#在安装-fastlane-之前">在安装 fastlane 之前</a></li><li class="toc-sub"><a href="#与-macos-系统自带的-ruby-环境隔离">与 macOS 系统自带的 Ruby 环境隔离</a></li><li class="toc-sub"><a href="#使用-bundler-管理-gem">使用 bundler 管理 gem</a></li><li><a href="#使用-fastlane-接管应用的打包和上传-app-store-流程">使用 fastlane 接管应用的打包和上传 App store 流程</a></li><li class="toc-sub"><a href="#1-设置打包参数">1. 设置打包参数</a></li><li class="toc-sub"><a href="#2-自动同步签名证书和-provisioning-profile">2. 自动同步签名证书和 Provisioning Profile</a></li><li class="toc-sub"><a href="#3-更新代码">3. 更新代码</a></li><li class="toc-sub"><a href="#4-安装-pod-依赖">4. 安装 Pod 依赖</a></li><li class="toc-sub"><a href="#5-清除-xcode-缓存">5. 清除 Xcode 缓存</a></li><li class="toc-sub"><a href="#6-开始打包">6. 开始打包</a></li><li class="toc-sub"><a href="#7-上传至-app-store">7. 上传至 App store</a></li><li><a href="#ci-的核心是什么">CI 的核心是什么？</a></li><li class="toc-sub"><a href="#xctest-是如何管理-test-case-的">XCTest 是如何管理 Test case 的？</a></li><li class="toc-sub"><a href="#避免重复测试代码的正确方式">避免重复测试代码的正确方式</a></li><li><a href="#结语">结语</a></li></ul>
+    </nav>
+    <details class="toc toc-mobile">
+      <summary>目录</summary>
+      <nav aria-label="目录"><ul><li><a href="#在安装-fastlane-之前">在安装 fastlane 之前</a></li><li class="toc-sub"><a href="#与-macos-系统自带的-ruby-环境隔离">与 macOS 系统自带的 Ruby 环境隔离</a></li><li class="toc-sub"><a href="#使用-bundler-管理-gem">使用 bundler 管理 gem</a></li><li><a href="#使用-fastlane-接管应用的打包和上传-app-store-流程">使用 fastlane 接管应用的打包和上传 App store 流程</a></li><li class="toc-sub"><a href="#1-设置打包参数">1. 设置打包参数</a></li><li class="toc-sub"><a href="#2-自动同步签名证书和-provisioning-profile">2. 自动同步签名证书和 Provisioning Profile</a></li><li class="toc-sub"><a href="#3-更新代码">3. 更新代码</a></li><li class="toc-sub"><a href="#4-安装-pod-依赖">4. 安装 Pod 依赖</a></li><li class="toc-sub"><a href="#5-清除-xcode-缓存">5. 清除 Xcode 缓存</a></li><li class="toc-sub"><a href="#6-开始打包">6. 开始打包</a></li><li class="toc-sub"><a href="#7-上传至-app-store">7. 上传至 App store</a></li><li><a href="#ci-的核心是什么">CI 的核心是什么？</a></li><li class="toc-sub"><a href="#xctest-是如何管理-test-case-的">XCTest 是如何管理 Test case 的？</a></li><li class="toc-sub"><a href="#避免重复测试代码的正确方式">避免重复测试代码的正确方式</a></li><li><a href="#结语">结语</a></li></ul></nav>
+    </details>
+  </aside>
+  <div class="post-content">
+    <p>除了 Xcode Cloud，你还有别的选择。<!-- more --><br />
 本文介绍如何在 macOS 上使用 <a href="https://fastlane.tools/">fastlane</a> 来帮助你打造一个简单的 iOS App CI 系统。</p>
 
 <h2 id="在安装-fastlane-之前">在安装 fastlane 之前</h2>
@@ -734,7 +635,9 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 
 <p>让工程师们 focus more on features and less on fixing，这一点真的很重要。</p>
 
-</div>
+  </div>
+  
+    
 
 
 <nav class="post-nav" aria-label="文章导航">
@@ -747,31 +650,8 @@ Wow！实例对象正确地初始化了，最终也被正确地销毁了！</p>
 </nav>
 
 
-        
-          
-
-<button
-  aria-label="切换到深色模式"
-  aria-pressed="false"
-  class="theme-toggle"
-  data-label-light="切换到浅色模式"
-  data-label-dark="切换到深色模式"
->
-  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="5"></circle>
-    <line x1="12" y1="1" x2="12" y2="3"></line>
-    <line x1="12" y1="21" x2="12" y2="23"></line>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-    <line x1="1" y1="12" x2="3" y2="12"></line>
-    <line x1="21" y1="12" x2="23" y2="12"></line>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-  </svg>
-  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
-</button>
+  
+</article>
 
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •

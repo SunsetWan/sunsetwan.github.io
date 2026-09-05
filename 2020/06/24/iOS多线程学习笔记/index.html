@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="html" data-theme="auto"><head>
+<html lang="zh-CN" class="html site-refresh" data-theme="auto"><head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -102,8 +102,11 @@
 
   
   <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+
+
 </head>
-<body>
+<body class="site-layout site-layout--post">
     
     
     <a class="skip-link" href="#main-content">跳到主要内容</a><div class="progress-bar" aria-hidden="true"></div>
@@ -212,16 +215,67 @@
 <main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
       <div class="w">
         
+          <header class="site-header">
+  
+    <a class="site-brand" href="/">日落大道</a>
+  
+  
+    <nav class="site-nav" aria-label="站点导航">
+      
+        
+        
+        <a href="/archives/">归档</a>
+      
+        
+        
+        <a href="/tags/">标签</a>
+      
+        
+        
+        <a href="/search/">搜索</a>
+      
+        
+        
+        <a href="/about/">关于</a>
+      
+    </nav>
+  
+  
+    
 
-
-<a href="/" class="back-link" aria-label="返回首页" title="返回首页">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <polyline points="15 18 9 12 15 6"></polyline>
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
   </svg>
-</a>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
 
-<h1 class="post-title">iOS 多线程学习笔记</h1>
+  
+</header>
 
+        
+        
+
+<article class="reading-layout reading-layout--with-toc">
+  <header class="reading-header">
+    <h1 class="post-title">iOS 多线程学习笔记</h1>
+    
 
 
 <div class="post-meta">
@@ -248,162 +302,19 @@
   
 </div>
 
-
-
-
-
-
-
-
-<details class="toc">
-  <summary>目录</summary>
-  <ul>
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q1什么是并发并发和并行的区别">Q1：什么是并发？并发和并行的区别？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q2什么是-gcdgrand-central-dispatch">Q2：什么是 GCD（Grand Central Dispatch）？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q3什么是串行队列什么是并发队列">Q3：什么是串行队列？什么是并发队列？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q4什么是同步任务什么是异步任务">Q4：什么是同步任务？什么是异步任务？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q5gcdoperationblockoperation-三者该怎么选择">Q5：GCD，Operation，BlockOperation 三者该怎么选择？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q6该如何选择六种不同的-qos">Q6：该如何选择六种不同的 QoS?</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q7什么时候使用-dispatchworkitem">Q7：什么时候使用 DispatchWorkItem？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q8什么时候使用-dispatch-group">Q8：什么时候使用 Dispatch Group?</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q9什么时候使用信号量semaphores">Q9：什么时候使用信号量（Semaphores）？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q10什么时候使用-thread-barrier-">Q10：什么时候使用 Thread barrier ？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q11-如何写一个异步的-operation">Q11: 如何写一个异步的 Operation？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q12-什么时候使用-operation-依赖">Q12: 什么时候使用 Operation 依赖？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#q13-thread-sanitizer-有什么用">Q13: Thread sanitizer 有什么用？</a></li>
-        
-      
-    
-      
-        
-        
-        
-        
-        
-          <li class="toc-sub"><a href="#结语">结语</a></li>
-        
-      
-    
-  </ul>
-</details>
-
-<div class="post-content">
-  <p>最近几天陆陆续续把 raywenderlich 出品的《Concurrency by tutorials》 看完了，写篇文章总结一下。<!-- more --></p>
+  </header>
+  <aside class="reading-toc" aria-label="文章目录">
+    <nav class="toc-desktop" aria-label="目录">
+      <p class="toc-title">目录</p>
+      <ul><li class="toc-sub"><a href="#q1什么是并发并发和并行的区别">Q1：什么是并发？并发和并行的区别？</a></li><li class="toc-sub"><a href="#q2什么是-gcdgrand-central-dispatch">Q2：什么是 GCD（Grand Central Dispatch）？</a></li><li class="toc-sub"><a href="#q3什么是串行队列什么是并发队列">Q3：什么是串行队列？什么是并发队列？</a></li><li class="toc-sub"><a href="#q4什么是同步任务什么是异步任务">Q4：什么是同步任务？什么是异步任务？</a></li><li class="toc-sub"><a href="#q5gcdoperationblockoperation-三者该怎么选择">Q5：GCD，Operation，BlockOperation 三者该怎么选择？</a></li><li class="toc-sub"><a href="#q6该如何选择六种不同的-qos">Q6：该如何选择六种不同的 QoS?</a></li><li class="toc-sub"><a href="#q7什么时候使用-dispatchworkitem">Q7：什么时候使用 DispatchWorkItem？</a></li><li class="toc-sub"><a href="#q8什么时候使用-dispatch-group">Q8：什么时候使用 Dispatch Group?</a></li><li class="toc-sub"><a href="#q9什么时候使用信号量semaphores">Q9：什么时候使用信号量（Semaphores）？</a></li><li class="toc-sub"><a href="#q10什么时候使用-thread-barrier-">Q10：什么时候使用 Thread barrier ？</a></li><li class="toc-sub"><a href="#q11-如何写一个异步的-operation">Q11: 如何写一个异步的 Operation？</a></li><li class="toc-sub"><a href="#q12-什么时候使用-operation-依赖">Q12: 什么时候使用 Operation 依赖？</a></li><li class="toc-sub"><a href="#q13-thread-sanitizer-有什么用">Q13: Thread sanitizer 有什么用？</a></li><li class="toc-sub"><a href="#结语">结语</a></li></ul>
+    </nav>
+    <details class="toc toc-mobile">
+      <summary>目录</summary>
+      <nav aria-label="目录"><ul><li class="toc-sub"><a href="#q1什么是并发并发和并行的区别">Q1：什么是并发？并发和并行的区别？</a></li><li class="toc-sub"><a href="#q2什么是-gcdgrand-central-dispatch">Q2：什么是 GCD（Grand Central Dispatch）？</a></li><li class="toc-sub"><a href="#q3什么是串行队列什么是并发队列">Q3：什么是串行队列？什么是并发队列？</a></li><li class="toc-sub"><a href="#q4什么是同步任务什么是异步任务">Q4：什么是同步任务？什么是异步任务？</a></li><li class="toc-sub"><a href="#q5gcdoperationblockoperation-三者该怎么选择">Q5：GCD，Operation，BlockOperation 三者该怎么选择？</a></li><li class="toc-sub"><a href="#q6该如何选择六种不同的-qos">Q6：该如何选择六种不同的 QoS?</a></li><li class="toc-sub"><a href="#q7什么时候使用-dispatchworkitem">Q7：什么时候使用 DispatchWorkItem？</a></li><li class="toc-sub"><a href="#q8什么时候使用-dispatch-group">Q8：什么时候使用 Dispatch Group?</a></li><li class="toc-sub"><a href="#q9什么时候使用信号量semaphores">Q9：什么时候使用信号量（Semaphores）？</a></li><li class="toc-sub"><a href="#q10什么时候使用-thread-barrier-">Q10：什么时候使用 Thread barrier ？</a></li><li class="toc-sub"><a href="#q11-如何写一个异步的-operation">Q11: 如何写一个异步的 Operation？</a></li><li class="toc-sub"><a href="#q12-什么时候使用-operation-依赖">Q12: 什么时候使用 Operation 依赖？</a></li><li class="toc-sub"><a href="#q13-thread-sanitizer-有什么用">Q13: Thread sanitizer 有什么用？</a></li><li class="toc-sub"><a href="#结语">结语</a></li></ul></nav>
+    </details>
+  </aside>
+  <div class="post-content">
+    <p>最近几天陆陆续续把 raywenderlich 出品的《Concurrency by tutorials》 看完了，写篇文章总结一下。<!-- more --></p>
 
 <h3 id="q1什么是并发并发和并行的区别">Q1：什么是并发？并发和并行的区别？</h3>
 <p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/%E5%B9%B6%E5%8F%91%E5%B9%B6%E8%A1%8C%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="并发用两队共用一台咖啡机、并行用两队各用一台咖啡机的对比" /></p>
@@ -743,7 +654,9 @@ T5: 执行 count = register2 // count = 4
 <h3 id="结语">结语</h3>
 <p>读完后，为 iOS 多线程方面打下了一点点基础，还是要在工作中多实践才有更深的感悟。</p>
 
-</div>
+  </div>
+  
+    
 
 
 <nav class="post-nav" aria-label="文章导航">
@@ -756,31 +669,8 @@ T5: 执行 count = register2 // count = 4
 </nav>
 
 
-        
-          
-
-<button
-  aria-label="切换到深色模式"
-  aria-pressed="false"
-  class="theme-toggle"
-  data-label-light="切换到浅色模式"
-  data-label-dark="切换到深色模式"
->
-  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="5"></circle>
-    <line x1="12" y1="1" x2="12" y2="3"></line>
-    <line x1="12" y1="21" x2="12" y2="23"></line>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-    <line x1="1" y1="12" x2="3" y2="12"></line>
-    <line x1="21" y1="12" x2="23" y2="12"></line>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-  </svg>
-  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
-</button>
+  
+</article>
 
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
