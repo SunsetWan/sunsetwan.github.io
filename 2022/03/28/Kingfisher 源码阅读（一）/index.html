@@ -15,8 +15,8 @@
 <meta property="og:title" content="Kingfisher 源码阅读（一）" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="最近想了解如何设计一个简单的缓存系统，于是找了 Kingfisher 7.1.2 版本的源代码读一读，有些收获，记录于此。" />
-<meta name="twitter:description" property="og:description" content="最近想了解如何设计一个简单的缓存系统，于是找了 Kingfisher 7.1.2 版本的源代码读一读，有些收获，记录于此。" />
+<meta name="description" content="阅读 Kingfisher 7.1.2 的缓存实现，分析 NSCache、硬盘缓存、过期与清理策略，并记录请求重试、委托和回调协调的设计。" />
+<meta name="twitter:description" property="og:description" content="阅读 Kingfisher 7.1.2 的缓存实现，分析 NSCache、硬盘缓存、过期与清理策略，并记录请求重试、委托和回调协调的设计。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2022-03-28T09:41:00+08:00","datePublished":"2022-03-28T09:41:00+08:00","description":"最近想了解如何设计一个简单的缓存系统，于是找了 Kingfisher 7.1.2 版本的源代码读一读，有些收获，记录于此。","headline":"Kingfisher 源码阅读（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/"},"url":"https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2022-03-28T09:41:00+08:00","datePublished":"2022-03-28T09:41:00+08:00","description":"阅读 Kingfisher 7.1.2 的缓存实现，分析 NSCache、硬盘缓存、过期与清理策略，并记录请求重试、委托和回调协调的设计。","headline":"Kingfisher 源码阅读（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/"},"url":"https://sunsetwan.github.io/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:15:00+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -303,6 +304,13 @@
         
 
 <a href="/tags/Kingfisher/" class="tag">Kingfisher</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Swift/" class="tag">Swift</a>
 
       
     </div>
@@ -329,7 +337,7 @@
 <p>内存缓存背后支撑的数据结构是 Foundation 框架中的 <code class="language-plaintext highlighter-rouge">NSCache</code>。<br />
 <code class="language-plaintext highlighter-rouge">NSCache</code> 有两个限制：<code class="language-plaintext highlighter-rouge">countLimit</code> 和 <code class="language-plaintext highlighter-rouge">totalCostLimit</code>。前者是表示能存储多少个对象，后者是表示缓存的容量有多大。但这两个限制是软限制——如果超过限制，<code class="language-plaintext highlighter-rouge">NSCache</code> 中保存的对象不一定会被及时地从其中移出。根据 <a href="https://developer.apple.com/documentation/foundation/nscache?language=objc">官方文档</a>，超过限制之后，对象的移出时机取决与 <code class="language-plaintext highlighter-rouge">NSCache</code> 背后的实现。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="NSCache 的泛型声明要求 KeyType 和 ObjectType 都是 AnyObject 引用类型" /></p>
+<p><img loading="lazy" decoding="async" width="2458" height="734" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_01.jpg" alt="NSCache 的泛型声明要求 KeyType 和 ObjectType 都是 AnyObject 引用类型" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">NSCache</code> 是个泛型类，所以我们得定义好 <code class="language-plaintext highlighter-rouge">KeyType</code> 和 <code class="language-plaintext highlighter-rouge">ObjectType</code>。<br />
 根据声明的类型约束，<code class="language-plaintext highlighter-rouge">KeyType</code> 的类型得是一个类。一般地，类似 key 的数据结构会采用 <code class="language-plaintext highlighter-rouge">String</code>。而这里 <code class="language-plaintext highlighter-rouge">KeyType</code> 得是引用类型而不是值类型，所以我们会选择 <code class="language-plaintext highlighter-rouge">NSString</code>。但在 API 设计时，对外暴露的那一层 API，还是可以使用 <code class="language-plaintext highlighter-rouge">String</code>。到调用 <code class="language-plaintext highlighter-rouge">NSCache</code> 的 <code class="language-plaintext highlighter-rouge">setObject(_:forKey:cost:)</code> 方法时，再把 <code class="language-plaintext highlighter-rouge">String</code> 转为 <code class="language-plaintext highlighter-rouge">NSString</code>。之所以这样做，是因为值类型更符合当前场景的需求。<br />
@@ -605,7 +613,7 @@ Kingfisher 有设计 3 种缓存续期策略：</p>
 <h2 id="其他">其他</h2>
 <p>在阅读 Kingfisher 缓存系统相关代码时，我还发现了其他值得学习的代码，一并记录。</p>
 <h3 id="网络请求重试机制">网络请求重试机制</h3>
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="Kingfisher 重试机制：RetryStrategy 根据数据源、错误和重试次数决定继续重试或停止" /><br />
+<p><img loading="lazy" decoding="async" width="1920" height="1080" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_02.png" alt="Kingfisher 重试机制：RetryStrategy 根据数据源、错误和重试次数决定继续重试或停止" /><br />
 Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">RetryStrategy</code> 协议，由遵循该协议的对象来作出决定（<code class="language-plaintext highlighter-rouge">RetryDecision</code>）。<code class="language-plaintext highlighter-rouge">RetryDecision</code> 有两种：继续重试和停止重试。</p>
 
 <p>遵循 <code class="language-plaintext highlighter-rouge">RetryStrategy</code> 协议的对象内部设计了三种重试模式：</p>
@@ -918,7 +926,7 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>有了这些，便可以画出一个有限状态机的状态转移图：<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_03.png" alt="CacheCallbackCoordinator 状态机" /><br />
+<p>有了这些，便可以画出一个有限状态机的状态转移图：<img loading="lazy" decoding="async" width="1920" height="1080" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/kf_03.png" alt="CacheCallbackCoordinator 状态机" /><br />
 从图中可以看出：在从 <code class="language-plaintext highlighter-rouge">idle</code> 状态到 <code class="language-plaintext highlighter-rouge">done</code> 状态的任意一条路线上，<code class="language-plaintext highlighter-rouge">trigger</code> 方法的执行次数<strong>有且只有一次</strong>！这样设计的代码清晰，也容易测试，是很值得学习的案例了！</p>
 
 <h2 id="结语">结语</h2>
@@ -946,10 +954,11 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -992,49 +1001,16 @@ Kingfisher 设计一个 <code class="language-plaintext highlighter-rouge">Retry
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

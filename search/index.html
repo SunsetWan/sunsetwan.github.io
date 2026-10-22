@@ -107,7 +107,7 @@
 <body class="site-layout site-layout--search">
     
     
-    <a class="skip-link" href="#main-content">跳到主要内容</a><main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -165,7 +165,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 
 
@@ -175,6 +176,7 @@
 <header>
   <h1>搜索</h1>
 </header>
+
 
 
 
@@ -194,86 +196,20 @@
     data-index-url="/search.json"
     data-max-results="8"
     data-no-results="没有找到与“{query}”匹配的文章"
-    data-load-error="暂时无法加载搜索索引。"
+    data-load-error="暂时无法加载搜索索引。 按 Enter 键重试。"
   >
   <ul id="search-results" class="search-results" aria-live="polite" aria-relevant="additions text" hidden></ul>
 </div>
 
-<script>
-(function() {
-  var input = document.getElementById('search-input');
-  var list = document.getElementById('search-results');
-  if (!input || !list) return;
-  var maxResults = Number(input.dataset.maxResults) || 8;
-
-  var index = null;
-  function loadIndex() {
-    return fetch(input.dataset.indexUrl)
-      .then(function(r) {
-        if (!r.ok) throw new Error('Search index request failed');
-        return r.json();
-      })
-      .then(function(data) { index = Array.isArray(data) ? data : []; return index; });
-  }
-
-  function score(p, q) {
-    var s = 0;
-    var ql = q.toLowerCase();
-    if ((p.title || '').toLowerCase().indexOf(ql) !== -1) s += 5;
-    if ((p.tags || []).some(function(t) { return String(t).toLowerCase().indexOf(ql) !== -1; })) s += 3;
-    if ((p.excerpt || '').toLowerCase().indexOf(ql) !== -1) s += 1;
-    return s;
-  }
-  function escape(s) {
-    return String(s || '').replace(/[&<>"']/g, function(c) {
-      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
-    });
-  }
-  function render(results, q) {
-    if (!results.length) {
-      var message = input.dataset.noResults.replace('{query}', escape(q));
-      list.innerHTML = '<li class="search-empty">' + message + '</li>';
-      list.hidden = false;
-      return;
-    }
-    list.innerHTML = results.slice(0, maxResults).map(function(p) {
-      return '<li class="search-result">' +
-        '<a href="' + escape(p.url) + '">' +
-        '<span class="search-result-body">' +
-        '<span class="search-result-title">' + escape(p.title) + '</span>' +
-        (p.excerpt ? '<span class="search-result-excerpt">' + escape(p.excerpt) + '</span>' : '') +
-        '</span>' +
-        '<span class="search-result-date">' + escape(p.date) + '</span>' +
-        '</a></li>';
-    }).join('');
-    list.hidden = false;
-  }
-
-  input.addEventListener('input', function() {
-    var q = input.value.trim();
-    if (!q) { list.hidden = true; list.innerHTML = ''; return; }
-    var run = function() {
-      var hits = index.map(function(p) { return [score(p, q), p]; })
-                      .filter(function(r) { return r[0] > 0; })
-                      .sort(function(a, b) { return b[0] - a[0]; })
-                      .map(function(r) { return r[1]; });
-      render(hits, q);
-    };
-    if (!index) {
-      loadIndex().then(run).catch(function() {
-        list.innerHTML = '<li class="search-empty">' + escape(input.dataset.loadError) + '</li>';
-        list.hidden = false;
-      });
-    } else {
-      run();
-    }
-  });
-})();
+<script type="module">
+  import { initializeSearch } from "/assets/js/search.mjs";
+  initializeSearch();
 </script>
 
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main></body>
+    </div></body>
 </html>

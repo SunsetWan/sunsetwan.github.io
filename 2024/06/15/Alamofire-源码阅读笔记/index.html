@@ -15,8 +15,8 @@
 <meta property="og:title" content="Alamofire 源码阅读（一）" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。" />
-<meta name="twitter:description" property="og:description" content="阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。" />
+<meta name="description" content="阅读 Alamofire 5.9.1 的源代码，梳理 URLSession 队列、请求与响应流程，并讨论数据竞争保护、SSL Pinning 和缓存。" />
+<meta name="twitter:description" property="og:description" content="阅读 Alamofire 5.9.1 的源代码，梳理 URLSession 队列、请求与响应流程，并讨论数据竞争保护、SSL Pinning 和缓存。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2024-06-15T00:01:13+08:00","datePublished":"2024-06-15T00:01:13+08:00","description":"阅读 Alamofire 5.9.1 版本的源代码，有些收获，记录于此。","headline":"Alamofire 源码阅读（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"},"url":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2024-06-15T00:01:13+08:00","datePublished":"2024-06-15T00:01:13+08:00","description":"阅读 Alamofire 5.9.1 的源代码，梳理 URLSession 队列、请求与响应流程，并讨论数据竞争保护、SSL Pinning 和缓存。","headline":"Alamofire 源码阅读（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"},"url":"https://sunsetwan.github.io/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:13:58+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -303,6 +304,20 @@
         
 
 <a href="/tags/Alamofire/" class="tag">Alamofire</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Networking/" class="tag">Networking</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Swift/" class="tag">Swift</a>
 
       
     </div>
@@ -333,7 +348,7 @@
 
 <p>如果 requestQueue 自己是个单独的串行队列呢？iOS 会专门给 requestQueue 分配另一个线程 T2，这样 App 就可能使用了不必要的线程资源。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="Alamofire 的 requestQueue 和 serializationQueue 都以 rootQueue 为目标队列，共用其执行线程" /></p>
+<p><img loading="lazy" decoding="async" width="1432" height="456" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_01.jpg" alt="Alamofire 的 requestQueue 和 serializationQueue 都以 rootQueue 为目标队列，共用其执行线程" /></p>
 
 <p>当存在过多线程时，不仅会增加内存压力，更重要的是，这些线程在有限的 CPU 核心上运行，导致频繁的线程上下文切换。有时候，与实际执行需要的指令相比，这些上下文切换所消耗的资源和时间反而占据了主要部分。这种情况下，由于线程被阻塞的同时，又不断有新的任务以 async 的方式提交到并行队列，导致过多的新线程被创建，我们将其称为<strong>线程爆炸</strong>。</p>
 
@@ -341,11 +356,11 @@
 
 <h2 id="af-创建-request-的流程">AF 创建 Request 的流程</h2>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="Alamofire 从 Session 发起请求并创建 DataRequest 的调用流程" /></p>
+<p><img loading="lazy" decoding="async" width="670" height="906" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_create_data_request.png" alt="Alamofire 从 Session 发起请求并创建 DataRequest 的调用流程" /></p>
 
 <h2 id="af-处理-response-的流程">AF 处理 Response 的流程</h2>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="Alamofire 接收 URLSession 回调并序列化 Response 的处理流程" /></p>
+<p><img loading="lazy" decoding="async" width="637" height="670" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/af_response.png" alt="Alamofire 接收 URLSession 回调并序列化 Response 的处理流程" /></p>
 
 <h2 id="af-中是如何解决数据竞争的">AF 中是如何解决数据竞争的？</h2>
 
@@ -475,7 +490,7 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 
 <p>但需要注意的是，这个代理方法被调用的条件有些苛刻，得同时满足以下 7 个条件才行！</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="URLSession 调用 willCacheResponse 代理方法所需满足的七个条件" /></p>
+<p><img loading="lazy" decoding="async" width="1940" height="914" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2024/AF_02.jpg" alt="URLSession 调用 willCacheResponse 代理方法所需满足的七个条件" /></p>
 
   </div>
   
@@ -495,10 +510,11 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -541,49 +557,16 @@ var queue = FIFOQueue&lt;Value&gt;.makeThreadSafeReference()
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

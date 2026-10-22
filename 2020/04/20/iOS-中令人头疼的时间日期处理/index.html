@@ -15,8 +15,8 @@
 <meta property="og:title" content="iOS 中令人头疼的时间日期处理" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="本文是 WWDC 2013 《Solutions to Common Date and Time Challenges》 视频的学习笔记。" />
-<meta name="twitter:description" property="og:description" content="本文是 WWDC 2013 《Solutions to Common Date and Time Challenges》 视频的学习笔记。" />
+<meta name="description" content="梳理 Date、Calendar、DateFormatter 与时区的关系，结合日期比较、午夜边界和匹配规则，讨论 iOS 日期处理中的常见问题。" />
+<meta name="twitter:description" property="og:description" content="梳理 Date、Calendar、DateFormatter 与时区的关系，结合日期比较、午夜边界和匹配规则，讨论 iOS 日期处理中的常见问题。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2020-04-20T11:16:38+08:00","datePublished":"2020-04-20T11:16:38+08:00","description":"本文是 WWDC 2013 《Solutions to Common Date and Time Challenges》 视频的学习笔记。","headline":"iOS 中令人头疼的时间日期处理","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/"},"url":"https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2020-04-20T11:16:38+08:00","datePublished":"2020-04-20T11:16:38+08:00","description":"梳理 Date、Calendar、DateFormatter 与时区的关系，结合日期比较、午夜边界和匹配规则，讨论 iOS 日期处理中的常见问题。","headline":"iOS 中令人头疼的时间日期处理","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/"},"url":"https://sunsetwan.github.io/2020/04/20/iOS-%E4%B8%AD%E4%BB%A4%E4%BA%BA%E5%A4%B4%E7%96%BC%E7%9A%84%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:13:28+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -297,6 +298,13 @@
 
   
     <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/iOS/" class="tag">iOS</a>
+
       
     </div>
   
@@ -552,7 +560,7 @@ print(timeString)
 <p>我有一个朋友，在美国一机场上班。他在今年 3 月 8 日的凌晨 03:30 有排班。他跟往常一样，打算提前一小时醒来做作准备。他把一个简单闹钟 App 的提醒时间设定为 3 月 8 号 02:30。</p>
 
 <p>先从上帝视角看这条时间线：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebedtest1.jpg" alt="夏令时跳过 02:00 后，02:30 闹钟与 03:30 上班时间的时间线" /></p>
+<img loading="lazy" decoding="async" width="1232" height="398" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebedtest1.jpg" alt="夏令时跳过 02:00 后，02:30 闹钟与 03:30 上班时间的时间线" /></p>
 
 <p>这一天其实是不存在<strong>凌晨两点半</strong>这个时间点的。这就是 matchingPolicy 大显身手的时候了。四种不同的 matchingPolicy 会导致闹钟 App 在四个不同的时间点响铃🔔：</p>
 <h4 id="matchingpolicy-nexttime">matchingPolicy: nextTime</h4>
@@ -650,7 +658,7 @@ dateLog(next, hint: "Matching Result")
 // Formatted: 2020/03/08 01:30:00
 dateLog(next, hint: "Matching Result")
 </code></pre></div></div>
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebed2.jpg" alt="四种 Calendar matchingPolicy 对不存在的 02:30 闹钟时间的匹配结果" /></p>
+<p><img loading="lazy" decoding="async" width="2074" height="1380" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/imagebed2.jpg" alt="四种 Calendar matchingPolicy 对不存在的 02:30 闹钟时间的匹配结果" /></p>
 
 <p>可能，我这位朋友真正想要的是并不是<strong>凌晨两点半</strong>，而是<strong>开始工作前的一小时</strong>。</p>
 
@@ -677,10 +685,11 @@ dateLog(next, hint: "Matching Result")
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -723,49 +732,16 @@ dateLog(next, hint: "Matching Result")
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

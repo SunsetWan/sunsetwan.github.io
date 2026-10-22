@@ -15,8 +15,8 @@
 <meta property="og:title" content="WebSocket 协议学习笔记" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！ 教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo" />
-<meta name="twitter:description" property="og:description" content="工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！ 教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo" />
+<meta name="description" content="依据 RFC 6455 实现部分 WebSocket 客户端功能，梳理握手、数据帧、分片与连接关闭，并结合 Wireshark 和 Starscream 源码验证理解。" />
+<meta name="twitter:description" property="og:description" content="依据 RFC 6455 实现部分 WebSocket 客户端功能，梳理握手、数据帧、分片与连接关闭，并结合 Wireshark 和 Starscream 源码验证理解。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2026/01/25/WebSocket-note/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2026/01/25/WebSocket-note/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2026-01-25T10:48:23+08:00","datePublished":"2026-01-25T10:48:23+08:00","description":"工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket 客户端 的 一小部分 功能，以达到了解 WebSocket 协议的目标！ 教科书：RFC 6455 老师：Codex 代码仓库地址：WebSocketClient-Demo","headline":"WebSocket 协议学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/"},"url":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2026-01-25T10:48:23+08:00","datePublished":"2026-01-25T10:48:23+08:00","description":"依据 RFC 6455 实现部分 WebSocket 客户端功能，梳理握手、数据帧、分片与连接关闭，并结合 Wireshark 和 Starscream 源码验证理解。","headline":"WebSocket 协议学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/"},"url":"https://sunsetwan.github.io/2026/01/25/WebSocket-note/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:19:02+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -310,6 +311,13 @@
         
 
 <a href="/tags/Networking/" class="tag">Networking</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Swift/" class="tag">Swift</a>
 
       
     </div>
@@ -423,7 +431,7 @@
 
 <p>在握手成功后，双端严格以数据帧格式通信，格式如下图：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="WebSocket 数据帧中 FIN、RSV、opcode、MASK、长度和载荷字段的位布局" /></p>
+<p><img loading="lazy" decoding="async" width="1678" height="916" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_1.png" alt="WebSocket 数据帧中 FIN、RSV、opcode、MASK、长度和载荷字段的位布局" /></p>
 
 <h4 id="头部结构2-个字节">头部结构（2 个字节）</h4>
 
@@ -541,7 +549,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <h3 id="建立连接时的握手阶段-1">建立连接时的握手阶段</h3>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Wireshark 抓包显示客户端 GET 升级请求和服务端 101 Switching Protocols 响应" /></p>
+<p><img loading="lazy" decoding="async" width="3720" height="1518" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_2.jpg" alt="Wireshark 抓包显示客户端 GET 升级请求和服务端 101 Switching Protocols 响应" /></p>
 
 <p>点击 Connect，客户端主动发送 HTTP 升级请求，并收到服务端的同意协议升级响应。</p>
 
@@ -549,7 +557,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>建立连接成功后，发送 “hello” 字符串</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Wireshark 显示客户端发送带 MASK 的 hello 文本帧" /></p>
+<p><img loading="lazy" decoding="async" width="3712" height="1462" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_3.jpg" alt="Wireshark 显示客户端发送带 MASK 的 hello 文本帧" /></p>
 
 <p>我们可以看到数据帧为：0x81 0x85 0x88 0x56 0xa3 0xf5 0xe0 0x33 0xcf 0x99 0xe7</p>
 
@@ -572,17 +580,17 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <h4 id="服务端发来的数据帧">服务端发来的数据帧</h4>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Wireshark 显示服务端返回不带 MASK 的 hello 文本帧" /></p>
+<p><img loading="lazy" decoding="async" width="3722" height="1502" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_4.jpg" alt="Wireshark 显示服务端返回不带 MASK 的 hello 文本帧" /></p>
 
 <p>因为是回声服务器，所以服务端也是发来 “hello”，没有做 masking，能直接看到 payload 是 “hello”。</p>
 
 <h4 id="客户端主动与服务端断开连接">客户端主动与服务端断开连接</h4>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Wireshark 显示客户端发送带 MASK、状态码 1000 的关闭帧" /></p>
+<p><img loading="lazy" decoding="async" width="2856" height="1456" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_5.jpg" alt="Wireshark 显示客户端发送带 MASK、状态码 1000 的关闭帧" /></p>
 
 <p>上图中：客户端发出关闭控制帧，FIN 位为 1，opcode 为 8。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Wireshark 显示服务端返回不带 MASK 和载荷的关闭帧" /></p>
+<p><img loading="lazy" decoding="async" width="2834" height="1428" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/websocket_note_6.jpg" alt="Wireshark 显示服务端返回不带 MASK 和载荷的关闭帧" /></p>
 
 <p>上图中：客户端收到服务端响应的关闭控制帧。</p>
 
@@ -646,7 +654,7 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 
 <p>看来看去还是 Starscream 的星星数比较多多，同时也是 Socket.IO iOS 客户端的依赖之一，所有首先来看看它的架构图：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="Starscream 从 API、Engine 到 Compression、Security、Transport 和 Framer 的分层架构图" /></p>
+<p><img loading="lazy" decoding="async" width="8191" height="2639" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2026/websocket_note/WebSocket%20Engine%20Protocol-2026-02-21-144603.png" alt="Starscream 从 API、Engine 到 Compression、Security、Transport 和 Framer 的分层架构图" /></p>
 
 <h4 id="设计特点">设计特点</h4>
 
@@ -809,10 +817,11 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -855,49 +864,16 @@ websocat -t ws-listen:127.0.0.1:8080 mirror:
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

@@ -15,8 +15,8 @@
 <meta property="og:title" content="初识 The Composable Architecture（一）" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="Reducer public enum CounterAction { case decrTapped case incrTapped } func counterReducer( state: AppState, action: CounterAction ) -&gt; AppState { var copy = state switch action { case .decrTapped: copy.count -= 1 case .incrTapped: copy.count += 1 } return copy } 上面的代码是个标准的 reducer 结构：当收到 incrTapped 时，修改全局状态（计数加一），再返回新的全局状态。为什么称这样的结构为 reducer？" />
-<meta name="twitter:description" property="og:description" content="Reducer public enum CounterAction { case decrTapped case incrTapped } func counterReducer( state: AppState, action: CounterAction ) -&gt; AppState { var copy = state switch action { case .decrTapped: copy.count -= 1 case .incrTapped: copy.count += 1 } return copy } 上面的代码是个标准的 reducer 结构：当收到 incrTapped 时，修改全局状态（计数加一），再返回新的全局状态。为什么称这样的结构为 reducer？" />
+<meta name="description" content="从 reducer 和纯函数出发，用 Swift 逐步构建 TCA 的状态管理模型，理解 combine、pullback、Store 与局部状态和动作的组合。" />
+<meta name="twitter:description" property="og:description" content="从 reducer 和纯函数出发，用 Swift 逐步构建 TCA 的状态管理模型，理解 combine、pullback、Store 与局部状态和动作的组合。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2026/01/26/tca-101-p1/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2026/01/26/tca-101-p1/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2026-01-26T15:22:14+08:00","datePublished":"2026-01-26T15:22:14+08:00","description":"Reducer public enum CounterAction { case decrTapped case incrTapped } func counterReducer( state: AppState, action: CounterAction ) -&gt; AppState { var copy = state switch action { case .decrTapped: copy.count -= 1 case .incrTapped: copy.count += 1 } return copy } 上面的代码是个标准的 reducer 结构：当收到 incrTapped 时，修改全局状态（计数加一），再返回新的全局状态。为什么称这样的结构为 reducer？","headline":"初识 The Composable Architecture（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2026/01/26/tca-101-p1/"},"url":"https://sunsetwan.github.io/2026/01/26/tca-101-p1/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2026-01-26T15:22:14+08:00","datePublished":"2026-01-26T15:22:14+08:00","description":"从 reducer 和纯函数出发，用 Swift 逐步构建 TCA 的状态管理模型，理解 combine、pullback、Store 与局部状态和动作的组合。","headline":"初识 The Composable Architecture（一）","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2026/01/26/tca-101-p1/"},"url":"https://sunsetwan.github.io/2026/01/26/tca-101-p1/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-15T23:25:11+08:00">
-        更新于 2026-07-15
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -297,6 +298,20 @@
 
   
     <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/TCA/" class="tag">TCA</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Swift/" class="tag">Swift</a>
+
       
     </div>
   
@@ -1184,7 +1199,7 @@
 
 <p>叽里咕噜说了一大堆，第一部分就写到这里吧，目前为止展示的示例代码可在<a href="https://github.com/pointfreeco/episode-code-samples/blob/main/0074-modular-state-management-view-actions/PrimeTime/ComposableArchitecture/ComposableArchitecture.swift">这里看</a>。</p>
 
-<p>下次介绍 reducer 在收到 action 后还可以执行一些副作用（Side Effects）。比如说，我收到一个 action，需要发送一个网络请求，等网络请求结束后，根据结果再执行不同的 action。</p>
+<p>在 <a href="/2026/02/04/tca-101-p2/">第二篇</a> 中，我们继续讨论 reducer 在收到 action 后还可以执行一些副作用（Side Effects）。比如说，我收到一个 action，需要发送一个网络请求，等网络请求结束后，根据结果再执行不同的 action。</p>
 
   </div>
   
@@ -1204,10 +1219,11 @@
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -1250,49 +1266,16 @@
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

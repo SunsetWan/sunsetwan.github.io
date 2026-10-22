@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="html site-refresh" data-theme="auto"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    
+      Swift
+    
+  </title>
+
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Swift" />
+<meta name="author" content="Sunset Wan" />
+<meta property="og:locale" content="zh_CN" />
+<meta name="description" content="Sunset Wan 的 Swift、iOS 与软件设计技术博客。" />
+<meta name="twitter:description" property="og:description" content="Sunset Wan 的 Swift、iOS 与软件设计技术博客。" />
+<link rel="canonical" href="https://sunsetwan.github.io/tags/Swift/" />
+<meta property="og:url" content="https://sunsetwan.github.io/tags/Swift/" />
+<meta property="og:site_name" content="日落大道" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Swift" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Sunset Wan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Sunset Wan"},"description":"Sunset Wan 的 Swift、iOS 与软件设计技术博客。","headline":"Swift","url":"https://sunsetwan.github.io/tags/Swift/"}</script>
+<!-- End Jekyll SEO tag -->
+
+  <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
+
+  
+
+  
+    <script type="text/javascript">
+  (function() {
+    try {
+      var storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    } catch (_) {}
+  })();
+
+  function themeChange() {
+    var button = document.querySelector('.theme-toggle');
+    if (!button) return;
+
+    function effectiveTheme() {
+      var selected = document.documentElement.getAttribute('data-theme');
+      if (selected === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return selected;
+    }
+
+    function updateIcon(theme) {
+      button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      button.setAttribute('aria-label', theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark);
+      button.querySelector('.icon-sun').style.display = theme === 'dark' ? 'block' : 'none';
+      button.querySelector('.icon-moon').style.display = theme === 'dark' ? 'none' : 'block';
+    }
+
+    updateIcon(effectiveTheme());
+
+    button.addEventListener('click', function () {
+      var currentTheme = effectiveTheme();
+      var next = currentTheme === 'dark' ? 'light' : 'dark';
+
+      transition();
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (_) {}
+      updateIcon(next);
+    });
+
+    var colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    var syncAutoTheme = function() {
+      if (document.documentElement.getAttribute('data-theme') === 'auto') {
+        updateIcon(effectiveTheme());
+      }
+    };
+    if (colorScheme.addEventListener) colorScheme.addEventListener('change', syncAutoTheme);
+
+    function transition() {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(function () {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', themeChange);
+  } else {
+    themeChange();
+  }
+</script>
+
+  
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+
+
+</head>
+<body class="site-layout site-layout--tag">
+    
+    
+    <a class="skip-link" href="#main-content">跳到主要内容</a><div class="page-content">
+      <div class="w">
+        
+          <header class="site-header">
+  
+    <a class="site-brand" href="/">日落大道</a>
+  
+  
+    <nav class="site-nav" aria-label="站点导航">
+      
+        
+        
+        <a href="/archives/">归档</a>
+      
+        
+        
+        <a href="/tags/" aria-current="location">标签</a>
+      
+        
+        
+        <a href="/search/">搜索</a>
+      
+        
+        
+        <a href="/about/">关于</a>
+      
+    </nav>
+  
+  
+    
+
+<button
+  aria-label="切换到深色模式"
+  aria-pressed="false"
+  class="theme-toggle"
+  data-label-light="切换到浅色模式"
+  data-label-dark="切换到深色模式"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+  
+</header>
+
+        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
+
+
+
+
+
+
+<header>
+  <h1>Swift</h1>
+  
+    <p class="archive-count">9 篇文章</p>
+  
+</header>
+
+
+
+
+  
+
+
+  <ul class="post-list">
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2026-02-04T21:37:39+08:00">2026-02-04</time>
+        <a href="/2026/02/04/tca-101-p2/">初识 The Composable Architecture（二）</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2026-01-26T15:22:14+08:00">2026-01-26</time>
+        <a href="/2026/01/26/tca-101-p1/">初识 The Composable Architecture（一）</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2026-01-25T10:48:23+08:00">2026-01-25</time>
+        <a href="/2026/01/25/WebSocket-note/">WebSocket 协议学习笔记</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2025-12-01T23:33:33+08:00">2025-12-01</time>
+        <a href="/2025/12/01/SwiftUI_Identity_lifetime/">SwiftUI View 的 Identity 与 Lifetime</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2024-06-23T21:23:49+08:00">2024-06-23</time>
+        <a href="/2024/06/23/Swift-Protocol-Witness/">Protocol Witness in Swift</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2024-06-15T00:01:13+08:00">2024-06-15</time>
+        <a href="/2024/06/15/Alamofire-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">Alamofire 源码阅读（一）</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2022-04-14T09:41:00+08:00">2022-04-14</time>
+        <a href="/2022/04/14/Codable/">Codable 学习笔记</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2022-03-28T09:41:00+08:00">2022-03-28</time>
+        <a href="/2022/03/28/Kingfisher%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%EF%BC%88%E4%B8%80%EF%BC%89/">Kingfisher 源码阅读（一）</a>
+      </li>
+    
+      <li class="post-list-item">
+        <time class="home-date" datetime="2020-07-03T09:10:50+08:00">2020-07-03</time>
+        <a href="/2020/07/03/WWDC20%2010168%20-%20Explore%20logging%20in%20Swift/">WWDC20 10168 - Explore logging in Swift</a>
+      </li>
+    
+  </ul>
+
+
+
+
+        </main>
+        <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
+          •
+          &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
+    </div></body>
+</html>

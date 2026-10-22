@@ -15,8 +15,8 @@
 <meta property="og:title" content="我所理解的 Auto Layout" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="拾人牙慧而已，並非创见。" />
-<meta name="twitter:description" property="og:description" content="拾人牙慧而已，並非创见。" />
+<meta name="description" content="从约束方程理解 Auto Layout，梳理布局周期、约束更新和视图布局，结合调试、性能与 Intrinsic Content Size 讨论常见问题。" />
+<meta name="twitter:description" property="og:description" content="从约束方程理解 Auto Layout，梳理布局周期、约束更新和视图布局，结合调试、性能与 Intrinsic Content Size 讨论常见问题。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2020/12/15/uncover_mysteries_of_auto_layout/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2020/12/15/uncover_mysteries_of_auto_layout/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2020-12-15T16:29:38+08:00","datePublished":"2020-12-15T16:29:38+08:00","description":"拾人牙慧而已，並非创见。","headline":"我所理解的 Auto Layout","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2020/12/15/uncover_mysteries_of_auto_layout/"},"url":"https://sunsetwan.github.io/2020/12/15/uncover_mysteries_of_auto_layout/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2020-12-15T16:29:38+08:00","datePublished":"2020-12-15T16:29:38+08:00","description":"从约束方程理解 Auto Layout，梳理布局周期、约束更新和视图布局，结合调试、性能与 Intrinsic Content Size 讨论常见问题。","headline":"我所理解的 Auto Layout","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2020/12/15/uncover_mysteries_of_auto_layout/"},"url":"https://sunsetwan.github.io/2020/12/15/uncover_mysteries_of_auto_layout/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:18:12+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -303,6 +304,13 @@
         
 
 <a href="/tags/AutoLayout/" class="tag">AutoLayout</a>
+
+      
+        
+        
+        
+
+<a href="/tags/iOS/" class="tag">iOS</a>
 
       
     </div>
@@ -342,7 +350,7 @@
 <p>随着 iPhone 的屏幕尺寸种类越来越多，第一种方法的用武之地已经很有限了。<br />
 所以我们常用第二种方法：使用线性方程组来描述 Constraint Anchor 之间的关系。Auto Layout 引擎则会根据这个方程组来计算出子视图的 frame。线性方程组中的等式格式如下图所示：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image1.jpg" alt="约束方程的组成：RedView.leading 等于 BlueView.trailing 乘系数 1 再加常量 8" /></p>
+<p><img loading="lazy" decoding="async" width="1472" height="916" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image1.jpg" alt="约束方程的组成：RedView.leading 等于 BlueView.trailing 乘系数 1 再加常量 8" /></p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>width = trailing - leading
 height = bottom - top
@@ -356,7 +364,7 @@ centerY = (top + bottom) / 2
 <p>计算好的 frame 数据会通知给对应视图的父视图，父视图会根据此数据对子视图进行布局，即调用 <code class="language-plaintext highlighter-rouge">layoutSubviews</code> 方法。<code class="language-plaintext highlighter-rouge">layoutSubviews</code> 方法会在一个 <code class="language-plaintext highlighter-rouge">Layout Pass</code> 出现时被调用。</p>
 
 <h2 id="the-layout-cycle">The Layout Cycle</h2>
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image2.jpg" alt="布局周期：约束变化触发延迟布局过程，完成后回到应用运行循环" /></p>
+<p><img loading="lazy" decoding="async" width="2238" height="1400" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image2.jpg" alt="布局周期：约束变化触发延迟布局过程，完成后回到应用运行循环" /></p>
 
 <h3 id="constraints-change">Constraints Change</h3>
 <p>视图的各个约束在 Auto Layout 的世界里是一堆线性等式（不等式）组。视图约束的改动即影响这些线性等式（不等式）组。</p>
@@ -431,28 +439,28 @@ You should only override this method when changing constraints in place is too s
 
 <p>当发生这种情况时，某个视图计算出来的 frame 是有多种可能的结果，Auto Layout 引擎选择其中一种来完成布局，但这种布局往往不会是理想的布局。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image3.jpg" alt="LLDB 调试输出：autolayoutTrace 标出布局不明确的 UILabel，并用 hasAmbiguousLayout 与 exerciseAmbiguityInLayout 验证" /><br />
+<p><img loading="lazy" decoding="async" width="2840" height="1338" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image3.jpg" alt="LLDB 调试输出：autolayoutTrace 标出布局不明确的 UILabel，并用 hasAmbiguousLayout 与 exerciseAmbiguityInLayout 验证" /><br />
 我们可以使用：<code class="language-plaintext highlighter-rouge">po view.value(forKey: "_autolayoutTrace")!</code> 打印出当前视图层级，可以很直观地看出是哪个子视图出现了 ambiguous layouts 的问题。<br />
 我们甚至还可以继续执行 <code class="language-plaintext highlighter-rouge">e label.exerciseAmbiguityInLayout()</code>，然后执行<code class="language-plaintext highlighter-rouge">continue</code> 命令，就可以看到其他可能的布局。这样，两种布局一对比就比较容易找到问题所在。</p>
 
 <h2 id="high-performance-auto-layout">High Performance Auto Layout</h2>
 <p>我们来看这个简单例子：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image4.jpg" alt="简单布局：同一容器内 text1 与 text2 水平排列并受间距、边距和尺寸约束" /><br />
+<img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image4.jpg" alt="简单布局：同一容器内 text1 与 text2 水平排列并受间距、边距和尺寸约束" /><br />
 这样一个简单布局是无须大费周章去覆盖 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法的。这里举一个反例，以更好地理解 Auto Layout 这个黑盒。<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image5.jpg" alt="性能反例：updateConstraints 每次停用、清空、重建并启用 text1 和 text2 的约束" /><br />
+<img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image5.jpg" alt="性能反例：updateConstraints 每次停用、清空、重建并启用 text1 和 text2 的约束" /><br />
 在这个方法里：首先停用现有的约束，然后重新添加约束，最后再启用新添加的约束。从直觉上来看，这样做好像看不出有什么损耗性能的地方。</p>
 
 <h3 id="render-loop">Render Loop</h3>
 <p>为了理解上述代码对性能的影响，我们需要更具体地了解 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法，这里引入一个新概念：<code class="language-plaintext highlighter-rouge">Render Loop</code>。<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image6.jpg" alt="渲染循环由 Update Constraints、Layout 和 Display 三个阶段组成" /><br />
+<img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image6.jpg" alt="渲染循环由 Update Constraints、Layout 和 Display 三个阶段组成" /><br />
 Render Loop 是每秒可能运行 120 次的进程，以确保每个子视图均恰当地显示在屏幕上。它包括三个阶段，分别是：Update Constraints、Layout 以及 Display。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image7.jpg" alt="渲染循环遍历方向：更新约束自底向上，布局与显示自顶向下" /><br />
+<p><img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image7.jpg" alt="渲染循环遍历方向：更新约束自底向上，布局与显示自顶向下" /><br />
 第一阶段：从视图层级的底部到顶部，每个视图都会调用 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法。<br />
 第二阶段：从视图层级的顶部到底部，每个视图都会调用 <code class="language-plaintext highlighter-rouge">layoutSubviews</code> 方法。<br />
 第三阶段：从视图层级的顶部到底部，每个视图会判断自己是否需要显示在屏幕上。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image8.jpg" alt="三个渲染阶段的方法类比：updateConstraints、layoutSubviews、draw 及各自的 setNeeds 和 IfNeeded 方法" /><br />
+<p><img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image8.jpg" alt="三个渲染阶段的方法类比：updateConstraints、layoutSubviews、draw 及各自的 setNeeds 和 IfNeeded 方法" /><br />
 上图这样把这几种方法列在表格中是为了说明这些方法虽是在不同阶段，但却可以<strong>用来作类比</strong>。</p>
 
 <p>整个 Render Loop 存在的目的就是：</p>
@@ -463,49 +471,49 @@ Render Loop 是每秒可能运行 120 次的进程，以确保每个子视图均
 </ol>
 
 <p>回头看这段代码：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image9.jpg.jpg" alt="布局性能反例：layoutSubviews 每次移除并重新创建 text1、text2 子视图" /><br />
+<img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image9.jpg.jpg" alt="布局性能反例：layoutSubviews 每次移除并重新创建 text1、text2 子视图" /><br />
 上文提及过 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法是可以同 <code class="language-plaintext highlighter-rouge">layoutSubviews</code> 方法类比的。<br />
 在 <code class="language-plaintext highlighter-rouge">layoutSubviews</code> 方法每次被调用时，所有的子视图都被销毁，然后再重新创建它们，并把它们添加到父视图上。绝大多数人看到上面这段代码时，肯定会有一种「这样做会影响到性能表现」的直觉。</p>
 
 <p>同理，那段 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法也是如此！</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image10.jpg" alt="优化后的 updateConstraints：只在约束数组为 nil 时创建并启用约束" /><br />
+<p><img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image10.jpg" alt="优化后的 updateConstraints：只在约束数组为 nil 时创建并启用约束" /><br />
 我们只需想方设法确保 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法内的做法只执行一次就可以避免多余的计算。</p>
 
 <p>通过上面的类比，我们逐渐明白之前那段 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法内的代码是有待优化的代码。但我们的目的不是为了仅仅说明这段代码不好，而是要尽量抽丝剥茧，尝试理解背后的原理。</p>
 
 <h3 id="activate-constraints-背后发生了什么">Activate constraints 背后发生了什么？</h3>
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image11.jpg" alt="激活约束的内部关系：视图持有变量与约束，布局引擎用约束建立方程并求解变量" /><br />
+<p><img loading="lazy" decoding="async" width="1648" height="988" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image11.jpg" alt="激活约束的内部关系：视图持有变量与约束，布局引擎用约束建立方程并求解变量" /><br />
 在对视图添加约束之后，Auto Layout 引擎会开始计算表示约束的方程组，然后再把方程组的解（该视图的 frame 数据，即 minX、minY、width 和 height）告知该视图。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image12.jpg" alt="text1 与 text2 的水平约束方程：两者宽度均为 100，text1 左距 20，间距 20" /><br />
+<p><img loading="lazy" decoding="async" width="1840" height="994" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image12.jpg" alt="text1 与 text2 的水平约束方程：两者宽度均为 100，text1 左距 20，间距 20" /><br />
 以上图这个简单布局为例（仅关注水平方向上的布局）。Auto Layout 引擎开始计算一个简单的方程组：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image13.jpg" alt="布局引擎缓存并求解 text1 的位置和宽度，以及 text2 对 text1 的依赖方程" /></p>
+<img loading="lazy" decoding="async" width="1824" height="994" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image13.jpg" alt="布局引擎缓存并求解 text1 的位置和宽度，以及 text2 对 text1 的依赖方程" /></p>
 
 <p>计算完毕后，Auto Layout 引擎会通知视图，然后视图向它的父视图发送 <code class="language-plaintext highlighter-rouge">setNeedsLayout</code> 信息。</p>
 
 <p>此时就进入 Render Loop 的第二阶段 Layout：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image14.jpg" alt="渲染循环进入 Layout 阶段，自顶向下遍历视图层级" /></p>
+<img loading="lazy" decoding="async" width="1808" height="1006" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image14.jpg" alt="渲染循环进入 Layout 阶段，自顶向下遍历视图层级" /></p>
 
 <p>在 <code class="language-plaintext highlighter-rouge">layoutSubviews</code> 方法中，视图从 Auto Layout 引擎中读取方程组的解（frame 数据）对子视图进行布局。<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image15.jpg" alt="layoutSubviews 从布局引擎读取变量值，再通过 bounds 和 center 设置子视图" /></p>
+<img loading="lazy" decoding="async" width="1770" height="990" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image15.jpg" alt="layoutSubviews 从布局引擎读取变量值，再通过 bounds 和 center 设置子视图" /></p>
 
 <p>到此为止，我们循序渐进地走过一遍布局的过程。相信你现在对这个过程有了比较直观的了解，这样会有助于你对当前布局性能的好坏做出恰当的判断。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image16.jpg" alt="反复停用再启用相同约束会使布局引擎频繁重复求解" /></p>
+<p><img loading="lazy" decoding="async" width="1804" height="954" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image16.jpg" alt="反复停用再启用相同约束会使布局引擎频繁重复求解" /></p>
 
 <p>让我们回顾这段代码，在 Render Loop 可能以每秒 120 次调用 <code class="language-plaintext highlighter-rouge">updateConstraints</code> 方法的情况下，这段代码中先停用现有的约束，然后再启用新添加的约束。我们可以粗浅地理解为  Auto Layout 引擎一秒钟解 120 次同样的方程组！虽然 Auto Layout 引擎解一次方程组会很快，但是累计下来在这儿会产生很大的开销，会对性能表现有不小的影响！</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image17.jpg" alt="两组独立局部布局：text1 与 text2、text3 与 text4 分属不同父视图" /><br />
+<p><img loading="lazy" decoding="async" width="1824" height="998" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image17.jpg" alt="两组独立局部布局：text1 与 text2、text3 与 text4 分属不同父视图" /><br />
 大多数情况下，我们都是在同一父视图内对子视图添加约束。</p>
 
 <p>如上图所示：text1 和 text2 拥有同一个父视图，text3 和 text4 拥有同一个父视图。text1 和 text3 分别在两个不同的视图层级里。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image18.jpg" alt="无关联视图形成两组独立方程，布局引擎可分别求解" /><br />
+<p><img loading="lazy" decoding="async" width="1876" height="1000" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image18.jpg" alt="无关联视图形成两组独立方程，布局引擎可分别求解" /><br />
 此时布局的时间复杂度是线性的，因为 Auto Layout 引擎实际上是在解两个独立无关的方程组。</p>
 
 <p>而当需要 text1 和 text3 左对齐时：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image19.jpg" alt="跨父视图对齐 text1 与 text3 后，两组局部布局产生全局依赖" /><br />
+<img loading="lazy" decoding="async" width="1818" height="986" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image19.jpg" alt="跨父视图对齐 text1 与 text3 后，两组局部布局产生全局依赖" /><br />
 Auto Layout 引擎就需要解两个有依赖关系的方程组了。可想而知此时的时间复杂度就不再是线性的，计算量相较之前会增大。</p>
 
 <p>通过上面的说明，我们可以逐渐领悟到这样一件事：</p>
@@ -527,7 +535,7 @@ Auto Layout 引擎就需要解两个有依赖关系的方程组了。可想而�
 </code></pre></div></div>
 
 <p>打断点进入调试状态，查看该 label 的约束:<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image20.jpg" alt="LLDB 输出显示手动 frame 被转换为位置和宽高各为 100 的 NSAutoresizingMaskLayoutConstraint" /><br />
+<img loading="lazy" decoding="async" width="1642" height="546" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image20.jpg" alt="LLDB 输出显示手动 frame 被转换为位置和宽高各为 100 的 NSAutoresizingMaskLayoutConstraint" /><br />
 可以看出：手动设置的 frame 在背地里转换成对应的<code class="language-plaintext highlighter-rouge">NSAutoresizingMaskLayoutConstraint</code> 来进行布局了。</p>
 
 <p>当用代码来创建视图约束时，一定要记得把 <code class="language-plaintext highlighter-rouge">tAMIC</code> 设为 false，以避免约束冲突。</p>
@@ -538,14 +546,14 @@ Auto Layout 引擎计算出的结果其实是视图 Alignment rectangle 的数�
 
 <p>但一般来说，视图 Alignment rectangle 和 frame 的数据是一致的。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image21.jpg" alt="黄色虚线表示图标与按钮的 Alignment Rect，仅包围核心视觉内容" /></p>
+<p><img loading="lazy" decoding="async" width="874" height="990" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image21.jpg" alt="黄色虚线表示图标与按钮的 Alignment Rect，仅包围核心视觉内容" /></p>
 
 <p>上图黄色虚线所标识的范围为两个视图的 Alignment rectangle。<br />
 Alignment rectangle 与 frame 的区别在于：前者仅包含视图的<strong>核心视觉元素</strong>，而后者不光包含视图的核心视觉元素，还包含其他修饰性的元素。<br />
 值得一提的是：<code class="language-plaintext highlighter-rouge">UIView.transform</code> 并不会改变 Alignment rectangle 的大小。</p>
 
 <p>举个例子，这里有一张图片，其宽高分别为：180 x 80，绿色矩形的大小为：150 x 50。<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image22.jpeg" alt="一张 180×80 图片中的绿色核心矩形为 150×50，且相对完整 frame 偏左上" /><br />
+<img loading="lazy" decoding="async" width="180" height="79" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image22.jpeg" alt="一张 180×80 图片中的绿色核心矩形为 150×50，且相对完整 frame 偏左上" /><br />
 如果想要使这张图片居中显示，对应的布局代码为：</p>
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">imageView</span><span class="o">.</span><span class="n">translatesAutoresizingMaskIntoConstraints</span> <span class="o">=</span> <span class="kc">false</span>
 <span class="n">view</span><span class="o">.</span><span class="nf">addSubview</span><span class="p">(</span><span class="n">imageView</span><span class="p">)</span>
@@ -575,7 +583,7 @@ Alignment rectangle 与 frame 的区别在于：前者仅包含视图的<strong>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image23.jpg" alt="居中对比：按完整图片 frame 居中时绿色矩形偏左，按 Alignment Rect 居中时绿色矩形居中" /></p>
+<p><img loading="lazy" decoding="async" width="1970" height="990" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2022/auto_layout_at_bb/auto_layout_image23.jpg" alt="居中对比：按完整图片 frame 居中时绿色矩形偏左，按 Alignment Rect 居中时绿色矩形居中" /></p>
 
 <p>至此，能证明「Auto Layout 使用 Alignment rectangle 来布局而不是 frame」。</p>
 
@@ -627,10 +635,11 @@ Alignment rectangle 与 frame 的区别在于：前者仅包含视图的<strong>
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -673,49 +682,16 @@ Alignment rectangle 与 frame 的区别在于：前者仅包含视图的<strong>
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

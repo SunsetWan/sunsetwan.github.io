@@ -15,8 +15,8 @@
 <meta property="og:title" content="SwiftUI View 的 Identity 与 Lifetime" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="前阵子遇到一个很奇怪的 BUG：用 NavigationStack push 一个 View，CPU 使用率竟然冲上 100%！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 WWDC 21 Demystify SwiftUI。" />
-<meta name="twitter:description" property="og:description" content="前阵子遇到一个很奇怪的 BUG：用 NavigationStack push 一个 View，CPU 使用率竟然冲上 100%！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 WWDC 21 Demystify SwiftUI。" />
+<meta name="description" content="结合视图示例与 Instruments，理解 SwiftUI 的 Identity、Lifetime 和 Dependency，分析条件分支如何影响状态保留与视图更新。" />
+<meta name="twitter:description" property="og:description" content="结合视图示例与 Instruments，理解 SwiftUI 的 Identity、Lifetime 和 Dependency，分析条件分支如何影响状态保留与视图更新。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2025-12-01T23:33:33+08:00","datePublished":"2025-12-01T23:33:33+08:00","description":"前阵子遇到一个很奇怪的 BUG：用 NavigationStack push 一个 View，CPU 使用率竟然冲上 100%！当 Xcode 运行一段 SwiftUI 代码时，我们应该关注哪些方面？特此回顾 WWDC 21 Demystify SwiftUI。","headline":"SwiftUI View 的 Identity 与 Lifetime","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/"},"url":"https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2025-12-01T23:33:33+08:00","datePublished":"2025-12-01T23:33:33+08:00","description":"结合视图示例与 Instruments，理解 SwiftUI 的 Identity、Lifetime 和 Dependency，分析条件分支如何影响状态保留与视图更新。","headline":"SwiftUI View 的 Identity 与 Lifetime","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/"},"url":"https://sunsetwan.github.io/2025/12/01/SwiftUI_Identity_lifetime/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:19:02+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -303,6 +304,20 @@
         
 
 <a href="/tags/SwiftUI/" class="tag">SwiftUI</a>
+
+      
+        
+        
+        
+
+<a href="/tags/Swift/" class="tag">Swift</a>
+
+      
+        
+        
+        
+
+<a href="/tags/iOS/" class="tag">iOS</a>
 
       
     </div>
@@ -335,7 +350,7 @@
 
 <p>SwiftUI 中 Identity 分为两种：Explicit Identity 和 Structural Identity。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="外表相似的双胞胎并肩站在走廊中" /></p>
+<p><img loading="lazy" decoding="async" width="1920" height="1743" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/01.jpeg" alt="外表相似的双胞胎并肩站在走廊中" /></p>
 
 <p>当遇到两个外表很相似的双胞胎，我们该如何区分？对，可以通过姓名来区分！这就是 Explicit Identity。</p>
 
@@ -344,7 +359,7 @@
 
 <p>接下来，我们来看一个更实际的例子：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="SwiftUI 条件分支映射为 ConditionalContent 的 True 和 False 两种结构身份" /></p>
+<p><img loading="lazy" decoding="async" width="1410" height="852" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/02.jpg" alt="SwiftUI 条件分支映射为 ConditionalContent 的 True 和 False 两种结构身份" /></p>
 
 <p>左边的代码在 SwiftUI 「眼里」当条件为真时显示 <code class="language-plaintext highlighter-rouge">AdoptionDirectory</code> 视图，条件为假时显示 <code class="language-plaintext highlighter-rouge">DogList</code> 视图。只要条件恒定，SwiftUI 能知道哪个是「真分支」哪个是「假分支」。</p>
 
@@ -372,7 +387,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
     <span class="p">}</span>
 </code></pre></div></div>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="条件分支切换时，绿色爪印消失后红色爪印重新出现的动画" /></p>
+<p><img loading="lazy" decoding="async" width="295" height="640" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/03.gif" alt="条件分支切换时，绿色爪印消失后红色爪印重新出现的动画" /></p>
 
 <h4 id="问题一为什么是绿色爪印消失后再出现红色爪印呢">问题一：为什么是绿色爪印消失后再出现红色爪印呢？</h4>
 
@@ -392,7 +407,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>我们可以把 <code class="language-plaintext highlighter-rouge">pawView</code> 里的 if 分支拿掉，单个 <code class="language-plaintext highlighter-rouge">PawView</code> 的 Structural Identity 就保持不变；<code class="language-plaintext highlighter-rouge">dog.isGood</code> 变化时，只是同一个视图的 tintColor 和位置在变，状态与动画都能连续。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="保持同一 PawView 身份后，爪印颜色和位置连续过渡的动画" /></p>
+<p><img loading="lazy" decoding="async" width="295" height="640" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/04.gif" alt="保持同一 PawView 身份后，爪印颜色和位置连续过渡的动画" /></p>
 
 <h2 id="lifetime">Lifetime</h2>
 
@@ -455,7 +470,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>再看这个 <a href="https://github.com/SunsetWan/WWDC-21-Demystify-SwiftUI-code-example/blob/main/SharingDemo-TreatJar/TreatJar/TreatJar/FavoritePetsView.swift#L37">例子</a>，来辅助理解上面的总结。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="Favorite Pets 列表显示五只宠物及右上角 Add 按钮" /></p>
+<p><img loading="lazy" decoding="async" width="852" height="1162" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/05.png" alt="Favorite Pets 列表显示五只宠物及右上角 Add 按钮" /></p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">Pet</span><span class="p">:</span> <span class="kt">Identifiable</span> <span class="p">{</span>
     <span class="k">var</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
@@ -500,7 +515,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>当点击 Add 按钮时，「汤姆猫」出现在 List 的首位。让我们用 SwiftUI Instruments 来查看当前视图的更新次数。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="SwiftUI Instruments 显示身份不稳定时 PetRow body 执行 29 次" /></p>
+<p><img loading="lazy" decoding="async" width="1874" height="612" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/06.jpg" alt="SwiftUI Instruments 显示身份不稳定时 PetRow body 执行 29 次" /></p>
 
 <p>因为 PetRow Identity 的不稳定性，导致 <code class="language-plaintext highlighter-rouge">PetRow</code> 的 body 被执行多次。如果放在一个大型项目中，可能会导致 App 出现卡顿。</p>
 
@@ -515,7 +530,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>可以再次运行 SwiftUI Instruments 来查看当前视图的更新次数：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="使用稳定 id 后 SwiftUI Instruments 显示 PetRow body 仅创建 6 次" /></p>
+<p><img loading="lazy" decoding="async" width="1936" height="592" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/07.jpg" alt="使用稳定 id 后 SwiftUI Instruments 显示 PetRow body 仅创建 6 次" /></p>
 
 <p>PetRow 的 body 被执行的次数锐减至 6 次！原本已有 5 个宠物，再加上新增的「汤姆猫」，总计 6 次，与预期相符。</p>
 
@@ -523,7 +538,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>再看这个稍微复杂一点的 <a href="https://github.com/SunsetWan/WWDC-21-Demystify-SwiftUI-code-example/blob/main/SharingDemo-TreatJar/TreatJar/TreatJar/TreatJarView.swift#L45">例子</a>。Treat Jar View 展示的是给宠物准备的零食。如果有零食过期，那就置灰。</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="Treat Jar 页面中已过期零食变灰，未过期零食保持高亮" /></p>
+<p><img loading="lazy" decoding="async" width="1206" height="2622" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/08.png" alt="Treat Jar 页面中已过期零食变灰，未过期零食保持高亮" /></p>
 
 <p>我们借助于 <code class="language-plaintext highlighter-rouge">ExpirationModifier</code> 来实现置灰的效果。</p>
 
@@ -567,7 +582,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>此时执行点击左上角 Expire 按钮来模拟所有的零食过期。SwiftUI Instruments 给出的视图更新次数如下：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="条件分支切换过期状态后，SwiftUI Instruments 显示 TreatCell body 创建 2 次" /></p>
+<p><img loading="lazy" decoding="async" width="1914" height="596" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/09.jpg" alt="条件分支切换过期状态后，SwiftUI Instruments 显示 TreatCell body 创建 2 次" /></p>
 
 <p>代表两种零食的 TreatCell 创建了两次，但实际上零食过期后，只需置灰即可，不需要重新创建 TreatCell。</p>
 
@@ -606,13 +621,13 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>运行 SwiftUI Instruments，再次点击左上角 Expire 按钮，可以看到：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="移除条件分支后，Instruments 只记录 ExpirationModifier body 的 7 次更新" /></p>
+<p><img loading="lazy" decoding="async" width="1928" height="558" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/10.jpg" alt="移除条件分支后，Instruments 只记录 ExpirationModifier body 的 7 次更新" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">TreatCell.body</code> 没有再被执行过了！所以在 View 中使用 if 分支时，可以停下来问自己：我是要多个视图还是某一视图的两种状态呢？引入不必要的分支，可能会导致性能下降，甚至视图的状态丢失。</p>
 
 <h2 id="dependency">Dependency</h2>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="DogView 代码中依赖、body 和 action 的对应区域" /></p>
+<p><img loading="lazy" decoding="async" width="1410" height="852" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/11.jpg" alt="DogView 代码中依赖、body 和 action 的对应区域" /></p>
 
 <p>（本节不是本文讨论的重点，于是我放上 AI 对此的总结）</p>
 
@@ -667,7 +682,7 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 
 <p>运行 SwiftUI Instruments 来看看视图的变化次数：</p>
 
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="SwiftUI Instruments 显示 DetailView 更新约 4900 次并出现严重卡顿" /></p>
+<p><img loading="lazy" decoding="async" width="3680" height="2258" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/2025/swiftui_identity_lifetime/assets/12.jpg" alt="SwiftUI Instruments 显示 DetailView 更新约 4900 次并出现严重卡顿" /></p>
 
 <p>从上图可以看出：在短短几秒之内，DetailView 更新了将近 5000 次，SwiftUI 内部的 NavigationStack 更新了将近一万五千次，整个 App 出现了严重的卡顿！</p>
 
@@ -689,10 +704,11 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -735,49 +751,16 @@ View 协议的 body 会隐式包裹在 ViewBuilder 中，ViewBuilder 会把 body
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 

@@ -15,8 +15,8 @@
 <meta property="og:title" content="iOS 多线程学习笔记" />
 <meta name="author" content="Sunset Wan" />
 <meta property="og:locale" content="zh_CN" />
-<meta name="description" content="最近几天陆陆续续把 raywenderlich 出品的《Concurrency by tutorials》 看完了，写篇文章总结一下。" />
-<meta name="twitter:description" property="og:description" content="最近几天陆陆续续把 raywenderlich 出品的《Concurrency by tutorials》 看完了，写篇文章总结一下。" />
+<meta name="description" content="以 GCD 和 Operation 为主线，整理并发与并行、队列、QoS、同步控制及任务依赖，并介绍使用 Thread Sanitizer 排查数据竞争。" />
+<meta name="twitter:description" property="og:description" content="以 GCD 和 Operation 为主线，整理并发与并行、队列、QoS、同步控制及任务依赖，并介绍使用 Thread Sanitizer 排查数据竞争。" />
 <link rel="canonical" href="https://sunsetwan.github.io/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" />
 <meta property="og:url" content="https://sunsetwan.github.io/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" />
 <meta property="og:site_name" content="日落大道" />
@@ -28,7 +28,7 @@
 <meta name="twitter:site" content="@abhinav" />
 <meta name="twitter:creator" content="@Sunset Wan" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2020-06-24T10:35:21+08:00","datePublished":"2020-06-24T10:35:21+08:00","description":"最近几天陆陆续续把 raywenderlich 出品的《Concurrency by tutorials》 看完了，写篇文章总结一下。","headline":"iOS 多线程学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"},"url":"https://sunsetwan.github.io/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Sunset Wan"},"dateModified":"2020-06-24T10:35:21+08:00","datePublished":"2020-06-24T10:35:21+08:00","description":"以 GCD 和 Operation 为主线，整理并发与并行、队列、QoS、同步控制及任务依赖，并介绍使用 Thread Sanitizer 排查数据竞争。","headline":"iOS 多线程学习笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://sunsetwan.github.io/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"},"url":"https://sunsetwan.github.io/2020/06/24/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"}</script>
 <!-- End Jekyll SEO tag -->
 
   <link type="application/atom+xml" rel="alternate" href="https://sunsetwan.github.io/feed.xml" title="日落大道" />
@@ -212,7 +212,7 @@
   }
 })();
 </script>
-<main id="main-content" class="page-content" aria-label="Content" tabindex="-1">
+<div class="page-content">
       <div class="w">
         
           <header class="site-header">
@@ -270,7 +270,8 @@
 </header>
 
         
-        
+        <main id="main-content" aria-label="Content" tabindex="-1">
+          
 
 <article class="reading-layout reading-layout--with-toc">
   <header class="reading-header">
@@ -288,8 +289,8 @@
     
     
       <span class="post-meta-sep">·</span>
-      <time class="post-meta-updated" datetime="2026-07-16T01:13:28+08:00">
-        更新于 2026-07-16
+      <time class="post-meta-updated" datetime="2026-10-22T23:21:24+08:00">
+        更新于 2026-10-22
       </time>
     
     
@@ -297,6 +298,13 @@
 
   
     <div class="post-meta-tags">
+      
+        
+        
+        
+
+<a href="/tags/iOS/" class="tag">iOS</a>
+
       
     </div>
   
@@ -317,7 +325,7 @@
     <p>最近几天陆陆续续把 raywenderlich 出品的《Concurrency by tutorials》 看完了，写篇文章总结一下。<!-- more --></p>
 
 <h3 id="q1什么是并发并发和并行的区别">Q1：什么是并发？并发和并行的区别？</h3>
-<p><img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/%E5%B9%B6%E5%8F%91%E5%B9%B6%E8%A1%8C%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="并发用两队共用一台咖啡机、并行用两队各用一台咖啡机的对比" /></p>
+<p><img loading="lazy" decoding="async" width="600" height="451" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/%E5%B9%B6%E5%8F%91%E5%B9%B6%E8%A1%8C%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="并发用两队共用一台咖啡机、并行用两队各用一台咖啡机的对比" /></p>
 <blockquote>
   <p>如果某个系统支持两个或者多个动作（Action）同时存在，那么这个系统就是一个并发系统。如果某个系统支持两个或者多个动作同时执行，那么这个系统就是一个并行系统。并发系统与并行系统这两个定义之间的关键差异在于“存在”这个词。<br />
 在并发程序中可以同时拥有两个或者多个线程。这意味着，如果程序在单核处理器上运行，那么这两个线程将交替地换入或者换出内存。这些线程是同时“存在”的——每个线程都处于执行过程中的某个状态。如果程序能够并行执行，那么就一定是运行在多核处理器上。此时，程序中的每个线程都将分配到一个独立的处理器核上，因此可以同时运行。<br />
@@ -622,7 +630,7 @@ T5: 执行 count = register2 // count = 4
 </code></pre></div></div>
 <p>再继续看一下更具体的例子：<br />
 首先先开启 Thread Sanitizer。<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/TSan%20configure.jpg" alt="Xcode Scheme 的 Diagnostics 页中勾选 Thread Sanitizer" /><br />
+<img loading="lazy" decoding="async" width="1884" height="1100" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/TSan%20configure.jpg" alt="Xcode Scheme 的 Diagnostics 页中勾选 Thread Sanitizer" /><br />
 运行以下代码：</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>final class MainViewController: UIViewController {
@@ -648,7 +656,7 @@ T5: 执行 count = register2 // count = 4
 }
 </code></pre></div></div>
 <p>Race condition 发生了：<br />
-<img loading="lazy" decoding="async" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/Untitled.png" alt="Thread Sanitizer 在 counter 自增代码中报告 Swift access race" /><br />
+<img loading="lazy" decoding="async" width="1524" height="394" src="https://imagebed-1301918945.cos.ap-shanghai.myqcloud.com/Untitled.png" alt="Thread Sanitizer 在 counter 自增代码中报告 Swift access race" /><br />
 需要注意的是：TSan 仅支持在模拟器下运行。</p>
 
 <h3 id="结语">结语</h3>
@@ -672,10 +680,11 @@ T5: 执行 count = register2 // count = 4
   
 </article>
 
+        </main>
         <div class="credits">&copy;&nbsp;2026&nbsp;Sunset Wan&nbsp;
           •
           &nbsp;Theme&nbsp; <a href="https://github.com/SunsetWan/moonwalk" target="_blank" rel="noopener noreferrer">Moonwalk</a></div></div>
-    </main><script>
+    </div><script>
   document.addEventListener("DOMContentLoaded", function () {
     var defined_alerts = {
       NOTE:      { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>', label: 'Note' },
@@ -718,49 +727,16 @@ T5: 执行 count = register2 // count = 4
 </script>
 
 
-<script>
-(function() {
-  var blocks = Array.from(document.querySelectorAll('div.highlighter-rouge'));
-  document.querySelectorAll('pre').forEach(function(pre) {
-    if (!pre.closest('div.highlighter-rouge')) blocks.push(pre);
+
+<script type="module">
+  import { initializeCodeCopy } from "/assets/js/code-copy.mjs";
+  initializeCodeCopy({
+    copy: "复制",
+    copyDescription: "复制代码",
+    copied: "已复制",
+    failed: "请手动复制",
+    failureDescription: "复制失败，请选择代码后手动复制。"
   });
-
-  blocks.forEach(function(block) {
-    var code = block.querySelector('code');
-    if (!code) return;
-
-    block.style.position = 'relative';
-    block.classList.add('has-code-copy');
-
-    // Language label derived from rouge's language-* class
-    var langClass = Array.from(block.classList).concat(Array.from(code.classList)).find(function(c) {
-      return c.indexOf('language-') === 0 && c !== 'language-plaintext';
-    });
-    if (langClass) {
-      var label = document.createElement('span');
-      label.className = 'code-lang';
-      label.textContent = langClass.replace('language-', '');
-      block.appendChild(label);
-    }
-
-    var btn = document.createElement('button');
-    btn.className = 'code-copy';
-    btn.setAttribute('aria-label', "复制代码");
-    btn.setAttribute('aria-live', 'polite');
-    btn.textContent = "复制";
-    btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(code.innerText).then(function() {
-        btn.textContent = "已复制";
-        btn.setAttribute('aria-label', "已复制");
-        setTimeout(function() {
-          btn.textContent = "复制";
-          btn.setAttribute('aria-label', "复制代码");
-        }, 2000);
-      });
-    });
-    block.appendChild(btn);
-  });
-})();
 </script>
 
 
