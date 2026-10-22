@@ -328,6 +328,10 @@
       <nav aria-label="目录"><ul><li><a href="#在安装-fastlane-之前">在安装 fastlane 之前</a></li><li class="toc-sub"><a href="#与-macos-系统自带的-ruby-环境隔离">与 macOS 系统自带的 Ruby 环境隔离</a></li><li class="toc-sub"><a href="#使用-bundler-管理-gem">使用 bundler 管理 gem</a></li><li><a href="#使用-fastlane-接管应用的打包和上传-app-store-流程">使用 fastlane 接管应用的打包和上传 App store 流程</a></li><li class="toc-sub"><a href="#1-设置打包参数">1. 设置打包参数</a></li><li class="toc-sub"><a href="#2-自动同步签名证书和-provisioning-profile">2. 自动同步签名证书和 Provisioning Profile</a></li><li class="toc-sub"><a href="#3-更新代码">3. 更新代码</a></li><li class="toc-sub"><a href="#4-安装-pod-依赖">4. 安装 Pod 依赖</a></li><li class="toc-sub"><a href="#5-清除-xcode-缓存">5. 清除 Xcode 缓存</a></li><li class="toc-sub"><a href="#6-开始打包">6. 开始打包</a></li><li class="toc-sub"><a href="#7-上传至-app-store">7. 上传至 App store</a></li><li><a href="#ci-的核心是什么">CI 的核心是什么？</a></li><li class="toc-sub"><a href="#xctest-是如何管理-test-case-的">XCTest 是如何管理 Test case 的？</a></li><li class="toc-sub"><a href="#避免重复测试代码的正确方式">避免重复测试代码的正确方式</a></li><li><a href="#结语">结语</a></li></ul></nav>
     </details>
   </aside>
+  <script type="module">
+    import { initializeReadingToc } from "/assets/js/reading-toc.mjs";
+    initializeReadingToc();
+  </script>
   <div class="post-content">
     <p>除了 Xcode Cloud，你还有别的选择。<!-- more --><br />
 本文介绍如何在 macOS 上使用 <a href="https://fastlane.tools/">fastlane</a> 来帮助你打造一个简单的 iOS App CI 系统。</p>

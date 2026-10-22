@@ -328,6 +328,10 @@
       <nav aria-label="目录"><ul><li><a href="#内存缓存">内存缓存</a></li><li><a href="#硬盘缓存">硬盘缓存</a></li><li><a href="#缓存过期策略">缓存过期策略</a></li><li><a href="#缓存续期策略">缓存续期策略</a></li><li><a href="#缓存清除策略">缓存清除策略</a></li><li class="toc-sub"><a href="#内存缓存清除策略">内存缓存清除策略</a></li><li class="toc-sub"><a href="#硬盘缓存清除策略">硬盘缓存清除策略</a></li><li><a href="#出错处理">出错处理</a></li><li><a href="#其他">其他</a></li><li class="toc-sub"><a href="#网络请求重试机制">网络请求重试机制</a></li><li class="toc-sub"><a href="#委托模式">委托模式</a></li><li class="toc-sub"><a href="#cachecallbackcoordinator">CacheCallbackCoordinator</a></li><li><a href="#结语">结语</a></li></ul></nav>
     </details>
   </aside>
+  <script type="module">
+    import { initializeReadingToc } from "/assets/js/reading-toc.mjs";
+    initializeReadingToc();
+  </script>
   <div class="post-content">
     <p>最近想了解如何设计一个简单的缓存系统，于是找了 Kingfisher 7.1.2 版本的源代码读一读，有些收获，记录于此。<!-- more --></p>
 

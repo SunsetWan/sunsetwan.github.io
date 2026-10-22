@@ -335,6 +335,10 @@
       <nav aria-label="目录"><ul><li><a href="#websocket-协议简介">WebSocket 协议简介</a></li><li class="toc-sub"><a href="#建立连接时的握手阶段">建立连接时的握手阶段</a></li><li class="toc-sub"><a href="#解析数据帧data-frame">解析数据帧（Data Frame）</a></li><li class="toc-sub"><a href="#关闭连接">关闭连接</a></li><li><a href="#用-wireshark-分析">用 Wireshark 分析</a></li><li class="toc-sub"><a href="#建立连接时的握手阶段-1">建立连接时的握手阶段</a></li><li class="toc-sub"><a href="#解析数据帧data-frame-1">解析数据帧（Data Frame）</a></li><li><a href="#心得体会">心得体会</a></li><li><a href="#q--a">Q &amp; A</a></li><li class="toc-sub"><a href="#websocket-的出现是为了解决什么问题">WebSocket 的出现是为了解决什么问题？</a></li><li class="toc-sub"><a href="#websocket-握手为什么要借用-http">WebSocket 握手为什么要借用 HTTP？</a></li><li class="toc-sub"><a href="#tcp-不是已经有-finack-关闭流程了吗为什么-websocket-还要多此一举">TCP 不是已经有 FIN/ACK 关闭流程了吗？为什么 WebSocket 还要多此一举？</a></li><li><a href="#参考">参考</a></li><li><a href="#starscream-源码分析">Starscream 源码分析</a></li></ul></nav>
     </details>
   </aside>
+  <script type="module">
+    import { initializeReadingToc } from "/assets/js/reading-toc.mjs";
+    initializeReadingToc();
+  </script>
   <div class="post-content">
     <p>工作项目用了 Socket.IO 来做客户端与服务端的实时通信，我看了 Socket.IO 是基于 WebSocket 协议进一步封装的。于是，我希望通过实现 WebSocket <strong>客户端</strong> 的 <strong>一小部分</strong> 功能，以达到了解 WebSocket 协议的目标！</p>
 

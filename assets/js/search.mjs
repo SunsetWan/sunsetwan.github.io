@@ -61,7 +61,9 @@ export function initializeSearch() {
   const input = document.getElementById('search-input');
   const list = document.getElementById('search-results');
   if (!input || !list) return;
-  const maxResults = Number(input.dataset.maxResults) || 8;
+  const savedQuery = window.history.state?.searchQuery;
+  let currentQuery = typeof savedQuery === 'string' ? savedQuery : input.value;
+  let composing = false;
 
   function showMessage(message) {
     list.innerHTML = '<li class="search-empty">' + escapeHTML(message) + '</li>';
@@ -79,7 +81,7 @@ export function initializeSearch() {
         showMessage(input.dataset.noResults.replace('{query}', query));
         return;
       }
-      list.innerHTML = posts.slice(0, maxResults).map(post =>
+      list.innerHTML = posts.map(post =>
         '<li class="search-result">' +
           '<a href="' + escapeHTML(post.url) + '">' +
             '<span class="search-result-body">' +
@@ -97,9 +99,38 @@ export function initializeSearch() {
       list.innerHTML = '';
     }
   });
-  input.addEventListener('input', () => { search(input.value); });
-  input.addEventListener('keydown', event => {
-    if (event.key === 'Enter' && !event.isComposing) search(input.value);
+  function searchInput() {
+    currentQuery = input.value;
+    try {
+      if (window.history.state?.searchQuery !== currentQuery) {
+        window.history.replaceState({ ...window.history.state, searchQuery: currentQuery }, '');
+      }
+    } catch {
+      // Search must still work when the browser blocks history writes.
+    }
+    search(currentQuery);
+  }
+
+  function restoreQuery() {
+    composing = false;
+    input.value = currentQuery;
+    search(currentQuery);
+  }
+
+  input.addEventListener('compositionstart', () => {
+    composing = true;
+    search('');
   });
-  if (input.value.trim()) search(input.value);
+  input.addEventListener('compositionend', () => {
+    composing = false;
+    searchInput();
+  });
+  input.addEventListener('input', event => {
+    if (!composing && !event.isComposing && input.value !== currentQuery) searchInput();
+  });
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !composing && !event.isComposing) searchInput();
+  });
+  window.addEventListener('pageshow', restoreQuery);
+  restoreQuery();
 }

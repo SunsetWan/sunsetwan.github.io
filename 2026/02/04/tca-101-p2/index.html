@@ -328,6 +328,10 @@
       <nav aria-label="目录"><ul><li><a href="#reducer-的副作用">Reducer 的副作用</a></li><li class="toc-sub"><a href="#同步副作用">同步副作用</a></li><li class="toc-sub"><a href="#单向数据流">单向数据流</a></li><li class="toc-sub"><a href="#异步副作用">异步副作用</a></li><li><a href="#结语">结语</a></li></ul></nav>
     </details>
   </aside>
+  <script type="module">
+    import { initializeReadingToc } from "/assets/js/reading-toc.mjs";
+    initializeReadingToc();
+  </script>
   <div class="post-content">
     <p>本文延续 <a href="/2026/01/26/tca-101-p1/">第一篇</a> 对 TCA 的建模思路，聚焦「副作用」该如何在 reducer 中显式表达与测试。我们会把原本隐式的 I/O 操作抽象为 <code class="language-plaintext highlighter-rouge">Effect</code>，让 reducer 返回副作用，并进一步调整 <code class="language-plaintext highlighter-rouge">combine</code>/<code class="language-plaintext highlighter-rouge">pullback</code> 以支持一组 effect 的组合。通过 Favorite Primes 的保存/读取示例，展示从「纯函数」到「可追踪副作用」的演化过程。</p>
 

@@ -54,6 +54,9 @@ export function initializeCodeCopy(labels) {
         }, 2000);
       }
     });
-    block.appendChild(button);
+    const controls = document.createElement('span');
+    controls.className = 'code-copy-controls';
+    controls.appendChild(button);
+    block.appendChild(controls);
   });
 }
